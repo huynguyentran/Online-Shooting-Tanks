@@ -10,7 +10,6 @@ namespace NetworkUtil
     {
 
 
-
         /////////////////////////////////////////////////////////////////////////////////////////
         // Server-Side Code
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -24,27 +23,27 @@ namespace NetworkUtil
         /// <param name="port">The the port to listen on</param>
         public static TcpListener StartServer(Action<SocketState> toCall, int port)
         {
+            TcpListener listener = null;
 
-            TcpListener listener = new TcpListener(IPAddress.Any, port);
-
-
-            listener.Start();
             try
             {
+                listener = new TcpListener(IPAddress.Any, port);
+                listener.Start();
                 Tuple<Action<SocketState>, TcpListener> argument = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
                 listener.BeginAcceptSocket(AcceptNewClient, argument);
             }
             catch (Exception e)
             {
-                Console.WriteLine("start server error." + e.Message);
+                if (!ReferenceEquals(listener, null))
+                    listener.Stop();
+
+                SocketState s = new SocketState(toCall, null);
+                s.ErrorOccurred = true;
+                s.ErrorMessage = e.Message;
+                toCall(s);
             }
-
-
+            
             return listener;
-            //throw new NotImplementedException();
-
-
-            //BeginAcceptingSocket at the end
         }
 
         /// <summary>
@@ -68,18 +67,63 @@ namespace NetworkUtil
         private static void AcceptNewClient(IAsyncResult ar)
         {
             Tuple<Action<SocketState>, TcpListener> argument = (Tuple<Action<SocketState>, TcpListener>)ar.AsyncState;
-
             Action<SocketState> action = argument.Item1;
 
-            Socket newClient = argument.Item2.EndAcceptSocket(ar);
+            Socket newClient = null;
+
+            try
+            {
+                newClient = argument.Item2.EndAcceptSocket(ar);
+            }
+            catch (Exception e)
+            {
+                SocketState errorSocket = new SocketState(action, null);
+                errorSocket.ErrorOccurred = true;
+                errorSocket.ErrorMessage = e.Message;
+                action(errorSocket);
+                return;
+            }
 
             SocketState state = new SocketState(action, newClient);
-
             action(state);
 
-            // try catch
-            argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
-            //  throw new NotImplementedException();
+            /*
+            try
+            {
+            */
+                argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
+            /*
+            }
+            catch(Exception e)
+            {
+                SocketState errorSocket = new SocketState(action, null);
+                errorSocket.ErrorOccurred = true;
+                errorSocket.ErrorMessage = e.Message;
+                action(errorSocket);
+                return;
+            }
+            */
+        }
+
+        private static bool HandleException(Action tryMethod, SocketState state)
+        {
+            try
+            {
+                tryMethod();
+                return true;
+            }
+            catch(Exception e)
+            {
+                state.ErrorOccurred = true;
+                state.ErrorMessage = e.Message;
+                state.OnNetworkAction(state);
+                return false;
+            }
+        }
+
+        private static bool HandleException(Action tryMethod, Action<SocketState> toCall, Socket s)
+        {
+            return HandleException(tryMethod, new SocketState(toCall, s));
         }
 
         /// <summary>
@@ -87,9 +131,7 @@ namespace NetworkUtil
         /// </summary>
         public static void StopServer(TcpListener listener)
         {
-            //try catch
             listener.Stop();
-            //  throw new NotImplementedException();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
