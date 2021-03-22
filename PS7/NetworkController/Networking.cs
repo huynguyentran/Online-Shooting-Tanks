@@ -42,7 +42,7 @@ namespace NetworkUtil
                 s.ErrorMessage = e.Message;
                 toCall(s);
             }
-            
+
             return listener;
         }
 
@@ -91,7 +91,7 @@ namespace NetworkUtil
             try
             {
             */
-                argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
+            argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
             /*
             }
             catch(Exception e)
@@ -112,7 +112,7 @@ namespace NetworkUtil
                 tryMethod();
                 return true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 state.ErrorOccurred = true;
                 state.ErrorMessage = e.Message;
@@ -178,7 +178,13 @@ namespace NetworkUtil
                 // Didn't find any IPV4 addresses
                 if (!foundIPV4)
                 {
+
                     // TODO: Indicate an error to the user, as specified in the documentation
+                    SocketState errorSocket = new SocketState(toCall, null);
+                    errorSocket.ErrorOccurred = true;
+                    errorSocket.ErrorMessage = "Can not find any IPV4 address";
+                    toCall(errorSocket);
+                    return;
                 }
             }
             catch (Exception)
@@ -188,9 +194,15 @@ namespace NetworkUtil
                 {
                     ipAddress = IPAddress.Parse(hostName);
                 }
-                catch (Exception)
+                // Adding an e 
+                catch (Exception e)
                 {
                     // TODO: Indicate an error to the user, as specified in the documentation
+                    SocketState errorSocket = new SocketState(toCall, null);
+                    errorSocket.ErrorOccurred = true;
+                    errorSocket.ErrorMessage = e.Message;
+                    toCall(errorSocket);
+                    return;
                 }
             }
 
@@ -204,8 +216,32 @@ namespace NetworkUtil
 
             SocketState state = new SocketState(toCall, socket);
 
-            // try catch
-            socket.BeginConnect(ipAddress, port, ConnectedCallback, state);
+            try
+            {
+
+              
+                IAsyncResult result = socket.BeginConnect(ipAddress, port, ConnectedCallback, state);
+
+                bool success = result.AsyncWaitHandle.WaitOne(3000, true);
+
+                if (!socket.Connected)
+                {
+                    //socket.Close();
+                    SocketState errorSocket = new SocketState(toCall, socket);
+                    errorSocket.ErrorOccurred = true;
+                    errorSocket.ErrorMessage = "Cannot connect to the server";
+                    toCall(errorSocket);
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                SocketState errorSocket = new SocketState(toCall, socket);
+                errorSocket.ErrorOccurred = true;
+                errorSocket.ErrorMessage = e.Message;
+                toCall(errorSocket);        
+            }
 
 
             // TODO: Finish the remainder of the connection process as specified.
@@ -231,14 +267,19 @@ namespace NetworkUtil
             // Enconncect
 
             SocketState state = (SocketState)ar.AsyncState;
-
-            state.TheSocket.EndConnect(ar);
-
+            try
+            {
+                state.TheSocket.EndConnect(ar);
+            }
+            catch (Exception e)
+            {
+                SocketState errorSocket = new SocketState(state.OnNetworkAction, state.TheSocket);
+                errorSocket.ErrorOccurred = true;
+                errorSocket.ErrorMessage = e.Message;
+                state.OnNetworkAction(errorSocket);
+                return;
+            }
             state.OnNetworkAction(state);
-
-
-
-            //throw new NotImplementedException();
         }
 
 
@@ -259,8 +300,16 @@ namespace NetworkUtil
         /// <param name="state">The SocketState to begin receiving</param>
         public static void GetData(SocketState state)
         {
-            //Try catch
-            state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
+            try
+            {
+                state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
+            }
+            catch (Exception e)
+            {
+                state.ErrorOccurred = true;
+                state.ErrorMessage = e.Message;
+                state.OnNetworkAction(state);
+            }
         }
 
         /// <summary>
@@ -294,14 +343,16 @@ namespace NetworkUtil
                 {
                     string message = Encoding.UTF8.GetString(state.buffer, 0, numBytes);
                     state.data.Append(message);
+
                 }
 
                 state.OnNetworkAction(state);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                return;
+                state.ErrorOccurred = true;
+                state.ErrorMessage = e.Message;
+                state.OnNetworkAction(state);
             }
 
         }
@@ -326,9 +377,9 @@ namespace NetworkUtil
                     socket.BeginSend(message, 0, SocketState.BufferSize, SocketFlags.None, SendCallback, socket);
                     return true;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Console.WriteLine(e.Message);
+                    socket.Close();
                     return false;
                 }
             }
@@ -349,16 +400,14 @@ namespace NetworkUtil
         /// </param>
         private static void SendCallback(IAsyncResult ar)
         {
-            //Try catch
-            
             Socket socket = (Socket)ar.AsyncState;
             try
             {
                 socket.EndSend(ar);
             }
-            catch(Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e.Message);
+                 return;
             }
         }
 
@@ -385,9 +434,9 @@ namespace NetworkUtil
                     socket.BeginSend(message, 0, SocketState.BufferSize, SocketFlags.None, SendAndCloseCallback, socket);
                     return true;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Console.WriteLine(e.Message);
+
                     socket.Close();
                     return false;
                 }
@@ -411,15 +460,11 @@ namespace NetworkUtil
         private static void SendAndCloseCallback(IAsyncResult ar)
         {
             Socket socket = (Socket)ar.AsyncState;
-            try
+            using (socket)
             {
                 socket.EndSend(ar);
-                socket.Close();      
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);           
-            }
+
         }
 
     }
