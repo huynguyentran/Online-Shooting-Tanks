@@ -27,22 +27,15 @@ namespace NetworkUtil
 
             try
             {
-                listener = new TcpListener(IPAddress.Any, port);
-                listener.Start();
-                Tuple<Action<SocketState>, TcpListener> argument = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
-                listener.BeginAcceptSocket(AcceptNewClient, argument);
+            listener = new TcpListener(IPAddress.Any, port);
+            listener.Start();
+            Tuple<Action<SocketState>, TcpListener> argument = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
+            listener.BeginAcceptSocket(AcceptNewClient, argument);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                if (!ReferenceEquals(listener, null))
-                    listener.Stop();
-
-                SocketState s = new SocketState(toCall, null);
-                s.ErrorOccurred = true;
-                s.ErrorMessage = e.Message;
-                toCall(s);
+             
             }
-
             return listener;
         }
 
@@ -87,14 +80,12 @@ namespace NetworkUtil
             SocketState state = new SocketState(action, newClient);
             action(state);
 
-            /*
             try
             {
-            */
-            argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
-            /*
+
+                argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 SocketState errorSocket = new SocketState(action, null);
                 errorSocket.ErrorOccurred = true;
@@ -102,7 +93,6 @@ namespace NetworkUtil
                 action(errorSocket);
                 return;
             }
-            */
         }
 
         private static bool HandleException(Action tryMethod, SocketState state)
@@ -131,7 +121,15 @@ namespace NetworkUtil
         /// </summary>
         public static void StopServer(TcpListener listener)
         {
-            listener.Stop();
+            try
+            {
+                listener.Stop();
+            }
+            catch (Exception)
+            {
+
+            }
+
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -178,11 +176,9 @@ namespace NetworkUtil
                 // Didn't find any IPV4 addresses
                 if (!foundIPV4)
                 {
-
-                    // TODO: Indicate an error to the user, as specified in the documentation
                     SocketState errorSocket = new SocketState(toCall, null);
                     errorSocket.ErrorOccurred = true;
-                    errorSocket.ErrorMessage = "Can not find any IPV4 address";
+                    errorSocket.ErrorMessage = "Can not find any IPV4 address/Invalid IPV4";
                     toCall(errorSocket);
                     return;
                 }
@@ -218,20 +214,13 @@ namespace NetworkUtil
 
             try
             {
-
-              
                 IAsyncResult result = socket.BeginConnect(ipAddress, port, ConnectedCallback, state);
 
                 bool success = result.AsyncWaitHandle.WaitOne(3000, true);
 
                 if (!socket.Connected)
                 {
-                    //socket.Close();
-                    SocketState errorSocket = new SocketState(toCall, socket);
-                    errorSocket.ErrorOccurred = true;
-                    errorSocket.ErrorMessage = "Cannot connect to the server";
-                    toCall(errorSocket);
-
+                    socket.Close();
                 }
 
             }
@@ -240,11 +229,8 @@ namespace NetworkUtil
                 SocketState errorSocket = new SocketState(toCall, socket);
                 errorSocket.ErrorOccurred = true;
                 errorSocket.ErrorMessage = e.Message;
-                toCall(errorSocket);        
+                toCall(errorSocket);
             }
-
-
-            // TODO: Finish the remainder of the connection process as specified.
         }
 
         /// <summary>
@@ -264,8 +250,6 @@ namespace NetworkUtil
         {
 
             //Finalizing connection
-            // Enconncect
-
             SocketState state = (SocketState)ar.AsyncState;
             try
             {
@@ -331,19 +315,16 @@ namespace NetworkUtil
         /// </param>
         private static void ReceiveCallback(IAsyncResult ar)
         {
-
-            //Try catch
             SocketState state = (SocketState)ar.AsyncState;
 
             try
             {
                 int numBytes = state.TheSocket.EndReceive(ar);
 
-                lock (state)
+                lock (state.data)
                 {
                     string message = Encoding.UTF8.GetString(state.buffer, 0, numBytes);
                     state.data.Append(message);
-
                 }
 
                 state.OnNetworkAction(state);
@@ -374,7 +355,7 @@ namespace NetworkUtil
                 try
                 {
                     byte[] message = Encoding.UTF8.GetBytes(data);
-                    socket.BeginSend(message, 0, SocketState.BufferSize, SocketFlags.None, SendCallback, socket);
+                    socket.BeginSend(message, 0, message.Length, SocketFlags.None, SendCallback, socket);
                     return true;
                 }
                 catch (Exception)
@@ -407,7 +388,7 @@ namespace NetworkUtil
             }
             catch (Exception)
             {
-                 return;
+                return;
             }
         }
 
@@ -431,7 +412,7 @@ namespace NetworkUtil
                 try
                 {
                     byte[] message = Encoding.UTF8.GetBytes(data);
-                    socket.BeginSend(message, 0, SocketState.BufferSize, SocketFlags.None, SendAndCloseCallback, socket);
+                    socket.BeginSend(message, 0, message.Length, SocketFlags.None, SendAndCloseCallback, socket);
                     return true;
                 }
                 catch (Exception)
@@ -460,9 +441,15 @@ namespace NetworkUtil
         private static void SendAndCloseCallback(IAsyncResult ar)
         {
             Socket socket = (Socket)ar.AsyncState;
-            using (socket)
+        
+            try
             {
                 socket.EndSend(ar);
+            }
+            catch (Exception)
+            {
+                socket.Close();
+         
             }
 
         }
