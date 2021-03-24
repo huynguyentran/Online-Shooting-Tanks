@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkController", "Networ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkTests", "NetworkTests\NetworkTests.csproj", "{87504EF2-85A1-4651-BDB1-D1AF8C83A39E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetworkTestHelper", "NetworkTestHelper\NetworkTestHelper.csproj", "{B600B867-0867-466E-AA10-5CA0ACDB756B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{87504EF2-85A1-4651-BDB1-D1AF8C83A39E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87504EF2-85A1-4651-BDB1-D1AF8C83A39E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87504EF2-85A1-4651-BDB1-D1AF8C83A39E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B600B867-0867-466E-AA10-5CA0ACDB756B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B600B867-0867-466E-AA10-5CA0ACDB756B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B600B867-0867-466E-AA10-5CA0ACDB756B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B600B867-0867-466E-AA10-5CA0ACDB756B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -49,7 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="NetworkTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +59,10 @@
     <ProjectReference Include="..\NetworkController\NetworkController.csproj">
       <Project>{0578539f-970b-48ec-96cb-bd0d6809061c}</Project>
       <Name>NetworkController</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NetworkTestHelper\NetworkTestHelper.csproj">
+      <Project>{b600b867-0867-466e-aa10-5ca0acdb756b}</Project>
+      <Name>NetworkTestHelper</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

@@ -5,7 +5,12 @@ using System.Text;
 
 namespace NetworkUtil
 {
-
+    /// <summary>
+    /// Author: William Erignac, Huy Nguyen
+    /// Date: 03/24/2012
+    /// CS 3500
+    /// Description: A class that simplified running TCP network operation.
+    /// </summary>
     public static class Networking
     {
 
@@ -64,56 +69,43 @@ namespace NetworkUtil
 
             Socket newClient = null;
 
-            try
+            //try
+            //{
+            //    newClient = argument.Item2.EndAcceptSocket(ar);
+            //}
+            //catch (Exception e)
+            //{
+            //    SocketState errorSocket = new SocketState(action, null);
+            //    errorSocket.ErrorOccurred = true;
+            //    errorSocket.ErrorMessage = e.Message;
+            //    action(errorSocket);
+            //    return;
+            //}
+
+
+            if (!HandleException(() => newClient = argument.Item2.EndAcceptSocket(ar), action, null))
             {
-                newClient = argument.Item2.EndAcceptSocket(ar);
-            }
-            catch (Exception e)
-            {
-                SocketState errorSocket = new SocketState(action, null);
-                errorSocket.ErrorOccurred = true;
-                errorSocket.ErrorMessage = e.Message;
-                action(errorSocket);
                 return;
             }
 
             SocketState state = new SocketState(action, newClient);
             action(state);
 
-            try
-            {
+            //try
+            //{
 
-                argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
-            }
-            catch (Exception e)
-            {
-                SocketState errorSocket = new SocketState(action, null);
-                errorSocket.ErrorOccurred = true;
-                errorSocket.ErrorMessage = e.Message;
-                action(errorSocket);
-                return;
-            }
-        }
+            //    argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
+            //}
+            //catch (Exception e)
+            //{
+            //    SocketState errorSocket = new SocketState(action, null);
+            //    errorSocket.ErrorOccurred = true;
+            //    errorSocket.ErrorMessage = e.Message;
+            //    action(errorSocket);
+            //    return;
+            //}
 
-        private static bool HandleException(Action tryMethod, SocketState state)
-        {
-            try
-            {
-                tryMethod();
-                return true;
-            }
-            catch (Exception e)
-            {
-                state.ErrorOccurred = true;
-                state.ErrorMessage = e.Message;
-                state.OnNetworkAction(state);
-                return false;
-            }
-        }
-
-        private static bool HandleException(Action tryMethod, Action<SocketState> toCall, Socket s)
-        {
-            return HandleException(tryMethod, new SocketState(toCall, s));
+            HandleException(() => argument.Item2.BeginAcceptSocket(AcceptNewClient, argument), action, null);
         }
 
         /// <summary>
@@ -153,8 +145,6 @@ namespace NetworkUtil
         /// <param name="port">The port on which the server is listening</param>
         public static void ConnectToServer(Action<SocketState> toCall, string hostName, int port)
         {
-            // TODO: This method is incomplete, but contains a starting point 
-            //       for decoding a host address
 
             // Establish the remote endpoint for the socket.
             IPHostEntry ipHostInfo;
@@ -175,10 +165,12 @@ namespace NetworkUtil
                 // Didn't find any IPV4 addresses
                 if (!foundIPV4)
                 {
-                    SocketState errorSocket = new SocketState(toCall, null);
-                    errorSocket.ErrorOccurred = true;
-                    errorSocket.ErrorMessage = "Can not find any IPV4 address/Invalid IPV4";
-                    toCall(errorSocket);
+                    //SocketState errorSocket = new SocketState(toCall, null);
+                    //errorSocket.ErrorOccurred = true;
+                    //errorSocket.ErrorMessage = "Can not find any IPV4 address/Invalid IPV4";
+                    //toCall(errorSocket);
+
+                    ErroWhenConnecting("Can not find any IPv4 address/Invalid IPv4.", toCall);
                     return;
                 }
             }
@@ -192,10 +184,7 @@ namespace NetworkUtil
                 catch (Exception)
                 {
                     // TODO: Indicate an error to the user, as specified in the documentation
-                    SocketState errorSocket = new SocketState(toCall, null);
-                    errorSocket.ErrorOccurred = true;
-                    errorSocket.ErrorMessage = "Host name is not valid address";
-                    toCall(errorSocket);
+                    ErroWhenConnecting("Host name is not a valid ipaddress.", toCall);
                     return;
                 }
             }
@@ -218,16 +207,20 @@ namespace NetworkUtil
 
                 if (!socket.Connected)
                 {
-                    socket.Close();
+                    try
+                    {
+                        socket.Close();
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
 
             }
             catch (Exception e)
             {
-                SocketState errorSocket = new SocketState(toCall, socket);
-                errorSocket.ErrorOccurred = true;
-                errorSocket.ErrorMessage = e.Message;
-                toCall(errorSocket);
+                ErroWhenConnecting(e.Message, toCall, socket);
             }
         }
 
@@ -247,19 +240,24 @@ namespace NetworkUtil
         private static void ConnectedCallback(IAsyncResult ar)
         {
             SocketState state = (SocketState)ar.AsyncState;
-            try
+            //try
+            //{
+            //    state.TheSocket.EndConnect(ar);
+            //}
+            //catch (Exception e)
+            //{
+            //    errorSocket.ErrorOccurred = true;
+            //    errorSocket.ErrorMessage = e.Message;
+            //    state.OnNetworkAction(errorSocket);
+            //    return;
+            //}
+
+            if (HandleException(() => state.TheSocket.EndConnect(ar), state))
             {
-                state.TheSocket.EndConnect(ar);
+                state.OnNetworkAction(state);
             }
-            catch (Exception e)
-            {
-                SocketState errorSocket = new SocketState(state.OnNetworkAction, state.TheSocket);
-                errorSocket.ErrorOccurred = true;
-                errorSocket.ErrorMessage = e.Message;
-                state.OnNetworkAction(errorSocket);
-                return;
-            }
-            state.OnNetworkAction(state);
+
+
         }
 
 
@@ -280,16 +278,18 @@ namespace NetworkUtil
         /// <param name="state">The SocketState to begin receiving</param>
         public static void GetData(SocketState state)
         {
-            try
-            {
-                state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
-            }
-            catch (Exception e)
-            {
-                state.ErrorOccurred = true;
-                state.ErrorMessage = e.Message;
-                state.OnNetworkAction(state);
-            }
+            //try
+            //{
+            //    state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
+            //}
+            //catch (Exception e)
+            //{
+            //    state.ErrorOccurred = true;
+            //    state.ErrorMessage = e.Message;
+            //    state.OnNetworkAction(state);
+            //}
+
+            HandleException(() => state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state), state);
         }
 
         /// <summary>
@@ -316,10 +316,16 @@ namespace NetworkUtil
             try
             {
                 int numBytes = state.TheSocket.EndReceive(ar);
+
+                //If the server has closed, then throws. 
                 if (numBytes == 0)
                 {
-                    throw new Exception("Server has closed.");
+                    //  throw new Exception("Server has closed.");
+                    ErrorsWhenCaught("Server has closed.", state);
+                    return;
                 }
+
+                //lock to make sure the data doesn't get corrupted
                 lock (state.data)
                 {
                     string message = Encoding.UTF8.GetString(state.buffer, 0, numBytes);
@@ -330,9 +336,11 @@ namespace NetworkUtil
             }
             catch (Exception e)
             {
-                state.ErrorOccurred = true;
-                state.ErrorMessage = e.Message;
-                state.OnNetworkAction(state);
+                //state.ErrorOccurred = true;
+                //state.ErrorMessage = e.Message;
+                //state.OnNetworkAction(state);
+
+                ErrorsWhenCaught(e.Message, state);
             }
         }
 
@@ -358,7 +366,14 @@ namespace NetworkUtil
                 }
                 catch (Exception)
                 {
-                    socket.Close();
+                    try
+                    {
+                        socket.Close();
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                     return false;
                 }
             }
@@ -415,8 +430,14 @@ namespace NetworkUtil
                 }
                 catch (Exception)
                 {
+                    try
+                    {
+                        socket.Close();
+                    }
+                    catch (Exception)
+                    {
 
-                    socket.Close();
+                    }
                     return false;
                 }
             }
@@ -443,12 +464,82 @@ namespace NetworkUtil
             try
             {
                 socket.EndSend(ar);
+                socket.Close();
             }
             catch (Exception)
             {
-                socket.Close();
+                
             }
 
+        }
+
+        /// <summary>
+        /// A private method to handle the exception.
+        /// </summary>
+        /// <param name="tryMethod">The method that we want to handle</param>
+        /// <param name="state">The socket state</param>
+        /// <returns>True if the method works, false if an error has occured.</returns>
+        private static bool HandleException(Action tryMethod, SocketState state)
+        {
+            try
+            {
+                tryMethod();
+                return true;
+            }
+            catch (Exception e)
+            {
+                ErrorsWhenCaught(e.Message, state);
+                return false;
+            }
+        }
+        private static bool HandleException(Action tryMethod, Action<SocketState> toCall, Socket s)
+        {
+            return HandleException(tryMethod, new SocketState(toCall, s));
+        }
+
+        /// <summary>
+        /// When an error occured, set the instance in the socket state to get the error and the error message.  
+        /// </summary>
+        /// <param name="error">the error we want to show</param>
+        /// <param name="state">the socket state</param>
+        private static void ErrorsWhenCaught(string error, SocketState state)
+        {
+            state.ErrorOccurred = true;
+            state.ErrorMessage = error;
+            state.OnNetworkAction(state);
+        }
+
+        /// <summary>
+        /// An overload method of the HandleException that takes in the action and the socket. 
+        /// </summary>
+        /// <param name="tryMethod">The method that we want to handle</param>
+        /// <param name="toCall">The user defined callbackt</param>
+        /// <param name="s">The socket</param>
+        /// <returns></returns>
+     
+
+        /// <summary>
+        /// A private method to that handle the error. This method will create a new SocketState to set the error. 
+        /// </summary>
+        /// <param name="error">The message error that we want to pass in</param>
+        /// <param name="toCall">The user defined callback</param>
+        /// <param name="socket">The socket</param>
+        private static void ErroWhenConnecting(String error, Action<SocketState> toCall, Socket socket)
+        {
+            SocketState errorSocket = new SocketState(toCall, socket);
+            errorSocket.ErrorOccurred = true;
+            errorSocket.ErrorMessage = error;
+            toCall(errorSocket);
+        }
+
+        /// <summary>
+        /// An overload method of the previous private method. We use null as a socket. 
+        /// </summary>
+        /// <param name="error">The message error that we want to pass in</param>
+        /// <param name="toCall">The user defined callback</param>
+        private static void ErroWhenConnecting(String error, Action<SocketState> toCall)
+        {
+            ErroWhenConnecting(error, toCall, null);
         }
 
     }
