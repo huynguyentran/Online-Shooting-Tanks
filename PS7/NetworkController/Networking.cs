@@ -27,14 +27,14 @@ namespace NetworkUtil
 
             try
             {
-            listener = new TcpListener(IPAddress.Any, port);
-            listener.Start();
-            Tuple<Action<SocketState>, TcpListener> argument = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
-            listener.BeginAcceptSocket(AcceptNewClient, argument);
+                listener = new TcpListener(IPAddress.Any, port);
+                listener.Start();
+                Tuple<Action<SocketState>, TcpListener> argument = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
+                listener.BeginAcceptSocket(AcceptNewClient, argument);
             }
             catch (Exception)
             {
-             
+
             }
             return listener;
         }
@@ -129,7 +129,6 @@ namespace NetworkUtil
             {
 
             }
-
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -190,13 +189,12 @@ namespace NetworkUtil
                 {
                     ipAddress = IPAddress.Parse(hostName);
                 }
-                // Adding an e 
-                catch (Exception e)
+                catch (Exception)
                 {
                     // TODO: Indicate an error to the user, as specified in the documentation
                     SocketState errorSocket = new SocketState(toCall, null);
                     errorSocket.ErrorOccurred = true;
-                    errorSocket.ErrorMessage = e.Message;
+                    errorSocket.ErrorMessage = "Host name is not valid address";
                     toCall(errorSocket);
                     return;
                 }
@@ -248,8 +246,6 @@ namespace NetworkUtil
         /// <param name="ar">The object asynchronously passed via BeginConnect</param>
         private static void ConnectedCallback(IAsyncResult ar)
         {
-
-            //Finalizing connection
             SocketState state = (SocketState)ar.AsyncState;
             try
             {
@@ -320,7 +316,10 @@ namespace NetworkUtil
             try
             {
                 int numBytes = state.TheSocket.EndReceive(ar);
-
+                if (numBytes == 0)
+                {
+                    throw new Exception("Server has closed.");
+                }
                 lock (state.data)
                 {
                     string message = Encoding.UTF8.GetString(state.buffer, 0, numBytes);
@@ -335,7 +334,6 @@ namespace NetworkUtil
                 state.ErrorMessage = e.Message;
                 state.OnNetworkAction(state);
             }
-
         }
 
         /// <summary>
@@ -441,7 +439,7 @@ namespace NetworkUtil
         private static void SendAndCloseCallback(IAsyncResult ar)
         {
             Socket socket = (Socket)ar.AsyncState;
-        
+
             try
             {
                 socket.EndSend(ar);
@@ -449,7 +447,6 @@ namespace NetworkUtil
             catch (Exception)
             {
                 socket.Close();
-         
             }
 
         }
