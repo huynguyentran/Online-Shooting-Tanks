@@ -469,7 +469,44 @@ namespace NetworkUtil
         /*** End Send/Receive Tests ***/
 
 
-        //TODO: Add more of your own tests here
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void TestMultipleEventCalls(bool clientSide)
+        {
+            SetupTestConnections(clientSide, out testListener, out testLocalSocketState, out testRemoteSocketState);
+
+            int calledCount = 3;
+
+            // This OnNetworkAction will not ask for more data after receiving one message,
+            // so it should only ever receive one message
+            testLocalSocketState.OnNetworkAction = (x) => {
+                if (calledCount > 0)
+                {
+                    calledCount--;
+                    Networking.GetData(x);
+                }
+            };
+
+            Networking.Send(testRemoteSocketState.TheSocket, "a");
+            Networking.GetData(testLocalSocketState);
+            // Note that waiting for data like this is *NOT* how the networking library is 
+            // intended to be used. This is only for testing purposes.
+            // Normally, you would provide an OnNetworkAction that handles the data.
+            NetworkTestHelper.WaitForOrTimeout(() => testLocalSocketState.GetData().Length > 0, NetworkTestHelper.timeout);
+
+            // Send a second message (which should not increment calledCount)
+            while (calledCount > 0)
+            {
+                Networking.Send(testRemoteSocketState.TheSocket, "a");
+                NetworkTestHelper.WaitForOrTimeout(() => false, NetworkTestHelper.timeout);
+            }
+
+            Networking.Send(testRemoteSocketState.TheSocket, "a");
+
+            Assert.AreEqual(0, calledCount);
+        }
+
 
     }
 }
