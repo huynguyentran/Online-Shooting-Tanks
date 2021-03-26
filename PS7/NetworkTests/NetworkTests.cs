@@ -507,26 +507,6 @@ namespace NetworkUtil
             Assert.AreEqual(0, calledCount);
         }
 
-
-        /// <summary>
-        /// This is used to reach the catch statement of startServer. This is to get as much code analysis as possible.
-        /// </summary>
-        [TestMethod]
-        public void TestStartServerCatch()
-        {
-            SocketState serverResult = null;
-            void saveServerState(SocketState x)
-            {
-                serverResult = x;
-            }
-            TcpListener listener = Networking.StartServer(saveServerState, 1000000);
-
-            Networking.StopServer(listener);
-
-            TcpListener listener2 = Networking.StartServer(saveServerState, 2100);
-            Networking.StopServer(listener2);
-        }
-
         /// <summary>
         /// Test send and close to make sure that the client receives the data after the server has closed. 
         /// </summary>
@@ -656,14 +636,21 @@ namespace NetworkUtil
         /// </summary>
         /// <param name="clientSide"></param>
         [TestMethod]
-        public void TestClientBadIP()
+        public void TestClientConnectToInternet()
         {
             void ReceiveClient(SocketState state)
             {
                 Assert.IsTrue(state.ErrorOccurred);
             }
 
-            Networking.ConnectToServer(ReceiveClient, ".com", 2101);
+            Networking.ConnectToServer(ReceiveClient, "cis.utah.edu", 2101);
         }
+
+        [TestMethod]
+        public void TestFail()
+        {
+            Assert.Fail();
+        }
+
     }
 }
