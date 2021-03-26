@@ -92,7 +92,6 @@ namespace NetworkUtil
             Assert.AreEqual("127.0.0.1:2112", testLocalSocketState.TheSocket.RemoteEndPoint.ToString());
         }
 
-
         [TestMethod]
         public void TestConnectNoServer()
         {
@@ -480,7 +479,8 @@ namespace NetworkUtil
 
             // This OnNetworkAction will not ask for more data after receiving one message,
             // so it should only ever receive one message
-            testLocalSocketState.OnNetworkAction = (x) => {
+            testLocalSocketState.OnNetworkAction = (x) =>
+            {
                 if (calledCount > 0)
                 {
                     calledCount--;
@@ -508,5 +508,95 @@ namespace NetworkUtil
         }
 
 
+        /// <summary>
+        /// This is used to reach the catch statement of startServer. This is to get as much code analysis as possible.
+        /// </summary>
+        [TestMethod]
+        public void TestStartServerCatch()
+        {
+            SocketState serverResult = null;
+            void saveServerState(SocketState x)
+            {
+                serverResult = x;
+            }
+            TcpListener listener = Networking.StartServer(saveServerState, 1000000);
+
+            Networking.StopServer(listener);
+
+            TcpListener listener2 = Networking.StartServer(saveServerState, 2100);
+            Networking.StopServer(listener2);
+        }
+
+        /// <summary>
+        /// Test send and close to make sure that the client receives the data after the server has closed. 
+        /// </summary>
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void TestServerSendAndClose(bool clientSide)
+        {
+            SetupTestConnections(clientSide, out testListener, out testLocalSocketState, out testRemoteSocketState);
+
+            Assert.IsTrue(testRemoteSocketState.TheSocket.Connected);
+            Assert.IsTrue(testLocalSocketState.TheSocket.Connected);
+
+            String message = "a very long sentence that is not very long";
+           Assert.IsTrue( Networking.SendAndClose(testRemoteSocketState.TheSocket, message));
+            Networking.GetData(testLocalSocketState);
+            NetworkTestHelper.WaitForOrTimeout(() => testLocalSocketState.GetData().Length == message.Length, NetworkTestHelper.timeout);
+            Assert.AreEqual(message.ToString(), testLocalSocketState.GetData());
+            NetworkTestHelper.WaitForOrTimeout(() =>!testLocalSocketState.TheSocket.Connected,  NetworkTestHelper.timeout);
+            Assert.IsFalse(testRemoteSocketState.TheSocket.Connected);
+        }
+
+        /// <summary>
+        /// Test send to make sure the remote and local both receive data. 
+        /// </summary>
+        /// <param name="clientSide"></param>
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void TestServerSend(bool clientSide)
+        {
+            SetupTestConnections(clientSide, out testListener, out testLocalSocketState, out testRemoteSocketState);
+
+            Assert.IsTrue(testRemoteSocketState.TheSocket.Connected);
+            Assert.IsTrue(testLocalSocketState.TheSocket.Connected);
+
+            String message = "a very long sentence that is not very long";
+
+          Assert.IsTrue(Networking.Send(testRemoteSocketState.TheSocket, message));
+            Networking.GetData(testLocalSocketState);
+            NetworkTestHelper.WaitForOrTimeout(() => testLocalSocketState.GetData().Length == message.Length, NetworkTestHelper.timeout);
+            Assert.AreEqual(message.ToString(), testLocalSocketState.GetData());
+            Assert.IsTrue(testRemoteSocketState.TheSocket.Connected);
+      
+        }
+
+        /// <summary>
+        /// Test send to make sure the remote and local both receive data. 
+        /// </summary>
+        /// <param name="clientSide"></param>
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void TestServerSendWithError(bool clientSide)
+        {
+            SetupTestConnections(clientSide, out testListener, out testLocalSocketState, out testRemoteSocketState);
+
+            Assert.IsTrue(testRemoteSocketState.TheSocket.Connected);
+            Assert.IsTrue(testLocalSocketState.TheSocket.Connected);
+
+            String message = "a very long sentence that is not very long";
+          
+            Assert.IsTrue(Networking.Send(testRemoteSocketState.TheSocket, message));
+            NetworkTestHelper.WaitForOrTimeout(() => false, NetworkTestHelper.timeout);
+            testLocalSocketState.TheSocket.Shutdown(SocketShutdown.Both);
+
+            //Networking.GetData(testLocalSocketState);
+            ///NetworkTestHelper.WaitForOrTimeout(() => testLocalSocketState.GetData().Length == message.Length, NetworkTestHelper.timeout);
+            // Assert.AreEqual(message.ToString(), testLocalSocketState.GetData());
+            // Assert.IsTrue(testRemoteSocketState.TheSocket.Connected);
+        }
     }
 }

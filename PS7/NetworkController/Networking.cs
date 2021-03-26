@@ -73,7 +73,7 @@ namespace NetworkUtil
             {
                 newClient = argument.Item2.EndAcceptSocket(ar);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ReportError(e.Message, new SocketState(action, null));
                 return;
@@ -186,17 +186,15 @@ namespace NetworkUtil
                  * Also this stategy was suggested by a TA we visited.
                  */
                 IAsyncResult result = socket.BeginConnect(ipAddress, port, ConnectedCallback, state);
-                result.AsyncWaitHandle.WaitOne(3000, true);
+                bool success = result.AsyncWaitHandle.WaitOne(3000, true);
 
-                if (!socket.Connected)
+                if (!success)
                 {
                     try
                     {
                         socket.Close();
                     }
                     catch (Exception) { }
-                    //To ask TA.
-                    //ReportError("Connection to ip timed out.", new SocketState(toCall, socket));
                 }
             }
             catch (Exception e)
@@ -226,7 +224,7 @@ namespace NetworkUtil
             {
                 state.TheSocket.EndConnect(ar);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ReportError(e.Message, state);
                 return;
@@ -367,7 +365,7 @@ namespace NetworkUtil
             }
             catch (Exception)
             {
-                return;
+              
             }
         }
 
@@ -434,7 +432,7 @@ namespace NetworkUtil
             }
             catch (Exception)
             {
-                
+
             }
 
         }
