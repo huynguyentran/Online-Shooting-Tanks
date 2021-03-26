@@ -34,7 +34,9 @@ namespace NetworkUtil
             {
                 listener = new TcpListener(IPAddress.Any, port);
                 listener.Start();
+                //Makes a tuple to hold the Action<SocketState> and the listener. 
                 Tuple<Action<SocketState>, TcpListener> argument = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
+                //Starts the event loop. 
                 listener.BeginAcceptSocket(AcceptNewClient, argument);
             }
             catch (Exception)
@@ -64,8 +66,9 @@ namespace NetworkUtil
         /// 1) a delegate so the user can take action (a SocketState Action), and 2) the TcpListener</param>
         private static void AcceptNewClient(IAsyncResult ar)
         {
+            //Passes in the argument to hold the toCall in our code and the listener. 
             Tuple<Action<SocketState>, TcpListener> argument = (Tuple<Action<SocketState>, TcpListener>)ar.AsyncState;
-            Action<SocketState> action = argument.Item1;
+            Action<SocketState> toCall = argument.Item1;
 
             Socket newClient = null;
 
@@ -75,20 +78,21 @@ namespace NetworkUtil
             }
             catch (Exception e)
             {
-                ReportError(e.Message, new SocketState(action, null));
+                ReportError(e.Message, new SocketState(toCall, null));
                 return;
             }
 
-            SocketState state = new SocketState(action, newClient);
-            action(state);
+            SocketState state = new SocketState(toCall, newClient);
+            toCall(state);
 
             try
             {
+                //Tries continuing the loop. 
                 argument.Item2.BeginAcceptSocket(AcceptNewClient, argument);
             }
             catch (Exception e)
             {
-                ReportError(e.Message, new SocketState(action, null));
+                ReportError(e.Message, new SocketState(toCall, null));
             }
         }
 
@@ -162,7 +166,6 @@ namespace NetworkUtil
                 }
                 catch (Exception)
                 {
-                    // TODO: Indicate an error to the user, as specified in the documentation
                     ReportError("Host name is not a valid ipaddress.", new SocketState(toCall, null));
                     return;
                 }
@@ -188,6 +191,7 @@ namespace NetworkUtil
                 IAsyncResult result = socket.BeginConnect(ipAddress, port, ConnectedCallback, state);
                 bool success = result.AsyncWaitHandle.WaitOne(3000, true);
 
+                //If it is timeout in 3 seconds, we close the socket. 
                 if (!success)
                 {
                     try
@@ -222,6 +226,7 @@ namespace NetworkUtil
 
             try
             {
+                //Finalizes the connection
                 state.TheSocket.EndConnect(ar);
             }
             catch (Exception e)
@@ -253,6 +258,7 @@ namespace NetworkUtil
         {
             try
             {
+                //Begins the receive process
                 state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
             }
             catch (Exception e)
@@ -284,6 +290,7 @@ namespace NetworkUtil
 
             try
             {
+                //Finalizes the receive process 
                 int numBytes = state.TheSocket.EndReceive(ar);
 
                 //If the server has closed, then throws. 
@@ -365,7 +372,7 @@ namespace NetworkUtil
             }
             catch (Exception)
             {
-              
+
             }
         }
 
@@ -437,6 +444,11 @@ namespace NetworkUtil
 
         }
 
+        /// <summary>
+        /// A private helper method to set the error message, and use the socket state to report an error back to the user. 
+        /// </summary>
+        /// <param name="message">The error message</param>
+        /// <param name="state">The socket state</param>
         private static void ReportError(string message, SocketState state)
         {
             state.ErrorMessage = message;
