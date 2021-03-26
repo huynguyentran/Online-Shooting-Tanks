@@ -565,7 +565,7 @@ namespace NetworkUtil
 
             String message = "a very long sentence that is not very long";
 
-          Assert.IsTrue(Networking.Send(testRemoteSocketState.TheSocket, message));
+            Assert.IsTrue(Networking.Send(testRemoteSocketState.TheSocket, message));
             Networking.GetData(testLocalSocketState);
             NetworkTestHelper.WaitForOrTimeout(() => testLocalSocketState.GetData().Length == message.Length, NetworkTestHelper.timeout);
             Assert.AreEqual(message.ToString(), testLocalSocketState.GetData());
@@ -588,15 +588,82 @@ namespace NetworkUtil
             Assert.IsTrue(testLocalSocketState.TheSocket.Connected);
 
             String message = "a very long sentence that is not very long";
-          
-            Assert.IsTrue(Networking.Send(testRemoteSocketState.TheSocket, message));
-            NetworkTestHelper.WaitForOrTimeout(() => false, NetworkTestHelper.timeout);
-            testLocalSocketState.TheSocket.Shutdown(SocketShutdown.Both);
 
-            //Networking.GetData(testLocalSocketState);
-            ///NetworkTestHelper.WaitForOrTimeout(() => testLocalSocketState.GetData().Length == message.Length, NetworkTestHelper.timeout);
-            // Assert.AreEqual(message.ToString(), testLocalSocketState.GetData());
-            // Assert.IsTrue(testRemoteSocketState.TheSocket.Connected);
+            testRemoteSocketState.TheSocket.Shutdown(SocketShutdown.Both);
+            NetworkTestHelper.WaitForOrTimeout(() => !testRemoteSocketState.TheSocket.Connected, NetworkTestHelper.timeout);
+            Assert.IsFalse(Networking.Send(testRemoteSocketState.TheSocket, message));
+        }
+
+        /// <summary>
+        /// Test send and close to make sure the send fails. 
+        /// </summary>
+        /// <param name="clientSide"></param>
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void TestServerSendAndCloseWithError(bool clientSide)
+        {
+            SetupTestConnections(clientSide, out testListener, out testLocalSocketState, out testRemoteSocketState);
+
+            Assert.IsTrue(testRemoteSocketState.TheSocket.Connected);
+            Assert.IsTrue(testLocalSocketState.TheSocket.Connected);
+
+            String message = "a very long sentence that is not very long";
+
+            testRemoteSocketState.TheSocket.Shutdown(SocketShutdown.Both);
+            NetworkTestHelper.WaitForOrTimeout(() => !testRemoteSocketState.TheSocket.Connected, NetworkTestHelper.timeout);
+            Assert.IsFalse(Networking.SendAndClose(testRemoteSocketState.TheSocket, message));
+        }
+
+        /// <summary>
+        /// Test send and close to make sure the send fails. 
+        /// </summary>
+        /// <param name="clientSide"></param>
+        [DataRow(true)]
+        [DataRow(false)]
+        [DataTestMethod]
+        public void TestServerSendAndCloseEndSendError(bool clientSide)
+        {
+            SetupTestConnections(clientSide, out testListener, out testLocalSocketState, out testRemoteSocketState);
+
+            Assert.IsTrue(testRemoteSocketState.TheSocket.Connected);
+            Assert.IsTrue(testLocalSocketState.TheSocket.Connected);
+
+            String message = "a very long sentence that is not very long";
+
+            testLocalSocketState.TheSocket.Shutdown(SocketShutdown.Both);
+            NetworkTestHelper.WaitForOrTimeout(() => false, NetworkTestHelper.timeout);
+            Assert.IsTrue(Networking.SendAndClose(testRemoteSocketState.TheSocket, message));
+        }
+
+        /// <summary>
+        /// Test nonexistent domain name. 
+        /// </summary>
+        /// <param name="clientSide"></param>
+        [TestMethod]
+        public void TestClientBadDomain()
+        {
+            void ReceiveClient(SocketState state)
+            {
+                Assert.IsTrue(state.ErrorOccurred);
+            }
+
+            Networking.ConnectToServer(ReceiveClient, "George Lucas Made Starwars", 2101);
+        }
+
+        /// <summary>
+        /// Test bad IPv4. 
+        /// </summary>
+        /// <param name="clientSide"></param>
+        [TestMethod]
+        public void TestClientBadIP()
+        {
+            void ReceiveClient(SocketState state)
+            {
+                Assert.IsTrue(state.ErrorOccurred);
+            }
+
+            Networking.ConnectToServer(ReceiveClient, ".com", 2101);
         }
     }
 }
