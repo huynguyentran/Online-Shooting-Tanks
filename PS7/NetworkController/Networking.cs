@@ -376,7 +376,6 @@ namespace NetworkUtil
             }
         }
 
-
         /// <summary>
         /// Begin the asynchronous process of sending data via BeginSend, using SendAndCloseCallback to finalize the send process.
         /// This variant closes the socket in the callback once complete. This is useful for HTTP servers.

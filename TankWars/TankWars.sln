@@ -7,11 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "View", "View\View.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkController", "NetworkController\NetworkController.csproj", "{EA3DEDBC-1A18-4B30-B84F-E0337BDF66BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{681EBBE6-1D02-437C-B8DA-F96360CA1A4F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model", "Model\Model.csproj", "{681EBBE6-1D02-437C-B8DA-F96360CA1A4F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameController", "GameController\GameController.csproj", "{535D1363-1C81-46B1-9D53-2582ECFA9290}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameController", "GameController\GameController.csproj", "{535D1363-1C81-46B1-9D53-2582ECFA9290}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vector2D", "Vector2D\Vector2D.csproj", "{E920B391-F0F2-4EDE-8DD6-2371A3594354}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vector2D", "Vector2D\Vector2D.csproj", "{E920B391-F0F2-4EDE-8DD6-2371A3594354}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{5CA89C98-C4B7-4E9E-AF19-67720550E058}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,9 @@ Global
 		{E920B391-F0F2-4EDE-8DD6-2371A3594354}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E920B391-F0F2-4EDE-8DD6-2371A3594354}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E920B391-F0F2-4EDE-8DD6-2371A3594354}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CA89C98-C4B7-4E9E-AF19-67720550E058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CA89C98-C4B7-4E9E-AF19-67720550E058}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CA89C98-C4B7-4E9E-AF19-67720550E058}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
