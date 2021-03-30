@@ -20,11 +20,13 @@ namespace View
 
             gController = new GameController(messageBoxForError);
 
+            gController.updateView += WorldUpdate;
+
         }
 
         private void serverTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (KeyPress += Keys.Enter)
+            if (KeyCode == Keys.Enter)
             {
                 //if both of them have something in it.
                 gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
@@ -34,7 +36,7 @@ namespace View
 
         private void nameTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (KeyPress += Keys.Enter)
+            if (KeyPress == Keys.Enter)
             {
                 gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
             }
@@ -43,6 +45,11 @@ namespace View
         private void messageBoxForError(string str)
         {
             MessageBox.Show(str);
+        }
+
+        private void WorldUpdate()
+        {
+            Invoke(new MethodInvoker(() => this.Invalidate(true)));
         }
     }
 }

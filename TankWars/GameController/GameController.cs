@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NetworkUtil;
 using Newtonsoft.Json.Linq;
@@ -14,7 +15,9 @@ namespace Controller
         private int playerID = -1;
         private int mapSize = -1;
 
-
+        //Do we want event to be public
+        public delegate void DataEvent();
+        public event DataEvent updateView;
 
         public GameController(Action<string> onError)
         {
@@ -101,7 +104,7 @@ namespace Controller
             }
             //Deserialization.
 
-
+            ParseGameObjects(state);
 
             //Parse Walls
             //If we've received all the walls, start taking frames.
@@ -148,6 +151,11 @@ namespace Controller
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
             }
+
+            updateView();
         }
+
+
+
     }
 }
