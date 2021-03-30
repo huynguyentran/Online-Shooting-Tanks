@@ -27,7 +27,7 @@ namespace View
             if (KeyPress += Keys.Enter)
             {
                 //if both of them have something in it.
-                gController.connectToServer(serverTextBox.Text, nameTextBox.Text);
+                gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
 
             }
         }
@@ -36,7 +36,7 @@ namespace View
         {
             if (KeyPress += Keys.Enter)
             {
-                gController.connectToServer(serverTextBox.Text, nameTextBox.Text);
+                gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
             }
         }
 
