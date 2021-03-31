@@ -19,7 +19,7 @@ namespace View
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             GameController gController = new GameController();
-            Application.Run(new Form1());
+            Application.Run(new Form1(gController));
         }
     }
 }
