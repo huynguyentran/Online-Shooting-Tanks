@@ -133,20 +133,21 @@ namespace Controller
                 //Get rid of extra newline character.
                 string trimmedPart = p.Substring(0, p.Length - 1);
 
-                JObject gObj = JObject.Parse(trimmedPart);
+        
+                //if (gObj["tank"] != null)
+                //    //Model.Tank.Deserialize(trimmedPart);
+                //else if (gObj["wall"] != null)
+                //    //Model.Wall.Deserialize(trimmedPart);
+                //else if (gObj["proj"] != null)
+                //    //Model.Projectiles.Deserialize(trimmedPart);
+                //else if (gObj["power"] != null)
+                //    //Model.PowerUps.Deserialize(trimmedPart);
+                //else if (gObj["beam"] != null)
+                //    //Model.Beam.Deserialize(trimmedPart);
+                //else
+                //    throw new ArgumentException("Unrecognized game object received: " + trimmedPart);
 
-                if (gObj["tank"] != null)
-                    //Model.Tank.Deserialize(trimmedPart);
-                else if (gObj["wall"] != null)
-                    //Model.Wall.Deserialize(trimmedPart);
-                else if (gObj["proj"] != null)
-                    //Model.Projectiles.Deserialize(trimmedPart);
-                else if (gObj["power"] != null)
-                    //Model.PowerUps.Deserialize(trimmedPart);
-                else if (gObj["beam"] != null)
-                    //Model.Beam.Deserialize(trimmedPart);
-                else
-                    throw new ArgumentException("Unrecognized game object received: " + trimmedPart);
+                Model.Deserialize(trimmedPart);
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
