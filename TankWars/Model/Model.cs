@@ -18,7 +18,9 @@ namespace Model
 
         private Dictionary<int, Powerup> powerups;
 
-        private Dictionary<int, Wall> wall;
+        private Dictionary<int, Wall> walls;
+
+        private Dictionary<int, Beam> beams;
 
         private int size;
 
@@ -28,21 +30,42 @@ namespace Model
         }
 
 
-        public object Deserialize(string input)
+        public void Deserialize(string input)
         {
             JObject gObj = JObject.Parse(input);
+
             if (gObj["tank"] != null)
-                Tank.Deserialize(input);
+            {
+                Tank t = Tank.Deserialize(input);
+                //Ensure this is the right way to get a intance variable from JSON.
+                tanks[gObj.Value<int>("tank")] = t;
+            }
             else if (gObj["wall"] != null)
-                Wall.Deserialize(trimmedPart);
+            {
+                Wall w = Wall.Deserialize(input);
+                //Ensure this is the right way to get a intance variable from JSON.
+                walls[gObj.Value<int>("tank")] = w;
+            }
             else if (gObj["proj"] != null)
-                Projectile.Deserialize(trimmedPart);
+            {
+                Projectile pr = Projectile.Deserialize(input);
+                //Ensure this is the right way to get a intance variable from JSON.
+                projectiles[gObj.Value<int>("tank")] = pr;
+            }
             else if (gObj["power"] != null)
-                Powerup.Deserialize(trimmedPart);
+            {
+                Powerup pu = Powerup.Deserialize(input);
+                //Ensure this is the right way to get a intance variable from JSON.
+                powerups[gObj.Value<int>("tank")] = pu;
+            }
             else if (gObj["beam"] != null)
-                Beam.Deserialize(trimmedPart);
+            {
+                Beam b = Beam.Deserialize(input);
+                //Ensure this is the right way to get a intance variable from JSON.
+                beams[gObj.Value<int>("tank")] = b;
+            }
             else
-                throw new ArgumentException("Unrecognized game object received: " + trimmedPart);
+                throw new ArgumentException("Unrecognized game object received: " + input);
 
         }
     }

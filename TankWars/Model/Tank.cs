@@ -47,8 +47,7 @@ namespace Model
 
         public static Tank Deserialize(string input)
         {
-            Tank rebuilt =JsonConvert.DeserializeObject<Tank>(input);
-            return rebuilt;
+            return JsonConvert.DeserializeObject<Tank>(input);
         }
     }
 
