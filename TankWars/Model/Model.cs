@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Model
+namespace theMap
 {
     public class Model
     {
@@ -67,6 +67,11 @@ namespace Model
             else
                 throw new ArgumentException("Unrecognized game object received: " + input);
 
+        }
+
+        public void changeSize(int newSize)
+        {
+            size = newSize;
         }
     }
 

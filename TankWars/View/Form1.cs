@@ -8,12 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Controller;
+using theMap;
 
 namespace View
 {
     public partial class Form1 : Form
     {
         private GameController gController;
+
+
+        private const int menuSize = 40;
+        private const int viewSize = 500;
+
         public Form1()
         {
             InitializeComponent();
@@ -22,25 +28,15 @@ namespace View
 
             gController.updateView += WorldUpdate;
 
+            DrawingPanel drawingPanel;
+            drawingPanel = new  DrawingPanel(gController.world);
+            drawingPanel.Location = new Point(0, menuSize);
+            drawingPanel.Size = new Size(viewSize, viewSize);
+            this.Controls.Add(drawingPanel);
+
         }
 
-        private void serverTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (KeyCode == Keys.Enter)
-            {
-                //if both of them have something in it.
-                gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
 
-            }
-        }
-
-        private void nameTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (KeyPress == Keys.Enter)
-            {
-                gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
-            }
-        }
 
         private void messageBoxForError(string str)
         {
@@ -50,6 +46,36 @@ namespace View
         private void WorldUpdate()
         {
             Invoke(new MethodInvoker(() => this.Invalidate(true)));
+        }
+
+        class DrawingPanel : Panel
+        {
+            private readonly Model theMap;
+            public DrawingPanel(Model w)
+            {
+                DoubleBuffered = true;
+                theMap = w;
+            }
+
+
+        }
+
+        private void serverTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter && (serverTextBox.Text !="" && nameTextBox.Text != ""))
+            {
+                //if both of them have something in it.
+                gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
+
+            }
+        }
+
+        private void nameTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter && (serverTextBox.Text != "" && nameTextBox.Text != ""))
+            {
+                gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NetworkUtil;
 using Newtonsoft.Json.Linq;
+using theMap;
 
 namespace Controller
 {
@@ -11,6 +12,12 @@ namespace Controller
     {
         private event Action<string> errorEvent;
 
+        private Model theWorld;
+
+        public Model world
+        {
+            get { return theWorld; }
+        }
         //Bad practice to use -1 to signify an invalid value.
         private int playerID = -1;
         private int mapSize = -1;
@@ -22,6 +29,7 @@ namespace Controller
         public GameController(Action<string> onError)
         {
             errorEvent += onError;
+            theWorld = new Model(0);
         }
 
         public void ConnectToServer(string address, string playerName)
@@ -34,7 +42,7 @@ namespace Controller
                     errorEvent.Invoke(state.ErrorMessage);
                     return;
                 }
-                
+
                 Networking.Send(state.TheSocket, playerName + "\n");
                 state.OnNetworkAction = RetrievePlayerIDandMapSize;
                 Networking.GetData(state);
@@ -88,8 +96,10 @@ namespace Controller
                 if (playerID == -1)
                     playerID = Int32.Parse(trimmedPart);
                 else if (mapSize == -1)
+                {
                     mapSize = Int32.Parse(trimmedPart);
-
+                    theWorld.changeSize(mapSize);
+                }
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
             }
@@ -133,7 +143,7 @@ namespace Controller
                 //Get rid of extra newline character.
                 string trimmedPart = p.Substring(0, p.Length - 1);
 
-        
+
                 //if (gObj["tank"] != null)
                 //    //Model.Tank.Deserialize(trimmedPart);
                 //else if (gObj["wall"] != null)
@@ -147,7 +157,7 @@ namespace Controller
                 //else
                 //    throw new ArgumentException("Unrecognized game object received: " + trimmedPart);
 
-                Model.Deserialize(trimmedPart);
+                theWorld.Deserialize(trimmedPart);
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
@@ -156,6 +166,43 @@ namespace Controller
             updateView();
         }
 
+
+
+
+
+
+
+        ///// <summary>
+        ///// Example of handling movement request
+        ///// </summary>
+        //public void HandleMoveRequest(/* pass info about which command here */)
+        //{
+        //    movingPressed = true;
+        //}
+
+        ///// <summary>
+        ///// Example of canceling a movement request
+        ///// </summary>
+        //public void CancelMoveRequest(/* pass info about which command here */)
+        //{
+        //    movingPressed = false;
+        //}
+
+        ///// <summary>
+        ///// Example of handling mouse request
+        ///// </summary>
+        //public void HandleMouseRequest(/* pass info about which button here */)
+        //{
+        //    mousePressed = true;
+        //}
+
+        ///// <summary>
+        ///// Example of canceling mouse request
+        ///// </summary>
+        //public void CancelMouseRequest(/* pass info about which button here */)
+        //{
+        //    mousePressed = false;
+        //}
 
 
     }

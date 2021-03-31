@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using TankWars;
 
-namespace Model
+namespace theMap
 {
     [JsonObject(MemberSerialization.OptIn)]
     public class Tank
@@ -24,8 +24,8 @@ namespace Model
         [JsonProperty(PropertyName = "name")]
         private string name;
 
-        [JsonProperty(PropertyName = "hp")]
-        private int hitPoints = Constants.MaxHP;
+        //[JsonProperty(PropertyName = "hp")]
+       // private int hitPoints = Constants.MaxHP;
 
         [JsonProperty(PropertyName = "score")]
         private int score = 0;
