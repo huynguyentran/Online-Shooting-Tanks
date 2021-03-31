@@ -102,10 +102,13 @@ namespace Controller
                 else if (mapSize == -1)
                 {
                     mapSize = Int32.Parse(trimmedPart);
-                    theWorld.changeSize(mapSize);
+                    theWorld.SetSize(mapSize);
                 }
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
+
+                if (playerID != -1 && mapSize != -1)
+                    break;
             }
         }
 
@@ -147,21 +150,7 @@ namespace Controller
                 //Get rid of extra newline character.
                 string trimmedPart = p.Substring(0, p.Length - 1);
 
-
-                //if (gObj["tank"] != null)
-                //    //Model.Tank.Deserialize(trimmedPart);
-                //else if (gObj["wall"] != null)
-                //    //Model.Wall.Deserialize(trimmedPart);
-                //else if (gObj["proj"] != null)
-                //    //Model.Projectiles.Deserialize(trimmedPart);
-                //else if (gObj["power"] != null)
-                //    //Model.PowerUps.Deserialize(trimmedPart);
-                //else if (gObj["beam"] != null)
-                //    //Model.Beam.Deserialize(trimmedPart);
-                //else
-                //    throw new ArgumentException("Unrecognized game object received: " + trimmedPart);
-
-                theWorld.Deserialize(trimmedPart);
+                theWorld.DeserializeGameObject(trimmedPart);
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);

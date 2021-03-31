@@ -18,7 +18,7 @@ namespace View
 
 
         private const int menuSize = 40;
-        private const int viewSize = 500;
+        private const int viewSize = 1000;
 
         public Form1(GameController _gController)
         {
@@ -47,18 +47,6 @@ namespace View
         private void WorldUpdate()
         {
             Invoke(new MethodInvoker(() => this.Invalidate(true)));
-        }
-
-        class DrawingPanel : Panel
-        {
-            private readonly Model theMap;
-            public DrawingPanel(Model w)
-            {
-                DoubleBuffered = true;
-                theMap = w;
-            }
-
-
         }
 
         private void serverTextBox_KeyPress(object sender, KeyPressEventArgs e)

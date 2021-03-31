@@ -6,7 +6,7 @@ using TankWars;
 
 namespace theMap
 {
-    class Powerup
+    public class Powerup
     {
 
         [JsonProperty(PropertyName = "power")]

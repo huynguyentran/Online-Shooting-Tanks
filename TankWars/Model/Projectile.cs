@@ -6,7 +6,7 @@ using TankWars;
 
 namespace theMap
 {
-    class Projectile
+    public class Projectile
     {
         [JsonProperty(PropertyName = "proj")]
         private int ID;

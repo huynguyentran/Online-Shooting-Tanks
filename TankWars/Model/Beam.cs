@@ -6,7 +6,7 @@ using TankWars;
 
 namespace theMap
 {
-    class Beam
+    public class Beam
     {
 
 
