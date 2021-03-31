@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Controller;
+
 
 namespace View
 {
@@ -16,6 +18,7 @@ namespace View
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            GameController gController = new GameController();
             Application.Run(new Form1());
         }
     }
