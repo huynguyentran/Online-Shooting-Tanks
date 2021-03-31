@@ -44,25 +44,25 @@ namespace Model
             {
                 Wall w = Wall.Deserialize(input);
                 //Ensure this is the right way to get a intance variable from JSON.
-                walls[gObj.Value<int>("tank")] = w;
+                walls[gObj.Value<int>("wall")] = w;
             }
             else if (gObj["proj"] != null)
             {
                 Projectile pr = Projectile.Deserialize(input);
                 //Ensure this is the right way to get a intance variable from JSON.
-                projectiles[gObj.Value<int>("tank")] = pr;
+                projectiles[gObj.Value<int>("proj")] = pr;
             }
             else if (gObj["power"] != null)
             {
                 Powerup pu = Powerup.Deserialize(input);
                 //Ensure this is the right way to get a intance variable from JSON.
-                powerups[gObj.Value<int>("tank")] = pu;
+                powerups[gObj.Value<int>("power")] = pu;
             }
             else if (gObj["beam"] != null)
             {
                 Beam b = Beam.Deserialize(input);
                 //Ensure this is the right way to get a intance variable from JSON.
-                beams[gObj.Value<int>("tank")] = b;
+                beams[gObj.Value<int>("beam")] = b;
             }
             else
                 throw new ArgumentException("Unrecognized game object received: " + input);
