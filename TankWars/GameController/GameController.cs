@@ -26,9 +26,13 @@ namespace Controller
         public delegate void DataEvent();
         public event DataEvent updateView;
 
-        public GameController(Action<string> onError)
+        public void AddErrorHandler(Action<string> onError)
         {
             errorEvent += onError;
+        }
+
+        public GameController()
+        {
             theWorld = new Model(0);
         }
 

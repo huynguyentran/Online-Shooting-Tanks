@@ -20,11 +20,12 @@ namespace View
         private const int menuSize = 40;
         private const int viewSize = 500;
 
-        public Form1()
+        public Form1(GameController _gController)
         {
             InitializeComponent();
 
-            gController = new GameController(messageBoxForError);
+            gController = _gController;
+            gController.AddErrorHandler(MessageBoxForError);
 
             gController.updateView += WorldUpdate;
 
@@ -38,7 +39,7 @@ namespace View
 
 
 
-        private void messageBoxForError(string str)
+        private void MessageBoxForError(string str)
         {
             MessageBox.Show(str);
         }
