@@ -19,7 +19,7 @@ namespace View
 
         private const int menuSize = 40;
         private const int viewSize = 1000;
-
+        private DrawingPanel drawingPanel;
         public Form1(GameController _gController)
         {
             InitializeComponent();
@@ -29,7 +29,7 @@ namespace View
 
             gController.updateView += WorldUpdate;
 
-            DrawingPanel drawingPanel;
+         
             drawingPanel = new  DrawingPanel(gController.world);
             drawingPanel.Location = new Point(0, menuSize);
             drawingPanel.Size = new Size(viewSize, viewSize);
@@ -37,14 +37,14 @@ namespace View
 
             //Handling Inputs
             //this.KeyDown += gController.HandleMoveRequest;
-            this.KeyPress += TranslateKeyPress;
+            drawingPanel.KeyDown += TranslateKeyPress;
             //this.KeyUp += gController.CancelMoveRequest;
 
+     
+            //drawingPanel.MouseMove += gController.HandleMousePosition;
 
-            drawingPanel.MouseMove += gController.HandleMousePosition;
-
-            drawingPanel.MouseDown += gController.HandleMouseRequest;
-            drawingPanel.MouseUp += gController.CancelMouseRequest;
+            //drawingPanel.MouseDown += gController.HandleMouseRequest;
+            //drawingPanel.MouseUp += gController.CancelMouseRequest;
         }
 
 
@@ -65,7 +65,9 @@ namespace View
             {
                 //if both of them have something in it.
                 gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
+                drawingPanel.Focus();
             }
+         
         }
 
         private void nameTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -73,23 +75,27 @@ namespace View
             if (e.KeyChar == (char)Keys.Enter && (serverTextBox.Text != "" && nameTextBox.Text != ""))
             {
                 gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
+                drawingPanel.Focus();
             }
+          
+
         }
 
-        private void TranslateKeyPress(object sender, KeyPressEventArgs e)
+        private void TranslateKeyPress(object sender, KeyEventArgs e)
         {
-            switch(e.KeyChar)
+            switch(e.KeyCode)
             {
-                case (char) Keys.W:
+              
+                case Keys.W:
                     gController.HandleMoveRequest(GameController.MovementDirection.UP);
                     break;
-                case (char)Keys.S:
+                case Keys.S:
                     gController.HandleMoveRequest(GameController.MovementDirection.DOWN);
                     break;
-                case (char)Keys.A:
+                case Keys.A:
                     gController.HandleMoveRequest(GameController.MovementDirection.LEFT);
                     break;
-                case (char)Keys.D:
+                case Keys.D:
                     gController.HandleMoveRequest(GameController.MovementDirection.RIGHT);
                     break;
             }

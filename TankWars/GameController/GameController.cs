@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NetworkUtil;
 using Newtonsoft.Json.Linq;
+using TankWars;
 using theMap;
 
 namespace Controller
@@ -13,6 +14,10 @@ namespace Controller
         private event Action<string> errorEvent;
 
         private Model theWorld;
+
+
+        private ControlCommands cmd;
+
 
         public Model world
         {
@@ -34,6 +39,11 @@ namespace Controller
         public GameController()
         {
             theWorld = new Model(0);
+            cmd = new ControlCommands();
+            cmd.Move = "none";
+            cmd.Fire = "none";
+            Vector2D s = new Vector2D(0,1);
+            cmd.directionOfTank = s;
         }
 
         public void ConnectToServer(string address, string playerName)
@@ -102,7 +112,7 @@ namespace Controller
                     playerID = Int32.Parse(trimmedPart);
                     theWorld.clientID = Int32.Parse(trimmedPart);
                 }
-                    
+
                 else if (mapSize == -1)
                 {
                     mapSize = Int32.Parse(trimmedPart);
@@ -126,6 +136,8 @@ namespace Controller
             //Deserialization.
 
             ParseGameObjects(state);
+
+            Networking.Send(state.TheSocket, ControlCommands.Serialize(cmd)+"\n");
 
             //Parse Walls
             //If we've received all the walls, start taking frames.
@@ -167,44 +179,59 @@ namespace Controller
 
 
 
-        public enum MovementDirection { UP, DOWN, LEFT, RIGHT};
+        public enum MovementDirection { UP, DOWN, LEFT, RIGHT };
 
         /// <summary>
         /// Example of handling movement request
         /// </summary>
         public void HandleMoveRequest(MovementDirection m)
         {
-            
+            switch (m)
+
+            {
+                case MovementDirection.UP:
+                    cmd.Move = "up";
+                    break;
+                case MovementDirection.DOWN:
+                    cmd.Move = "down";
+                    break;
+                case MovementDirection.LEFT:
+                    cmd.Move = "left";
+                    break;
+                case MovementDirection.RIGHT:
+                    cmd.Move = "right";
+                    break;
+            }
         }
 
-        
-        /// <summary>
-        /// Example of canceling a movement request
-        /// </summary>
-        public void CancelMoveRequest(/* pass info about which command here */)
-        {
-            movingPressed = false;
-        }
 
-        public void HandleMousePosition()
-        {
+        ///// <summary>
+        ///// Example of canceling a movement request
+        ///// </summary>
+        //public void CancelMoveRequest(/* pass info about which command here */)
+        //{
+        //    movingPressed = false;
+        //}
 
-        }
+        //public void HandleMousePosition()
+        //{
 
-        /// <summary>
-        /// Example of handling mouse request
-        /// </summary>
-        public void HandleMouseRequest(/* pass info about which button here */)
-        {
-            mousePressed = true;
-        }
+        //}
 
-        /// <summary>
-        /// Example of canceling mouse request
-        /// </summary>
-        public void CancelMouseRequest(/* pass info about which button here */)
-        {
-            mousePressed = false;
-        }
+        ///// <summary>
+        ///// Example of handling mouse request
+        ///// </summary>
+        //public void HandleMouseRequest(/* pass info about which button here */)
+        //{
+        //    mousePressed = true;
+        //}
+
+        ///// <summary>
+        ///// Example of canceling mouse request
+        ///// </summary>
+        //public void CancelMouseRequest(/* pass info about which button here */)
+        //{
+        //    mousePressed = false;
+        //}
     }
 }
