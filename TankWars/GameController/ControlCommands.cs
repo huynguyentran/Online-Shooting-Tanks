@@ -6,11 +6,13 @@ using TankWars;
 
 namespace Controller
 {
+    [JsonObject(MemberSerialization.OptIn)]
     class ControlCommands
     {
         [JsonProperty(PropertyName = "moving")]
         private string movement;
 
+        [JsonIgnore]
         public string Move
         {
             get
@@ -26,7 +28,7 @@ namespace Controller
         [JsonProperty(PropertyName = "fire")]
         private string fireType;
 
-
+        [JsonIgnore]
         public string Fire
         {
             get
@@ -43,7 +45,7 @@ namespace Controller
         [JsonProperty(PropertyName = "tdir")]
         private Vector2D direction;
 
-
+        [JsonIgnore]
         public Vector2D directionOfTank
         {
             get

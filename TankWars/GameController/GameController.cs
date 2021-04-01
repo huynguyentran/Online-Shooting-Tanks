@@ -44,6 +44,8 @@ namespace Controller
             cmd.Fire = "none";
             Vector2D s = new Vector2D(0,1);
             cmd.directionOfTank = s;
+
+            //movementMemory = new LinkedList<string>();
         }
 
         public void ConnectToServer(string address, string playerName)
@@ -137,7 +139,9 @@ namespace Controller
 
             ParseGameObjects(state);
 
-            Networking.Send(state.TheSocket, ControlCommands.Serialize(cmd)+"\n");
+            string serializedCommand = ControlCommands.Serialize(cmd);
+
+            Networking.Send(state.TheSocket, serializedCommand+"\n");
 
             //Parse Walls
             //If we've received all the walls, start taking frames.
@@ -186,32 +190,49 @@ namespace Controller
         /// </summary>
         public void HandleMoveRequest(MovementDirection m)
         {
-            switch (m)
+            string stringDir = MovementDirectionToString(m);
+            cmd.Move = stringDir;
+            //movementMemory.AddLast(stringDir);
+        }
 
+        //private LinkedList<string> movementMemory;
+
+        private string MovementDirectionToString(MovementDirection m)
+        {
+            switch (m)
             {
                 case MovementDirection.UP:
-                    cmd.Move = "up";
-                    break;
+                    return "up";
                 case MovementDirection.DOWN:
-                    cmd.Move = "down";
-                    break;
+                    return "down";
                 case MovementDirection.LEFT:
-                    cmd.Move = "left";
-                    break;
+                    return "left";
                 case MovementDirection.RIGHT:
-                    cmd.Move = "right";
-                    break;
+                    return "right";
+                default:
+                    return "none";
             }
         }
 
 
-        ///// <summary>
-        ///// Example of canceling a movement request
-        ///// </summary>
-        //public void CancelMoveRequest(/* pass info about which command here */)
-        //{
-        //    movingPressed = false;
-        //}
+        /// <summary>
+        /// Example of canceling a movement request
+        /// </summary>
+        public void CancelMoveRequest(MovementDirection m)
+        {
+            //movementMemory.Remove(MovementDirectionToString(m));
+
+            if (cmd.Move.Equals(MovementDirectionToString(m)))//movementMemory.Count == 0)
+            {
+                cmd.Move = "none";
+            }
+            /*
+            else
+            {
+                cmd.Move = movementMemory.Last.Value;
+            }
+            */
+        }
 
         //public void HandleMousePosition()
         //{

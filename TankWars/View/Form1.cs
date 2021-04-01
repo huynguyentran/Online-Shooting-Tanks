@@ -38,8 +38,7 @@ namespace View
             //Handling Inputs
             //this.KeyDown += gController.HandleMoveRequest;
             drawingPanel.KeyDown += TranslateKeyPress;
-            //this.KeyUp += gController.CancelMoveRequest;
-
+            drawingPanel.KeyUp += TranslateKeyUp;
      
             //drawingPanel.MouseMove += gController.HandleMousePosition;
 
@@ -97,6 +96,25 @@ namespace View
                     break;
                 case Keys.D:
                     gController.HandleMoveRequest(GameController.MovementDirection.RIGHT);
+                    break;
+            }
+        }
+
+        private void TranslateKeyUp(object sender, KeyEventArgs e)
+        {
+            switch(e.KeyCode)
+            {
+                case Keys.W:
+                    gController.CancelMoveRequest(GameController.MovementDirection.UP);
+                    break;
+                case Keys.S:
+                    gController.CancelMoveRequest(GameController.MovementDirection.DOWN);
+                    break;
+                case Keys.A:
+                    gController.CancelMoveRequest(GameController.MovementDirection.LEFT);
+                    break;
+                case Keys.D:
+                    gController.CancelMoveRequest(GameController.MovementDirection.RIGHT);
                     break;
             }
         }
