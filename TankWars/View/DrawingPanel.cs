@@ -72,24 +72,51 @@ namespace View
             }
         }
 
+        private void TankDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+
+            int width = 60;
+            int height = 70;
+
+            using (Brush b = new SolidBrush(Color.Blue))
+            {
+                Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
+
+                e.Graphics.FillRectangle(b, rec);
+            }
+
+        }
+
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
+
             // Center the view on the middle of the world,
             // since the image and world use different coordinate systems
             int viewSize = Size.Width; // view is square, so we can just use width
-            e.Graphics.TranslateTransform(viewSize / 2, viewSize / 2);
+            if (model.Tanks.ContainsKey(model.clientID))
+            {
+                float xLoc = (float)model.Tanks[model.clientID].Location.GetX();
+                float yLoc = (float)model.Tanks[model.clientID].Location.GetY();
+                e.Graphics.TranslateTransform(viewSize/2 - xLoc , viewSize/2 - yLoc );
+            }
 
             lock (model)
             {
                 // Draw the players
                 foreach (Wall w in model.Walls.Values)
                 {
-                    DrawObjectWithTransform(e, w, (w.Start.GetX() + w.End.GetX())/2, (w.Start.GetY() + w.End.GetY()) / 2, 0, WallDrawer);
+                    DrawObjectWithTransform(e, w, (w.Start.GetX() + w.End.GetX()) / 2, (w.Start.GetY() + w.End.GetY()) / 2, 0, WallDrawer);
                 }
-            }
 
+                foreach (Tank t in model.Tanks.Values)
+                {
+                    DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), t.Orientation.ToAngle(), TankDrawer);
+                }
+
+            }
             // Do anything that Panel (from which we inherit) needs to do
             base.OnPaint(e);
         }

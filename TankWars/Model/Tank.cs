@@ -15,8 +15,25 @@ namespace theMap
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
 
+
+        public Vector2D Location
+        {
+            get
+            {
+                return location;
+            }
+        }
+
         [JsonProperty(PropertyName = "bdir")]
         private Vector2D orientation;
+
+        public Vector2D Orientation
+        {
+            get
+            {
+                return orientation;
+            }
+        }
 
         [JsonProperty(PropertyName = "tdir")]
         private Vector2D aiming = new Vector2D(0, -1);
@@ -25,7 +42,7 @@ namespace theMap
         private string name;
 
         //[JsonProperty(PropertyName = "hp")]
-       // private int hitPoints = Constants.MaxHP;
+        // private int hitPoints = Constants.MaxHP;
 
         [JsonProperty(PropertyName = "score")]
         private int score = 0;

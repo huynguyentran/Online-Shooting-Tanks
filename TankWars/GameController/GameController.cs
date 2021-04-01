@@ -98,7 +98,11 @@ namespace Controller
 
                 //Switch to assigning values to model.
                 if (playerID == -1)
+                {
                     playerID = Int32.Parse(trimmedPart);
+                    theWorld.clientID = Int32.Parse(trimmedPart);
+                }
+                    
                 else if (mapSize == -1)
                 {
                     mapSize = Int32.Parse(trimmedPart);

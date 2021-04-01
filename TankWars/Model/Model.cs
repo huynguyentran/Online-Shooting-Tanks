@@ -28,6 +28,21 @@ namespace theMap
         public Dictionary<int, Beam> Beams { get { return beams; } }
 
 
+        private int playerID;
+
+        public int clientID
+        {
+            get
+            {
+                return playerID;
+            }
+
+            set
+            {
+                playerID = value;
+            }
+        }
+
         private int size;
 
         public Model(int _size)
