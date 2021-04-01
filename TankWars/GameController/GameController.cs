@@ -167,40 +167,44 @@ namespace Controller
 
 
 
+        public enum MovementDirection { UP, DOWN, LEFT, RIGHT};
 
+        /// <summary>
+        /// Example of handling movement request
+        /// </summary>
+        public void HandleMoveRequest(MovementDirection m)
+        {
+            
+        }
 
-        ///// <summary>
-        ///// Example of handling movement request
-        ///// </summary>
-        //public void HandleMoveRequest(/* pass info about which command here */)
-        //{
-        //    movingPressed = true;
-        //}
+        
+        /// <summary>
+        /// Example of canceling a movement request
+        /// </summary>
+        public void CancelMoveRequest(/* pass info about which command here */)
+        {
+            movingPressed = false;
+        }
 
-        ///// <summary>
-        ///// Example of canceling a movement request
-        ///// </summary>
-        //public void CancelMoveRequest(/* pass info about which command here */)
-        //{
-        //    movingPressed = false;
-        //}
+        public void HandleMousePosition()
+        {
 
-        ///// <summary>
-        ///// Example of handling mouse request
-        ///// </summary>
-        //public void HandleMouseRequest(/* pass info about which button here */)
-        //{
-        //    mousePressed = true;
-        //}
+        }
 
-        ///// <summary>
-        ///// Example of canceling mouse request
-        ///// </summary>
-        //public void CancelMouseRequest(/* pass info about which button here */)
-        //{
-        //    mousePressed = false;
-        //}
+        /// <summary>
+        /// Example of handling mouse request
+        /// </summary>
+        public void HandleMouseRequest(/* pass info about which button here */)
+        {
+            mousePressed = true;
+        }
 
-
+        /// <summary>
+        /// Example of canceling mouse request
+        /// </summary>
+        public void CancelMouseRequest(/* pass info about which button here */)
+        {
+            mousePressed = false;
+        }
     }
 }

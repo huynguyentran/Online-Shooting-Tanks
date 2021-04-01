@@ -35,6 +35,16 @@ namespace View
             drawingPanel.Size = new Size(viewSize, viewSize);
             this.Controls.Add(drawingPanel);
 
+            //Handling Inputs
+            //this.KeyDown += gController.HandleMoveRequest;
+            this.KeyPress += TranslateKeyPress;
+            //this.KeyUp += gController.CancelMoveRequest;
+
+
+            drawingPanel.MouseMove += gController.HandleMousePosition;
+
+            drawingPanel.MouseDown += gController.HandleMouseRequest;
+            drawingPanel.MouseUp += gController.CancelMouseRequest;
         }
 
 
@@ -55,7 +65,6 @@ namespace View
             {
                 //if both of them have something in it.
                 gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
-
             }
         }
 
@@ -64,6 +73,25 @@ namespace View
             if (e.KeyChar == (char)Keys.Enter && (serverTextBox.Text != "" && nameTextBox.Text != ""))
             {
                 gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
+            }
+        }
+
+        private void TranslateKeyPress(object sender, KeyPressEventArgs e)
+        {
+            switch(e.KeyChar)
+            {
+                case (char) Keys.W:
+                    gController.HandleMoveRequest(GameController.MovementDirection.UP);
+                    break;
+                case (char)Keys.S:
+                    gController.HandleMoveRequest(GameController.MovementDirection.DOWN);
+                    break;
+                case (char)Keys.A:
+                    gController.HandleMoveRequest(GameController.MovementDirection.LEFT);
+                    break;
+                case (char)Keys.D:
+                    gController.HandleMoveRequest(GameController.MovementDirection.RIGHT);
+                    break;
             }
         }
     }
