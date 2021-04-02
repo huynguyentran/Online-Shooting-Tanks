@@ -77,16 +77,38 @@ namespace View
             Tank t = o as Tank;
 
             int width = 60;
-            int height = 70;
+            int height = 60;
+
+
 
             using (Brush b = new SolidBrush(Color.Blue))
             {
                 Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
 
                 e.Graphics.FillRectangle(b, rec);
+
+
             }
 
         }
+
+        private void TurretDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+            int widthTurret = 50;
+            int heightTurret = 50;
+            using (Brush b = new SolidBrush(Color.Purple))
+            {
+                Rectangle tur = new Rectangle(-(widthTurret / 2), -(heightTurret / 2), widthTurret, heightTurret);
+                e.Graphics.FillRectangle(b, tur);
+            }
+        }
+
+
+        //private void TurretDrawer(object o, PaintEventArgs e)
+        //{
+
+        //}
 
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
@@ -100,7 +122,7 @@ namespace View
             {
                 float xLoc = (float)model.Tanks[model.clientID].Location.GetX();
                 float yLoc = (float)model.Tanks[model.clientID].Location.GetY();
-                e.Graphics.TranslateTransform(viewSize/2 - xLoc , viewSize/2 - yLoc );
+                e.Graphics.TranslateTransform(viewSize / 2 - xLoc, viewSize / 2 - yLoc);
             }
 
             lock (model)
@@ -114,6 +136,7 @@ namespace View
                 foreach (Tank t in model.Tanks.Values)
                 {
                     DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), t.Orientation.ToAngle(), TankDrawer);
+                    DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), t.TurretDirection.ToAngle(), TurretDrawer);
                 }
 
             }

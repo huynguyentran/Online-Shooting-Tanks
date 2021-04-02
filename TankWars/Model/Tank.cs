@@ -38,6 +38,21 @@ namespace theMap
         [JsonProperty(PropertyName = "tdir")]
         private Vector2D aiming = new Vector2D(0, -1);
 
+
+
+        public Vector2D TurretDirection
+        {
+            get
+            {
+                return aiming;
+            }
+
+            set
+            {
+                aiming = value;
+            }
+        }
+
         [JsonProperty(PropertyName = "name")]
         private string name;
 

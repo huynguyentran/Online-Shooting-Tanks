@@ -41,7 +41,6 @@ namespace View
             this.nameTextBox.Name = "nameTextBox";
             this.nameTextBox.Size = new System.Drawing.Size(100, 22);
             this.nameTextBox.TabIndex = 0;
-       
             this.nameTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.nameTextBox_KeyPress);
             // 
             // serverTextBox
@@ -51,7 +50,6 @@ namespace View
             this.serverTextBox.Size = new System.Drawing.Size(100, 22);
             this.serverTextBox.TabIndex = 1;
             this.serverTextBox.Text = "localhost";
-         
             this.serverTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.serverTextBox_KeyPress);
             // 
             // serverLable

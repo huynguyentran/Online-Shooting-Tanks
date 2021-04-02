@@ -39,7 +39,12 @@ namespace View
             //this.KeyDown += gController.HandleMoveRequest;
             drawingPanel.KeyDown += TranslateKeyPress;
             drawingPanel.KeyUp += TranslateKeyUp;
-     
+            drawingPanel.MouseMove += MouseMovement;
+
+            drawingPanel.MouseDown += MouseFire;
+            drawingPanel.MouseUp += MouseCancel;
+
+
             //drawingPanel.MouseMove += gController.HandleMousePosition;
 
             //drawingPanel.MouseDown += gController.HandleMouseRequest;
@@ -116,6 +121,41 @@ namespace View
                 case Keys.D:
                     gController.CancelMoveRequest(GameController.MovementDirection.RIGHT);
                     break;
+            }
+        }
+
+        private void MouseMovement(object sender, MouseEventArgs e)
+        {
+            
+            gController.MouseMovementRequest(e.X-(viewSize/2), e.Y-(viewSize/2));
+        }
+
+        private void MouseFire(object sender, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    gController.HandleMouseRequest(GameController.MouseClickRequest.main);
+                    break;
+                case MouseButtons.Right:
+                    gController.HandleMouseRequest(GameController.MouseClickRequest.alt);
+                    break;
+    
+
+            }
+        }
+
+        private void MouseCancel(object sender, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.Left:
+                    gController.MouseCancelRequest(GameController.MouseClickRequest.main);
+                    break;
+                case MouseButtons.Right:
+                    gController.MouseCancelRequest(GameController.MouseClickRequest.alt);
+                    break;
+
             }
         }
     }

@@ -19,6 +19,9 @@ namespace Controller
         private ControlCommands cmd;
 
 
+
+
+
         public Model world
         {
             get { return theWorld; }
@@ -42,7 +45,7 @@ namespace Controller
             cmd = new ControlCommands();
             cmd.Move = "none";
             cmd.Fire = "none";
-            Vector2D s = new Vector2D(0,1);
+            Vector2D s = new Vector2D(0, 1);
             cmd.directionOfTank = s;
 
             //movementMemory = new LinkedList<string>();
@@ -141,7 +144,7 @@ namespace Controller
 
             string serializedCommand = ControlCommands.Serialize(cmd);
 
-            Networking.Send(state.TheSocket, serializedCommand+"\n");
+            Networking.Send(state.TheSocket, serializedCommand + "\n");
 
             //Parse Walls
             //If we've received all the walls, start taking frames.
@@ -195,6 +198,7 @@ namespace Controller
             //movementMemory.AddLast(stringDir);
         }
 
+
         //private LinkedList<string> movementMemory;
 
         private string MovementDirectionToString(MovementDirection m)
@@ -232,6 +236,45 @@ namespace Controller
                 cmd.Move = movementMemory.Last.Value;
             }
             */
+        }
+
+
+        public enum MouseClickRequest { main, alt };
+
+        public void HandleMouseRequest(MouseClickRequest m)
+        {
+     
+            cmd.Fire = MouseClickRequestToString(m);
+        }
+
+        public string MouseClickRequestToString(MouseClickRequest m)
+        {
+            switch (m)
+            {
+                case MouseClickRequest.main:
+                    return "main";
+                case MouseClickRequest.alt:
+                    return "alt";
+                default:
+                    return "none";
+            }
+        }
+
+        public void MouseCancelRequest(MouseClickRequest m)
+        {
+            if (cmd.Fire.Equals(MouseClickRequestToString(m)))
+            {
+                cmd.Fire = "none";
+            }
+        }
+
+
+        public void MouseMovementRequest(int x, int y)
+
+        {
+            Vector2D tdir = new Vector2D(x, y);
+            tdir.Normalize();
+            cmd.directionOfTank = tdir;
         }
 
         //public void HandleMousePosition()
