@@ -13,12 +13,22 @@ namespace View
     class DrawingPanel : Panel
     {
         private Model model;
+        private Vector2D lastClientPosition;
         public DrawingPanel(Model m)
         {
             DoubleBuffered = true;
             model = m;
+            lastClientPosition = new Vector2D(0, 0);
         }
 
+
+        public void OnTankDeath(Tank t)
+        {
+            if (t.TankID == model.clientID)
+            {
+                lastClientPosition = t.Location;
+            }
+        }
 
         // A delegate for DrawObjectWithTransform
         // Methods matching this delegate can draw whatever they want using e  
@@ -104,11 +114,24 @@ namespace View
             }
         }
 
+        private void ProjectileDrawer(object o, PaintEventArgs e)
+        {
+            Projectile p = (Projectile)o;
 
-        //private void TurretDrawer(object o, PaintEventArgs e)
-        //{
+            int majorDiameter = 20;
+            int minorDiameter = 10;
 
-        //}
+            Color c = Color.Green;
+
+            if (p.PlayerID == model.clientID)
+                c = Color.Red;
+
+            using (Brush b = new SolidBrush(c))
+            {
+                Rectangle bounds = new Rectangle(-(minorDiameter / 2), -(majorDiameter / 2), minorDiameter, majorDiameter);
+                e.Graphics.FillEllipse(b, bounds);
+            }            
+        }
 
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
@@ -118,12 +141,22 @@ namespace View
             // Center the view on the middle of the world,
             // since the image and world use different coordinate systems
             int viewSize = Size.Width; // view is square, so we can just use width
+            float xLoc;
+            float yLoc;
+
             if (model.Tanks.ContainsKey(model.clientID))
             {
-                float xLoc = (float)model.Tanks[model.clientID].Location.GetX();
-                float yLoc = (float)model.Tanks[model.clientID].Location.GetY();
-                e.Graphics.TranslateTransform(viewSize / 2 - xLoc, viewSize / 2 - yLoc);
+                xLoc = (float)model.Tanks[model.clientID].Location.GetX();
+                yLoc = (float)model.Tanks[model.clientID].Location.GetY();
             }
+            else
+            {
+                xLoc = (float)lastClientPosition.GetX();
+                yLoc = (float)lastClientPosition.GetY();
+            }
+
+            e.Graphics.TranslateTransform(viewSize / 2 - xLoc, viewSize / 2 - yLoc);
+
 
             lock (model)
             {
@@ -139,6 +172,11 @@ namespace View
                     DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), t.TurretDirection.ToAngle(), TurretDrawer);
                 }
 
+                foreach (Projectile p in model.Projectiles.Values)
+                {
+
+                    DrawObjectWithTransform(e, p, p.Location.GetX(), p.Location.GetY(), p.Orientation.ToAngle(), ProjectileDrawer);
+                }
             }
             // Do anything that Panel (from which we inherit) needs to do
             base.OnPaint(e);

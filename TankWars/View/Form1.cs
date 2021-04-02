@@ -29,6 +29,7 @@ namespace View
 
             gController.updateView += WorldUpdate;
 
+            gController.deathEvent += OnDeath;
          
             drawingPanel = new  DrawingPanel(gController.world);
             drawingPanel.Location = new Point(0, menuSize);
@@ -140,8 +141,6 @@ namespace View
                 case MouseButtons.Right:
                     gController.HandleMouseRequest(GameController.MouseClickRequest.alt);
                     break;
-    
-
             }
         }
 
@@ -155,6 +154,22 @@ namespace View
                 case MouseButtons.Right:
                     gController.MouseCancelRequest(GameController.MouseClickRequest.alt);
                     break;
+
+            }
+        }
+
+        private void OnDeath(object dead)
+        {
+            if (dead is Tank t)
+            {
+                drawingPanel.OnTankDeath(t);
+            }
+            else if (dead is Powerup pu)
+            {
+
+            }
+            else if (dead is Projectile pr)
+            {
 
             }
         }

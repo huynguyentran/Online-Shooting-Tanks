@@ -57,10 +57,9 @@ namespace theMap
         }
 
 
-        public void DeserializeGameObject(string input)
+        public Tuple<bool, object> DeserializeGameObject(string input)
         {
             JObject gObj = JObject.Parse(input);
-
             /*
              * May be slow because it forces the Model to wait for the frame to finish redering to start loading new objects.
              * Consider replacing with individual lacks for each if statement.
@@ -70,36 +69,49 @@ namespace theMap
                 if (gObj["tank"] != null)
                 {
                     Tank t = Tank.Deserialize(input);
-                    //Ensure this is the right way to get a intance variable from JSON.
-                    tanks[gObj.Value<int>("tank")] = t;
+                    int id = gObj.Value<int>("tank");
+                    if (!t.Died && t.HitPoints > 0)
+                        tanks[id] = t;
+                    else
+                        if (tanks.ContainsKey(id))
+                            tanks.Remove(id);
+                    return new Tuple<bool, object>(t.Died, t);
                 }
                 else if (gObj["wall"] != null)
                 {
                     Wall w = Wall.Deserialize(input);
-                    //Ensure this is the right way to get a intance variable from JSON.
                     walls[gObj.Value<int>("wall")] = w;
                 }
                 else if (gObj["proj"] != null)
                 {
                     Projectile pr = Projectile.Deserialize(input);
-                    //Ensure this is the right way to get a intance variable from JSON.
-                    projectiles[gObj.Value<int>("proj")] = pr;
+                    int id = gObj.Value<int>("proj");
+                    if (!pr.Died)
+                        projectiles[id] = pr;
+                    else
+                        projectiles.Remove(id);
+                    return new Tuple<bool, object>(pr.Died, pr);
                 }
                 else if (gObj["power"] != null)
                 {
                     Powerup pu = Powerup.Deserialize(input);
-                    //Ensure this is the right way to get a intance variable from JSON.
-                    powerups[gObj.Value<int>("power")] = pu;
+                    int id = gObj.Value<int>("power");
+                    if (!pu.Died)
+                        powerups[id] = pu;
+                    else
+                        powerups.Remove(id);
+                    return new Tuple<bool, object>(pu.Died, pu);
                 }
                 else if (gObj["beam"] != null)
                 {
                     Beam b = Beam.Deserialize(input);
-                    //Ensure this is the right way to get a intance variable from JSON.
                     beams[gObj.Value<int>("beam")] = b;
                 }
                 else
                     throw new ArgumentException("Unrecognized game object received: " + input);
             }
+
+            return new Tuple<bool, object>(false, null);
         }
 
         public void SetSize(int newSize)

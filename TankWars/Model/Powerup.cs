@@ -17,6 +17,11 @@ namespace theMap
 
         [JsonProperty(PropertyName = "died")]
         private bool died = false;
+        [JsonIgnore]
+        public bool Died
+        {
+            get { return died; }
+        }
 
         public static Powerup Deserialize(string input)
         {

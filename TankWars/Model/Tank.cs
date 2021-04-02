@@ -11,11 +11,13 @@ namespace theMap
     {
         [JsonProperty(PropertyName = "tank")]
         private int ID;
+        public int TankID
+        {
+            get { return ID; }
+        }
 
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
-
-
         public Vector2D Location
         {
             get
@@ -38,8 +40,6 @@ namespace theMap
         [JsonProperty(PropertyName = "tdir")]
         private Vector2D aiming = new Vector2D(0, -1);
 
-
-
         public Vector2D TurretDirection
         {
             get
@@ -56,14 +56,23 @@ namespace theMap
         [JsonProperty(PropertyName = "name")]
         private string name;
 
-        //[JsonProperty(PropertyName = "hp")]
-        // private int hitPoints = Constants.MaxHP;
+        [JsonProperty(PropertyName = "hp")]
+        private int hitPoints = 3;//Constants.MaxHP;
+        public int HitPoints
+        {
+            get { return hitPoints; }
+        }
 
         [JsonProperty(PropertyName = "score")]
         private int score = 0;
 
         [JsonProperty(PropertyName = "died")]
         private bool died = false;
+        [JsonIgnore]
+        public bool Died
+        {
+            get { return died; }
+        }
 
         [JsonProperty(PropertyName = "dc")]
         private bool disconnected = false;

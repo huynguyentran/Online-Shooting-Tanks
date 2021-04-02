@@ -34,6 +34,8 @@ namespace Controller
         public delegate void DataEvent();
         public event DataEvent updateView;
 
+        public event Action<object> deathEvent;
+
         public void AddErrorHandler(Action<string> onError)
         {
             errorEvent += onError;
@@ -173,7 +175,12 @@ namespace Controller
                 //Get rid of extra newline character.
                 string trimmedPart = p.Substring(0, p.Length - 1);
 
-                theWorld.DeserializeGameObject(trimmedPart);
+                Tuple<bool, object> died = theWorld.DeserializeGameObject(trimmedPart);
+
+                if (died.Item1)
+                {
+                    deathEvent(died.Item2);
+                }
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
