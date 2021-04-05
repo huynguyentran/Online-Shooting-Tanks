@@ -19,6 +19,7 @@ namespace View
             DoubleBuffered = true;
             model = m;
             lastClientPosition = new Vector2D(0, 0);
+            animationBeams = new HashSet<BeamAnimation>();
         }
 
 
@@ -147,19 +148,6 @@ namespace View
             }
         }
 
-        private void BeamDrawer(object o, PaintEventArgs e)
-        {
-            Beam b = (Beam)o;
-            int length = 900;
-            int width = 1;
-            Color c = Color.Yellow;
-            using (Brush br = new SolidBrush(c))
-            {
-                Rectangle bounds = new Rectangle(-(width / 2), -(length), width, length);
-                e.Graphics.FillRectangle(br, bounds);
-            }
-        }
-
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
@@ -210,15 +198,30 @@ namespace View
                     DrawObjectWithTransform(e, p, p.Location.GetX(), p.Location.GetY(), 0, PowerupDrawer);
                 }
 
-                foreach (Beam b in model.Beams.Values)
+
+                HashSet<BeamAnimation> beamsToRemove = new HashSet<BeamAnimation>();
+
+                foreach (BeamAnimation b in animationBeams)
                 {
-                    DrawObjectWithTransform(e, b, b.origin.GetX(), b.origin.GetY(), b.Direction.ToAngle(), BeamDrawer);
-                   
+                    b.Update();
+                    DrawObjectWithTransform(e, b, b.ThisBeam.origin.GetX(), b.ThisBeam.origin.GetY(), b.ThisBeam.Direction.ToAngle(), BeamAnimation.Draw);
+                    if (b.HasFinished())
+                        beamsToRemove.Add(b);
                 }
+
+                foreach(BeamAnimation b in beamsToRemove)
+                    animationBeams.Remove(b);
+
             }
             // Do anything that Panel (from which we inherit) needs to do
             base.OnPaint(e);
         }
 
+        private HashSet<BeamAnimation> animationBeams;
+
+        public void OnBeamArrive(Beam b)
+        {
+            animationBeams.Add(new BeamAnimation(b));
+        }
     }
 }
