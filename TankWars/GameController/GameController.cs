@@ -18,17 +18,10 @@ namespace Controller
 
         private ControlCommands cmd;
 
-
-
-
-
         public Model world
         {
             get { return theWorld; }
         }
-        //Bad practice to use -1 to signify an invalid value.
-        private int playerID = -1;
-        private int mapSize = -1;
 
         //Do we want event to be public
         public delegate void DataEvent();
@@ -44,6 +37,7 @@ namespace Controller
         public GameController()
         {
             theWorld = new Model(0);
+           
             cmd = new ControlCommands();
             cmd.Move = "none";
             cmd.Fire = "none";
@@ -82,7 +76,7 @@ namespace Controller
 
             ParsePlayerIDandMapSize(state);
 
-            if (playerID != -1 && mapSize != -1)
+            if (theWorld.mapSize !=0 && theWorld.clientID != 0)
             {
                 //Receive Walls and Stuff
                 //Almost everytime resets on network action. 
@@ -114,21 +108,19 @@ namespace Controller
                 string trimmedPart = p.Substring(0, p.Length - 1);
 
                 //Switch to assigning values to model.
-                if (playerID == -1)
+                if (theWorld.clientID == -1)
                 {
-                    playerID = Int32.Parse(trimmedPart);
                     theWorld.clientID = Int32.Parse(trimmedPart);
                 }
 
-                else if (mapSize == -1)
+                else if (theWorld.mapSize == 0)
                 {
-                    mapSize = Int32.Parse(trimmedPart);
-                    theWorld.SetSize(mapSize);
+                    theWorld.mapSize = Int32.Parse(trimmedPart);
                 }
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
 
-                if (playerID != -1 && mapSize != -1)
+                if (theWorld.clientID != -1 && theWorld.mapSize != 0)
                     break;
             }
         }
@@ -200,8 +192,8 @@ namespace Controller
         /// </summary>
         public void HandleMoveRequest(MovementDirection m)
         {
-            string stringDir = MovementDirectionToString(m);
-            cmd.Move = stringDir;
+            cmd.Move = MovementDirectionToString(m);
+           
             //movementMemory.AddLast(stringDir);
         }
 

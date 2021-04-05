@@ -16,9 +16,18 @@ namespace theMap
         [JsonProperty(PropertyName = "org")]
         private Vector2D shootLocaiton;
 
+        public Vector2D origin
+        {
+            get { return shootLocaiton; }
+        }
+
         [JsonProperty(PropertyName = "dir")]
         private Vector2D direction;
 
+         public Vector2D Direction
+        {
+            get { return direction; }
+        }
         [JsonProperty(PropertyName = "owner")]
         private int playerID;
 

@@ -18,7 +18,7 @@ namespace View
 
 
         private const int menuSize = 40;
-        private const int viewSize = 1000;
+        private const int viewSize = 900;
         private DrawingPanel drawingPanel;
         public Form1(GameController _gController)
         {
@@ -45,6 +45,7 @@ namespace View
             drawingPanel.MouseDown += MouseFire;
             drawingPanel.MouseUp += MouseCancel;
 
+            ClientSize = new Size(viewSize, viewSize + menuSize);
 
             //drawingPanel.MouseMove += gController.HandleMousePosition;
 

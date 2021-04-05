@@ -57,7 +57,7 @@ namespace theMap
         private string name;
 
         [JsonProperty(PropertyName = "hp")]
-        private int hitPoints = 3;//Constants.MaxHP;
+        private int hitPoints = 0;//Constants.MaxHP;
         public int HitPoints
         {
             get { return hitPoints; }

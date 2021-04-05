@@ -130,7 +130,34 @@ namespace View
             {
                 Rectangle bounds = new Rectangle(-(minorDiameter / 2), -(majorDiameter / 2), minorDiameter, majorDiameter);
                 e.Graphics.FillEllipse(b, bounds);
-            }            
+            }
+        }
+
+        private void PowerupDrawer(object o, PaintEventArgs e)
+        {
+            Powerup p = (Powerup)o;
+            int size = 10;
+
+            Color c = Color.Orange;
+
+            using (Brush b = new SolidBrush(c))
+            {
+                Rectangle bounds = new Rectangle(-(size / 2), -(size / 2), size, size);
+                e.Graphics.FillEllipse(b, bounds);
+            }
+        }
+
+        private void BeamDrawer(object o, PaintEventArgs e)
+        {
+            Beam b = (Beam)o;
+            int length = 900;
+            int width = 1;
+            Color c = Color.Yellow;
+            using (Brush br = new SolidBrush(c))
+            {
+                Rectangle bounds = new Rectangle(-(width / 2), -(length), width, length);
+                e.Graphics.FillRectangle(br, bounds);
+            }
         }
 
 
@@ -176,6 +203,17 @@ namespace View
                 {
 
                     DrawObjectWithTransform(e, p, p.Location.GetX(), p.Location.GetY(), p.Orientation.ToAngle(), ProjectileDrawer);
+                }
+
+                foreach (Powerup p in model.Powerups.Values)
+                {
+                    DrawObjectWithTransform(e, p, p.Location.GetX(), p.Location.GetY(), 0, PowerupDrawer);
+                }
+
+                foreach (Beam b in model.Beams.Values)
+                {
+                    DrawObjectWithTransform(e, b, b.origin.GetX(), b.origin.GetY(), b.Direction.ToAngle(), BeamDrawer);
+                   
                 }
             }
             // Do anything that Panel (from which we inherit) needs to do

@@ -28,7 +28,7 @@ namespace theMap
         public Dictionary<int, Beam> Beams { get { return beams; } }
 
 
-        private int playerID;
+        private int playerID = -1;
 
         public int clientID
         {
@@ -45,10 +45,21 @@ namespace theMap
 
         private int size;
 
+        public int mapSize
+        {
+            get
+            {
+                return size;
+            }
+            set
+            {
+                size = value;
+            }
+        }
+
         public Model(int _size)
         {
             size = _size;
-
             tanks = new Dictionary<int, Tank>();
             projectiles = new Dictionary<int, Projectile>();
             powerups = new Dictionary<int, Powerup>();
@@ -105,7 +116,9 @@ namespace theMap
                 else if (gObj["beam"] != null)
                 {
                     Beam b = Beam.Deserialize(input);
-                    beams[gObj.Value<int>("beam")] = b;
+                      beams[gObj.Value<int>("beam")] = b;
+                    return new Tuple<bool, object>(true, b);
+
                 }
                 else
                     throw new ArgumentException("Unrecognized game object received: " + input);
@@ -114,10 +127,7 @@ namespace theMap
             return new Tuple<bool, object>(false, null);
         }
 
-        public void SetSize(int newSize)
-        {
-            size = newSize;
-        }
+
     }
 
 

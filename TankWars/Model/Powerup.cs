@@ -15,6 +15,15 @@ namespace theMap
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
 
+        public Vector2D Location
+        {
+            get
+            {
+                return location;
+            }
+        }
+
+
         [JsonProperty(PropertyName = "died")]
         private bool died = false;
         [JsonIgnore]
@@ -22,6 +31,8 @@ namespace theMap
         {
             get { return died; }
         }
+
+      
 
         public static Powerup Deserialize(string input)
         {
