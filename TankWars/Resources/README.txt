@@ -16,6 +16,7 @@ _Since tank only "died" for a single frame. By default, when a tank's heath reac
 The dictionary will automatically add the tank back when the server signifies its new spawn location. This will make the view draw the tank in a new location. 
 _The "death" of objects on the map. When an object is marked as "death" by the server, we remove it from the Dictionary that contain the object and its id in the Model. Then we notify the controller to inform the View through an action event. 
 If the object that "died" is the client's tank. We force the camera to the new location after the tank has been revived. 
+_Create a new class in Model to handel the beam animation. We will have a method that update the information with form.invalidiate. By doing this, we can modify 
 
 
 <External code and resources> 

@@ -157,6 +157,7 @@ namespace View
             {
                 Rectangle bounds = new Rectangle(-(width / 2), -(length), width, length);
                 e.Graphics.FillRectangle(br, bounds);
+               
             }
         }
 
@@ -213,7 +214,7 @@ namespace View
                 foreach (Beam b in model.Beams.Values)
                 {
                     DrawObjectWithTransform(e, b, b.origin.GetX(), b.origin.GetY(), b.Direction.ToAngle(), BeamDrawer);
-                   
+              
                 }
             }
             // Do anything that Panel (from which we inherit) needs to do
