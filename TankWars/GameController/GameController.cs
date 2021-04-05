@@ -139,6 +139,8 @@ namespace Controller
             string serializedCommand = ControlCommands.Serialize(cmd);
 
             Networking.Send(state.TheSocket, serializedCommand + "\n");
+            if (cmd.Fire.Equals("alt"))
+                cmd.Fire = "none";
 
             //Parse Walls
             //If we've received all the walls, start taking frames.

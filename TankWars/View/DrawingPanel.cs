@@ -14,11 +14,18 @@ namespace View
     {
         private Model model;
         private Vector2D lastClientPosition;
+
+        Image world, wall;
         public DrawingPanel(Model m)
         {
             DoubleBuffered = true;
             model = m;
             lastClientPosition = new Vector2D(0, 0);
+            animationBeams = new HashSet<BeamAnimation>();
+
+            string root = AppDomain.CurrentDomain.BaseDirectory;
+            world = Image.FromFile(root + @"..\..\..\Resources\Image\Background.png");
+            wall = Image.FromFile(root + @"..\..\..\Resources\Image\WallSprite.png");
         }
 
 
@@ -57,29 +64,44 @@ namespace View
             e.Graphics.Transform = oldMatrix;
         }
 
-        private void WallDrawer(object wall, PaintEventArgs e)
+        //private void WorldDrawer(object o, PaintEventArgs e)
+        //{
+
+        //}
+
+
+        private void WallDrawer(object o, PaintEventArgs e)
         {
-            Wall castWall = (Wall)wall;
+            Wall castWall = (Wall)o;
 
-            using (Brush b = new SolidBrush(Color.Red))
+            double totalWidth = Math.Abs(castWall.Start.GetX() - castWall.End.GetX());
+            double totalHeight = Math.Abs(castWall.Start.GetY() - castWall.End.GetY());
+
+            if (totalWidth == 0)
             {
-                double totalWidth = Math.Abs(castWall.Start.GetX() - castWall.End.GetX());
-                double totalHeight = Math.Abs(castWall.Start.GetY() - castWall.End.GetY());
+                totalHeight += 50;
+                totalWidth = 50;
 
-                if (totalWidth == 0)
-                {
-                    totalHeight += 50;
-                    totalWidth = 50;
-                }
-                else if (totalHeight == 0)
-                {
-                    totalHeight = 50;
-                    totalWidth += 50;
-                }
 
-                Rectangle rect = new Rectangle((int)-(totalWidth / 2), (int)-(totalHeight / 2), (int)totalWidth, (int)totalHeight);
-                e.Graphics.FillRectangle(b, rect);
+                for (int i = (int)-(totalHeight / 2); i < totalHeight / 2; i += 50)
+                {
+                    Rectangle rect = new Rectangle(-25, i, 50, 50);
+                    e.Graphics.DrawImage(wall, rect);
+                }
             }
+            else if (totalHeight == 0)
+            {
+                totalHeight = 50;
+                totalWidth += 50;
+                for (int i = (int)-(totalWidth / 2); i < totalWidth / 2; i += 50)
+                {
+                    Rectangle rect = new Rectangle(i, -25, 50, 50);
+                    e.Graphics.DrawImage(wall, rect);
+                }
+            }
+
+
+
         }
 
         private void TankDrawer(object o, PaintEventArgs e)
@@ -89,15 +111,20 @@ namespace View
             int width = 60;
             int height = 60;
 
-
-
-            using (Brush b = new SolidBrush(Color.Blue))
+            using (Brush br = new SolidBrush(Color.Red))
+            using (Brush bb = new SolidBrush(Color.Blue))
             {
-                Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
+                if (t.TankID == model.clientID)
+                {
+                    Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
+                    e.Graphics.FillRectangle(bb, rec);
+                }
 
-                e.Graphics.FillRectangle(b, rec);
-
-
+                else
+                {
+                    Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
+                    e.Graphics.FillRectangle(br, rec);
+                }
             }
 
         }
@@ -109,6 +136,7 @@ namespace View
             int heightTurret = 50;
             using (Brush b = new SolidBrush(Color.Purple))
             {
+
                 Rectangle tur = new Rectangle(-(widthTurret / 2), -(heightTurret / 2), widthTurret, heightTurret);
                 e.Graphics.FillRectangle(b, tur);
             }
@@ -147,18 +175,12 @@ namespace View
             }
         }
 
-        private void BeamDrawer(object o, PaintEventArgs e)
+        public void WorldDrawer(object o, PaintEventArgs e)
         {
-            Beam b = (Beam)o;
-            int length = 900;
-            int width = 1;
-            Color c = Color.Yellow;
-            using (Brush br = new SolidBrush(c))
-            {
-                Rectangle bounds = new Rectangle(-(width / 2), -(length), width, length);
-                e.Graphics.FillRectangle(br, bounds);
-               
-            }
+            int size = model.mapSize;
+
+            Rectangle bounds = new Rectangle(-(size / 2), -(size / 2), size, size);
+            e.Graphics.DrawImage(world, bounds);
         }
 
 
@@ -186,6 +208,10 @@ namespace View
             e.Graphics.TranslateTransform(viewSize / 2 - xLoc, viewSize / 2 - yLoc);
 
 
+            DrawObjectWithTransform(e, world, 0, 0, 0, WorldDrawer);
+
+
+
             lock (model)
             {
                 // Draw the players
@@ -211,15 +237,30 @@ namespace View
                     DrawObjectWithTransform(e, p, p.Location.GetX(), p.Location.GetY(), 0, PowerupDrawer);
                 }
 
-                foreach (Beam b in model.Beams.Values)
+
+                HashSet<BeamAnimation> beamsToRemove = new HashSet<BeamAnimation>();
+
+                foreach (BeamAnimation b in animationBeams)
                 {
-                    DrawObjectWithTransform(e, b, b.origin.GetX(), b.origin.GetY(), b.Direction.ToAngle(), BeamDrawer);
-              
+                    b.Update();
+                    DrawObjectWithTransform(e, b, b.ThisBeam.origin.GetX(), b.ThisBeam.origin.GetY(), b.ThisBeam.Direction.ToAngle(), BeamAnimation.Draw);
+                    if (b.HasFinished())
+                        beamsToRemove.Add(b);
                 }
+
+                foreach (BeamAnimation b in beamsToRemove)
+                    animationBeams.Remove(b);
+
             }
             // Do anything that Panel (from which we inherit) needs to do
             base.OnPaint(e);
         }
 
+        private HashSet<BeamAnimation> animationBeams;
+
+        public void OnBeamArrive(Beam b)
+        {
+            animationBeams.Add(new BeamAnimation(b));
+        }
     }
 }

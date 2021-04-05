@@ -28,5 +28,8 @@ _Create a new class in Model to handel the beam animation. We will have a method
 ()The turret is not rotating full 360 degree																							(Fixed by using formula for getting the cordinates of the mouse )
 ()The projectiles staying on the map after they have "died""																			(Fixed by    )
 ()When moving the tank, when holding a key then holding another key, after releasing the second key  that we hold, the tank would stop. 
+()When moving and click on the form(outside of drawing panel), the tank will move forward. 
+()When playing the game, clicking on the box will have make the form focus on the boxes, and the player lose controls
 
-
+//TO DO
+//Dictionary for the different tanks, projectiles, powerups. 

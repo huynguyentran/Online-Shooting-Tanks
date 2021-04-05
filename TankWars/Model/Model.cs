@@ -24,8 +24,8 @@ namespace theMap
         private Dictionary<int, Wall> walls;
         public Dictionary<int, Wall> Walls { get { return walls; } }
 
-        private Dictionary<int, Beam> beams;
-        public Dictionary<int, Beam> Beams { get { return beams; } }
+        //private Dictionary<int, Beam> beams;
+        //public Dictionary<int, Beam> Beams { get { return beams; } }
 
 
         private int playerID = -1;
@@ -64,7 +64,7 @@ namespace theMap
             projectiles = new Dictionary<int, Projectile>();
             powerups = new Dictionary<int, Powerup>();
             walls = new Dictionary<int, Wall>();
-            beams = new Dictionary<int, Beam>();
+            //beams = new Dictionary<int, Beam>();
         }
 
 
@@ -116,7 +116,7 @@ namespace theMap
                 else if (gObj["beam"] != null)
                 {
                     Beam b = Beam.Deserialize(input);
-                      beams[gObj.Value<int>("beam")] = b;
+                    //beams[gObj.Value<int>("beam")] = b;
                     return new Tuple<bool, object>(true, b);
 
                 }

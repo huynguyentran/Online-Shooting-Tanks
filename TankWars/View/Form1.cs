@@ -173,6 +173,10 @@ namespace View
             {
 
             }
+            else if (dead is Beam b)
+            {
+                drawingPanel.OnBeamArrive(b);
+            }
         }
     }
 }
