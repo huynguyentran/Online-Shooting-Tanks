@@ -65,7 +65,7 @@ namespace View
                 colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, image, null);
             }
 
-            Regex projectileRegex = new Regex(@"shot[-_](.+)\.png");
+            Regex projectileRegex = new Regex(@"shot[-_](?'color'.+)\.png");
 
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Projectiles", "*png"))
             {
@@ -75,16 +75,11 @@ namespace View
                 string imageName = directories[directories.Length - 1];
                 Match nameMatch = projectileRegex.Match(imageName);
 
-                string color;
+                string color ="";
 
-                if (!nameMatch.Groups[1].Value[nameMatch.Groups[1].Value.Length - 1].Equals('g'))
-                {
-                    color = nameMatch.Groups[1].Value;
-                }
-                else
-                {
-                    color = nameMatch.Groups[0].Value;
-                }
+                foreach (Group g in nameMatch.Groups)
+                    if (g.Name.Equals("color"))
+                        color = g.Value;
 
                 color = color.ToUpper();
 

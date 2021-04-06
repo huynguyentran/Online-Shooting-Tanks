@@ -37,11 +37,14 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Image\Background.png" />
+    <Content Include="Image\Projectiles\shot-disco.png" />
     <Content Include="Image\Tanks\BlueTank.png" />
+    <Content Include="Image\Tanks\DiscoTank.png" />
     <Content Include="Image\Turrets\BlueTurret.png" />
     <Content Include="Image\Tanks\DarkTank.png" />
     <Content Include="Image\Turrets\DarkTurret.png" />
     <Content Include="Image\Tanks\GreenTank.png" />
+    <Content Include="Image\Turrets\DiscoTurret.png" />
     <Content Include="Image\Turrets\GreenTurret.png" />
     <Content Include="Image\Tanks\LightGreenTank.png" />
     <Content Include="Image\Turrets\LightGreenTurret.png" />
