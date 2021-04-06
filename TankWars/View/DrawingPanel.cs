@@ -15,6 +15,12 @@ namespace View
         private Model model;
         private Vector2D lastClientPosition;
 
+        private Dictionary<int, Image> spriteList;
+
+        private Queue<Image> queue;
+
+
+
         Image world, wall;
         public DrawingPanel(Model m)
         {
@@ -26,7 +32,20 @@ namespace View
             string root = AppDomain.CurrentDomain.BaseDirectory;
             world = Image.FromFile(root + @"..\..\..\Resources\Image\Background.png");
             wall = Image.FromFile(root + @"..\..\..\Resources\Image\WallSprite.png");
+
+            queue = new Queue<Image>();
+
+
+            foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Tanks", "*png"))
+            {
+                Image image = Image.FromFile(file);
+                queue.Enqueue(image);
+            }
+            spriteList = new Dictionary<int, Image>();    
         }
+
+
+
 
 
         public void OnTankDeath(Tank t)
@@ -114,16 +133,17 @@ namespace View
             using (Brush br = new SolidBrush(Color.Red))
             using (Brush bb = new SolidBrush(Color.Blue))
             {
-                if (t.TankID == model.clientID)
+                Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
+                if (!spriteList.ContainsKey(t.TankID))
                 {
-                    Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
-                    e.Graphics.FillRectangle(bb, rec);
+                    Image usedImage = queue.Dequeue();
+                    spriteList.Add(t.TankID, usedImage);
+                    e.Graphics.DrawImage(usedImage, rec);
+                    queue.Enqueue(usedImage);
                 }
-
                 else
                 {
-                    Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
-                    e.Graphics.FillRectangle(br, rec);
+                    e.Graphics.DrawImage(spriteList[t.TankID],rec);
                 }
             }
 
@@ -263,4 +283,23 @@ namespace View
             animationBeams.Add(new BeamAnimation(b));
         }
     }
+
+
+    //public static class ListExtension
+    //{
+    //    private static Random rng = new Random();
+    //    public static void Shuffle<T>(this IList<T> list)
+    //    {
+    //        int n = list.Count;
+    //        while (n > 1)
+    //        {
+    //            n--;
+    //            int k = rng.Next(n + 1);
+    //            T value = list[k];
+    //            list[k] = list[n];
+    //            list[n] = value;
+    //        }
+    //    }
+
+    //}
 }

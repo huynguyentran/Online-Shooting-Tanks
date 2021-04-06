@@ -76,7 +76,7 @@ namespace Controller
 
             ParsePlayerIDandMapSize(state);
 
-            if (theWorld.mapSize !=0 && theWorld.clientID != 0)
+            if (theWorld.mapSize !=0 && theWorld.clientID != -1)
             {
                 //Receive Walls and Stuff
                 //Almost everytime resets on network action. 

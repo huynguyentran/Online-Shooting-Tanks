@@ -37,7 +37,35 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Image\Background.png" />
+    <Content Include="Image\Tanks\BlueTank.png" />
+    <Content Include="Image\Turrets\BlueTurret.png" />
+    <Content Include="Image\Tanks\DarkTank.png" />
+    <Content Include="Image\Turrets\DarkTurret.png" />
+    <Content Include="Image\Tanks\GreenTank.png" />
+    <Content Include="Image\Turrets\GreenTurret.png" />
+    <Content Include="Image\Tanks\LightGreenTank.png" />
+    <Content Include="Image\Turrets\LightGreenTurret.png" />
+    <Content Include="Image\Tanks\OrangeTank.png" />
+    <Content Include="Image\Turrets\OrangeTurret.png" />
+    <Content Include="Image\Tanks\PurpleTank.png" />
+    <Content Include="Image\Turrets\PurpleTurret.png" />
+    <Content Include="Image\Tanks\RedTank.png" />
+    <Content Include="Image\Turrets\RedTurret.png" />
+    <Content Include="Image\Projectiles\shot-blue.png" />
+    <Content Include="Image\Projectiles\shot-brown.png" />
+    <Content Include="Image\Projectiles\shot-green.png" />
+    <Content Include="Image\Projectiles\shot-grey.png" />
+    <Content Include="Image\Projectiles\shot-red.png" />
+    <Content Include="Image\Projectiles\shot-violet.png" />
+    <Content Include="Image\Projectiles\shot-white.png" />
+    <Content Include="Image\Projectiles\shot-yellow.png" />
+    <Content Include="Image\Projectiles\shot_blue.png" />
+    <Content Include="Image\Projectiles\shot_grey.png" />
+    <Content Include="Image\Projectiles\shot_red_new.png" />
+    <Content Include="Image\Projectiles\shot_violet.png" />
     <Content Include="Image\WallSprite.png" />
+    <Content Include="Image\Tanks\YellowTank.png" />
+    <Content Include="Image\Turrets\YellowTurret.png" />
     <Content Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
