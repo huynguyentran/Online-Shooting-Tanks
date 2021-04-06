@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using theMap;
 using TankWars;
+using System.Text.RegularExpressions;
 
 namespace View
 {
@@ -15,11 +16,9 @@ namespace View
         private Model model;
         private Vector2D lastClientPosition;
 
-        private Dictionary<int, Image> spriteList;
+        private Dictionary<int, Tuple<Image, Image, Image>> spriteList;
 
-        private Queue<Image> queue;
-
-
+        private Queue<Tuple<Image, Image, Image>> queue;
 
         Image world, wall;
         public DrawingPanel(Model m)
@@ -33,15 +32,69 @@ namespace View
             world = Image.FromFile(root + @"..\..\..\Resources\Image\Background.png");
             wall = Image.FromFile(root + @"..\..\..\Resources\Image\WallSprite.png");
 
-            queue = new Queue<Image>();
+            queue = new Queue<Tuple<Image, Image, Image>>();
 
+            Dictionary<string, Tuple<Image, Image, Image>> colorSpriteCollection = new Dictionary<string, Tuple<Image, Image, Image>>();
+
+            Regex tankRegex = new Regex(@"(.+)Tank\.png");
 
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Tanks", "*png"))
             {
                 Image image = Image.FromFile(file);
-                queue.Enqueue(image);
+                Tuple<Image, Image, Image> t = new Tuple<Image, Image, Image>(image, null, null);
+                
+                string[] directories = file.Split('\\');
+                string imageName = directories[directories.Length - 1];
+                Match nameMatch = tankRegex.Match(imageName);
+                string color = nameMatch.Groups[1].Value.ToUpper();
+
+                colorSpriteCollection.Add(color, t);
             }
-            spriteList = new Dictionary<int, Image>();    
+
+            Regex turretRegex = new Regex(@"(.+)Turret\.png");
+
+            foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Turrets", "*png"))
+            {
+                Image image = Image.FromFile(file);
+
+                string[] directories = file.Split('\\');
+                string imageName = directories[directories.Length - 1];
+                Match nameMatch = turretRegex.Match(imageName);
+                string color = nameMatch.Groups[1].Value.ToUpper();
+
+                colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, image, null);
+            }
+
+            Regex projectileRegex = new Regex(@"shot[-_](.+)\.png");
+
+            foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Projectiles", "*png"))
+            {
+                Image image = Image.FromFile(file);
+
+                string[] directories = file.Split('\\');
+                string imageName = directories[directories.Length - 1];
+                Match nameMatch = projectileRegex.Match(imageName);
+
+                string color;
+
+                if (!nameMatch.Groups[1].Value[nameMatch.Groups[1].Value.Length - 1].Equals('g'))
+                {
+                    color = nameMatch.Groups[1].Value;
+                }
+                else
+                {
+                    color = nameMatch.Groups[0].Value;
+                }
+
+                color = color.ToUpper();
+
+                colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, colorSpriteCollection[color].Item2, image);
+            }
+
+            foreach (Tuple<Image, Image, Image> spriteGroup in colorSpriteCollection.Values)
+                queue.Enqueue(spriteGroup);
+
+            spriteList = new Dictionary<int, Tuple<Image, Image, Image>>();    
         }
 
 
@@ -129,24 +182,19 @@ namespace View
 
             int width = 60;
             int height = 60;
-
-            using (Brush br = new SolidBrush(Color.Red))
-            using (Brush bb = new SolidBrush(Color.Blue))
+            
+            Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
+            if (!spriteList.ContainsKey(t.TankID))
             {
-                Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
-                if (!spriteList.ContainsKey(t.TankID))
-                {
-                    Image usedImage = queue.Dequeue();
-                    spriteList.Add(t.TankID, usedImage);
-                    e.Graphics.DrawImage(usedImage, rec);
-                    queue.Enqueue(usedImage);
-                }
-                else
-                {
-                    e.Graphics.DrawImage(spriteList[t.TankID],rec);
-                }
+                Tuple<Image, Image, Image> usedImage = queue.Dequeue();
+                spriteList.Add(t.TankID, usedImage);
+                e.Graphics.DrawImage(usedImage.Item1, rec);
+                queue.Enqueue(usedImage);
             }
-
+            else
+            {
+                e.Graphics.DrawImage(spriteList[t.TankID].Item1,rec);
+            }
         }
 
         private void TurretDrawer(object o, PaintEventArgs e)
@@ -154,31 +202,19 @@ namespace View
             Tank t = o as Tank;
             int widthTurret = 50;
             int heightTurret = 50;
-            using (Brush b = new SolidBrush(Color.Purple))
-            {
-
-                Rectangle tur = new Rectangle(-(widthTurret / 2), -(heightTurret / 2), widthTurret, heightTurret);
-                e.Graphics.FillRectangle(b, tur);
-            }
+            
+            Rectangle tur = new Rectangle(-(widthTurret / 2), -(heightTurret / 2), widthTurret, heightTurret);
+            e.Graphics.DrawImage(spriteList[t.TankID].Item2, tur);
         }
 
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
             Projectile p = (Projectile)o;
 
-            int majorDiameter = 20;
-            int minorDiameter = 10;
+            int size = 30;
 
-            Color c = Color.Green;
-
-            if (p.PlayerID == model.clientID)
-                c = Color.Red;
-
-            using (Brush b = new SolidBrush(c))
-            {
-                Rectangle bounds = new Rectangle(-(minorDiameter / 2), -(majorDiameter / 2), minorDiameter, majorDiameter);
-                e.Graphics.FillEllipse(b, bounds);
-            }
+            Rectangle bounds = new Rectangle(-(size / 2), -(size / 2), size, size);
+            e.Graphics.DrawImage(spriteList[p.PlayerID].Item3, bounds);
         }
 
         private void PowerupDrawer(object o, PaintEventArgs e)
