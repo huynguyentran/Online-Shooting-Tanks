@@ -234,6 +234,50 @@ namespace View
             e.Graphics.DrawImage(world, bounds);
         }
 
+        public void NameAndScoreDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+            FontFamily fontFamily = new FontFamily("Arial");
+            Font font = new Font(
+               fontFamily,
+               14,
+               FontStyle.Regular,
+               GraphicsUnit.Pixel);
+            using (Brush b  = new SolidBrush(Color.White))
+            {
+                StringFormat drawFormat = new StringFormat();
+                drawFormat.Alignment = StringAlignment.Center;
+                e.Graphics.DrawString("Player name: " +t.Name + "\nScore: " +t.Score,font,b,0,40,drawFormat);
+            }
+        }
+
+        public void HealthbarDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+            Color c = new Color();
+            int height = 5;
+            int width = 50*t.HitPoints/3;
+            int maxhealth = 3;
+            if (t.HitPoints > maxhealth * 2/3f)
+            {
+                c = Color.Green;
+            }
+            else if (t.HitPoints <= maxhealth * 1/3f)
+            {
+                c = Color.Red;
+            }
+            else
+            {
+                c = Color.Yellow;
+            }
+            
+            using (Brush b = new SolidBrush(c))
+            {
+                Rectangle bounds = new Rectangle(-(width / 2), -(height / 2) - 40, width, height);
+                e.Graphics.FillRectangle(b, bounds);     
+            }
+        }
+
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
@@ -275,6 +319,8 @@ namespace View
                 {
                     DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), t.Orientation.ToAngle(), TankDrawer);
                     DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), t.TurretDirection.ToAngle(), TurretDrawer);
+                    DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), 0, NameAndScoreDrawer);
+                    DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), 0, HealthbarDrawer);
                 }
 
                 foreach (Projectile p in model.Projectiles.Values)

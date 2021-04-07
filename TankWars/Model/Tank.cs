@@ -56,6 +56,14 @@ namespace theMap
         [JsonProperty(PropertyName = "name")]
         private string name;
 
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+        }
+
         [JsonProperty(PropertyName = "hp")]
         private int hitPoints = 0;//Constants.MaxHP;
         public int HitPoints
@@ -65,6 +73,14 @@ namespace theMap
 
         [JsonProperty(PropertyName = "score")]
         private int score = 0;
+
+        public int Score
+        {
+            get
+            {
+                return score;
+            }
+        }
 
         [JsonProperty(PropertyName = "died")]
         private bool died = false;
