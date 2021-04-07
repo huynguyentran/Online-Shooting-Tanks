@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 using theMap;
 using System.Drawing;
 using System.Windows.Forms;
+using TankWars;
 
 namespace View
 {
-    class BeamAnimation
+    class BeamAnimation : Animatable
     {
         private Beam thisBeam;
         public Beam ThisBeam
@@ -17,30 +18,28 @@ namespace View
             get { return thisBeam; }
         }
 
+        public override Vector2D Location => thisBeam.origin;
+
+        public override float Orientation => thisBeam.Direction.ToAngle();
+
         private const int lifetime = 120;
-        private int age;
+        
 
         public BeamAnimation(Beam b)
         {
             thisBeam = b;
-            age = 0;
         }
 
-        public void Update()
+        public override bool HasFinished()
         {
-            age++;
+            return Age > lifetime;
         }
 
-        public bool HasFinished()
-        {
-            return age > lifetime;
-        }
-
-        public static void Draw(object o, PaintEventArgs e)
+        public override void Draw(object o, PaintEventArgs e)
         {
             BeamAnimation b = (BeamAnimation)o;
             int length = 2000;
-            float width = 10 * (1-(((float)b.age) / BeamAnimation.lifetime));
+            float width = 10 * (1-(((float)b.Age) / BeamAnimation.lifetime));
             Color c = Color.Black;
             using (Brush br = new SolidBrush(c))
             {

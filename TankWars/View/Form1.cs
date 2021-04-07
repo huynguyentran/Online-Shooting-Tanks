@@ -63,6 +63,7 @@ namespace View
         private void WorldUpdate()
         {
             Invoke(new MethodInvoker(() => this.Invalidate(true)));
+            gController.OnNewFrame();
         }
 
         private void serverTextBox_KeyPress(object sender, KeyPressEventArgs e)

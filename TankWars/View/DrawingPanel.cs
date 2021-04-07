@@ -17,16 +17,22 @@ namespace View
         private Vector2D lastClientPosition;
 
         private Dictionary<int, Tuple<Image, Image, Image>> spriteList;
-
         private Queue<Tuple<Image, Image, Image>> queue;
 
         Image world, wall;
+
+        private HashSet<BeamAnimation> animationBeams;
+
+        private HashSet<TankExplosionAnimation> explosions;
+
         public DrawingPanel(Model m)
         {
             DoubleBuffered = true;
             model = m;
             lastClientPosition = new Vector2D(0, 0);
+
             animationBeams = new HashSet<BeamAnimation>();
+            explosions = new HashSet<TankExplosionAnimation>();
 
             string root = AppDomain.CurrentDomain.BaseDirectory;
             world = Image.FromFile(root + @"..\..\..\Resources\Image\Background.png");
@@ -98,6 +104,8 @@ namespace View
 
         public void OnTankDeath(Tank t)
         {
+            explosions.Add(new TankExplosionAnimation(t));
+
             if (t.TankID == model.clientID)
             {
                 lastClientPosition = t.Location;
@@ -130,11 +138,6 @@ namespace View
             // "pop" the transform
             e.Graphics.Transform = oldMatrix;
         }
-
-        //private void WorldDrawer(object o, PaintEventArgs e)
-        //{
-
-        //}
 
 
         private void WallDrawer(object o, PaintEventArgs e)
@@ -334,33 +337,36 @@ namespace View
                     DrawObjectWithTransform(e, p, p.Location.GetX(), p.Location.GetY(), 0, PowerupDrawer);
                 }
 
+                DrawAnimations(explosions, e);
 
-                HashSet<BeamAnimation> beamsToRemove = new HashSet<BeamAnimation>();
-
-                foreach (BeamAnimation b in animationBeams)
-                {
-                    b.Update();
-                    DrawObjectWithTransform(e, b, b.ThisBeam.origin.GetX(), b.ThisBeam.origin.GetY(), b.ThisBeam.Direction.ToAngle(), BeamAnimation.Draw);
-                    if (b.HasFinished())
-                        beamsToRemove.Add(b);
-                }
-
-                foreach (BeamAnimation b in beamsToRemove)
-                    animationBeams.Remove(b);
+                DrawAnimations(animationBeams, e);
 
             }
             // Do anything that Panel (from which we inherit) needs to do
             base.OnPaint(e);
         }
 
-        private HashSet<BeamAnimation> animationBeams;
-
         public void OnBeamArrive(Beam b)
         {
             animationBeams.Add(new BeamAnimation(b));
         }
-    }
 
+        private void DrawAnimations<T>(HashSet<T> anims, PaintEventArgs e) where T : Animatable
+        {
+            HashSet<T> animsToRemove = new HashSet<T>();
+
+            foreach (T anim in anims)
+            {
+                anim.Update();
+                DrawObjectWithTransform(e, anim, anim.Location.GetX(), anim.Location.GetY(), anim.Orientation, anim.Draw);
+                if (anim.HasFinished())
+                    animsToRemove.Add(anim);
+            }
+
+            foreach (T anim in animsToRemove)
+                anims.Remove(anim);
+        }
+    }
 
     //public static class ListExtension
     //{
