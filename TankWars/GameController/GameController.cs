@@ -29,6 +29,8 @@ namespace Controller
 
         public event Action<object> deathEvent;
 
+        private SocketState connectionState;
+
         public void AddErrorHandler(Action<string> onError)
         {
             errorEvent += onError;
@@ -43,8 +45,6 @@ namespace Controller
             cmd.Fire = "none";
             Vector2D s = new Vector2D(0, 1);
             cmd.directionOfTank = s;
-
-            //movementMemory = new LinkedList<string>();
         }
 
         public void ConnectToServer(string address, string playerName)
@@ -57,6 +57,8 @@ namespace Controller
                     errorEvent.Invoke(state.ErrorMessage);
                     return;
                 }
+
+                connectionState = state;
 
                 Networking.Send(state.TheSocket, playerName + "\n");
                 state.OnNetworkAction = RetrievePlayerIDandMapSize;
@@ -136,12 +138,6 @@ namespace Controller
 
             ParseGameObjects(state);
 
-            string serializedCommand = ControlCommands.Serialize(cmd);
-
-            Networking.Send(state.TheSocket, serializedCommand + "\n");
-            if (cmd.Fire.Equals("alt"))
-                cmd.Fire = "none";
-
             //Parse Walls
             //If we've received all the walls, start taking frames.
 
@@ -183,8 +179,14 @@ namespace Controller
             updateView();
         }
 
+        public void OnNewFrame()
+        {
+            string serializedCommand = ControlCommands.Serialize(cmd);
 
-
+            Networking.Send(connectionState.TheSocket, serializedCommand + "\n");
+            if (cmd.Fire.Equals("alt"))
+                cmd.Fire = "none";
+        }
 
 
         public enum MovementDirection { UP, DOWN, LEFT, RIGHT };
@@ -194,14 +196,18 @@ namespace Controller
         /// </summary>
         public void HandleMoveRequest(MovementDirection m)
         {
-            cmd.Move = MovementDirectionToString(m);
-           
+            string movementDirection = MovementDirectionToString(m);
+            if (!movementDirection.Equals(cmd.Move))
+            {
+                lastPress = cmd.Move;
+                cmd.Move = movementDirection;
+            }
             //movementMemory.AddLast(stringDir);
         }
 
 
         //private LinkedList<string> movementMemory;
-
+        private string lastPress = "none";
         private string MovementDirectionToString(MovementDirection m)
         {
             switch (m)
@@ -225,18 +231,16 @@ namespace Controller
         /// </summary>
         public void CancelMoveRequest(MovementDirection m)
         {
-            //movementMemory.Remove(MovementDirectionToString(m));
-
-            if (cmd.Move.Equals(MovementDirectionToString(m)))//movementMemory.Count == 0)
+            string movementDirection = MovementDirectionToString(m);
+            if (cmd.Move.Equals(movementDirection))
             {
-                cmd.Move = "none";
+                cmd.Move = lastPress;
+                lastPress = "none";
             }
-            /*
-            else
+            else if (movementDirection.Equals(lastPress))
             {
-                cmd.Move = movementMemory.Last.Value;
+                lastPress = "none";
             }
-            */
         }
 
 
@@ -277,26 +281,5 @@ namespace Controller
             tdir.Normalize();
             cmd.directionOfTank = tdir;
         }
-
-        //public void HandleMousePosition()
-        //{
-
-        //}
-
-        ///// <summary>
-        ///// Example of handling mouse request
-        ///// </summary>
-        //public void HandleMouseRequest(/* pass info about which button here */)
-        //{
-        //    mousePressed = true;
-        //}
-
-        ///// <summary>
-        ///// Example of canceling mouse request
-        ///// </summary>
-        //public void CancelMouseRequest(/* pass info about which button here */)
-        //{
-        //    mousePressed = false;
-        //}
     }
 }
