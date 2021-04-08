@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using TankWars;
 
-namespace theMap
+namespace Model
 {
     public class Wall
     {

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using TankWars;
 
-namespace theMap
+namespace Model
 {
     [JsonObject(MemberSerialization.OptIn)]
     public class Tank
@@ -65,7 +65,7 @@ namespace theMap
         }
 
         [JsonProperty(PropertyName = "hp")]
-        private int hitPoints = 0;//Constants.MaxHP;
+        private int hitPoints = 0;
         public int HitPoints
         {
             get { return hitPoints; }
@@ -100,7 +100,6 @@ namespace theMap
         {
 
         }
-
 
         public static Tank Deserialize(string input)
         {

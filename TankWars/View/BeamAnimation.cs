@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using theMap;
+using Model;
 using System.Drawing;
 using System.Windows.Forms;
 using TankWars;
 
 namespace View
 {
+    /// <summary>
+    /// A class represents the Beam animation. 
+    /// </summary>
     class BeamAnimation : FrameByFrameAnimation
     {
         private Beam thisBeam;
@@ -32,6 +35,9 @@ namespace View
             thisBeam = b;
         }
 
+        /// <summary>
+        /// The method that draw the beam. The beam would get smaller as the its life time goes on until the end of its animation cycle. 
+        /// </summary>
         public override void Draw(object o, PaintEventArgs e)
         {
             int length = 2000;

@@ -8,14 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Controller;
-using theMap;
+using Model;
 
 namespace View
 {
     /// <summary>
     /// A view of the Tank Wars game. 
     /// </summary>
-    public partial class Form1 : Form
+    public partial class ClientView : Form
     {
         /// <summary>
         /// The controller communicates between model, server, and the view. 
@@ -32,7 +32,7 @@ namespace View
         /// The drawing panel object that handles all drawing. 
         /// </summary>
         private DrawingPanel drawingPanel;
-        public Form1(GameController _gController)
+        public ClientView(GameController _gController)
         {
             InitializeComponent();
 
@@ -97,6 +97,8 @@ namespace View
                     gameController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
                     drawingPanel.Focus();
                     e.Handled = true;
+                    serverTextBox.Enabled = false;
+                    nameTextBox.Enabled = false;
                 }
                 else
                 {
@@ -157,6 +159,7 @@ namespace View
                     gameController.CancelMoveRequest(GameController.MovementDirection.RIGHT);
                     break;
             }
+           
         }
 
         /// <summary>
@@ -210,20 +213,18 @@ namespace View
             {
                 drawingPanel.OnTankDeath(t);
             }
-            else if (dead is Powerup pu)
-            {
-
-            }
-            else if (dead is Projectile pr)
-            {
-
-            }
             else if (dead is Beam b)
             {
                 drawingPanel.OnBeamArrive(b);
             }
         }
 
-    
+        /// <summary>
+        /// Call the controller to clear all movements.
+        /// </summary>
+        private void ClientView_Deactivate(object sender, EventArgs e)
+        {
+            gameController.ClearAllMovement();
+        }
     }
 }
