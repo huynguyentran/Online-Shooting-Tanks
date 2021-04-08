@@ -10,7 +10,7 @@ using TankWars;
 
 namespace View
 {
-    class BeamAnimation : Animatable
+    class BeamAnimation : FrameByFrameAnimation
     {
         private Beam thisBeam;
         public Beam ThisBeam
@@ -22,30 +22,34 @@ namespace View
 
         public override float Orientation => thisBeam.Direction.ToAngle();
 
-        private const int lifetime = 120;
+        protected override int LifeTime { get => lifeTime; set => lifeTime = value; }
+
+        private int lifeTime;
         
 
-        public BeamAnimation(Beam b)
+        public BeamAnimation(Beam b, Image[] _frames) : base(_frames)
         {
             thisBeam = b;
         }
 
-        public override bool HasFinished()
-        {
-            return Age > lifetime;
-        }
-
         public override void Draw(object o, PaintEventArgs e)
         {
-            BeamAnimation b = (BeamAnimation)o;
             int length = 2000;
-            float width = 10 * (1-(((float)b.Age) / BeamAnimation.lifetime));
-            Color c = Color.Black;
-            using (Brush br = new SolidBrush(c))
+            float width;
+
+            float expandPercent = 0.15f;
+
+            if (Age < lifeTime * expandPercent)
             {
-                RectangleF bounds = new RectangleF(-(width / 2), -(length), width, length);
-                e.Graphics.FillRectangle(br, bounds);
+                width = 200 * ((((float)Age) / (lifeTime* expandPercent))) + 25;
             }
+            else
+            {
+                width = 200 * (1 - (((float)Age - lifeTime*expandPercent) / (lifeTime*(1 - expandPercent)))) + 25;
+            }
+            
+            RectangleF bounds = new RectangleF(-(width / 2), -(length), width, length);
+            e.Graphics.DrawImage(CurrentFrame(), bounds);
         }
     }
 }

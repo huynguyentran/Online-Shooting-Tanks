@@ -37,6 +37,7 @@ namespace View
         //A HashSet of tank explosions. 
         private HashSet<TankExplosionAnimation> explosions;
 
+        private Image[] laserFrames;
         /// <summary>
         /// A constructor to initializing the drawing panel. 
         /// </summary>
@@ -65,23 +66,31 @@ namespace View
             {
                 Image image = Image.FromFile(file);
                 Tuple<Image, Image, Image> t = new Tuple<Image, Image, Image>(image, null, null);
-                String color = GetColor(tankRegex, file);
+
+                string color = GetInfoFromRegexGroup(tankRegex, file, "color").ToUpper();
+
                 colorSpriteCollection.Add(color, t);
             }
 
             Regex turretRegex = new Regex(@"^.*\\(?'color'.+)Turret\.png$");
+
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Turrets", "*png"))
             {
                 Image image = Image.FromFile(file);
-                String color = GetColor(turretRegex, file);
+
+                string color = GetInfoFromRegexGroup(turretRegex, file, "color").ToUpper();
+
                 colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, image, null);
             }
 
             Regex projectileRegex = new Regex(@"^.*\\shot[-_](?'color'.+)\.png$");
+
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Projectiles", "*png"))
             {
                 Image image = Image.FromFile(file);
-                String color = GetColor(projectileRegex, file);
+
+                string color = GetInfoFromRegexGroup(projectileRegex, file, "color").ToUpper();
+
                 colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, colorSpriteCollection[color].Item2, image);
             }
 
@@ -92,26 +101,33 @@ namespace View
                
 
             spriteList = new Dictionary<int, Tuple<Image, Image, Image>>();
+
+            string[] laserFiles = System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Laser", "*png");
+            laserFrames = new Image[laserFiles.Length];
+
+            Regex laserRegex = new Regex(@"^.*\\laserAnimation[0]*(?'index'\d+)\.png$");
+
+            foreach(string laserFile in laserFiles)
+            {
+                Image laserFrame = Image.FromFile(laserFile);
+                int index = int.Parse(GetInfoFromRegexGroup(laserRegex, laserFile, "index")) - 1;
+                laserFrames[index] = laserFrame;
+            }
+
+
         }
 
-
-        /// <summary>
-        /// Get the color from the file name. This method is depended on the Regex, so the naming scheme of the file has to be correct;
-        /// </summary>
-        /// <param name="regex">The regex</param>
-        /// <param name="file">The name of the file</param>
-        /// <returns></returns>
-        private string GetColor(Regex regex, String file)
+        private string GetInfoFromRegexGroup(Regex r, string file, string groupName)
         {
-            Match nameMatch = regex.Match(file);
-            string color = "";
+            Match nameMatch = r.Match(file);
+            string output = "";
             foreach (Group g in nameMatch.Groups)
-                if (g.Name.Equals("color"))
-                    color = g.Value;
-
-            color = color.ToUpper();
-            return color;
+                if (g.Name.Equals(groupName))
+                    output = g.Value;
+            return output;
         }
+
+
 
         public void OnTankDeath(Tank t)
         {
@@ -362,7 +378,7 @@ namespace View
 
         public void OnBeamArrive(Beam b)
         {
-            animationBeams.Add(new BeamAnimation(b));
+            animationBeams.Add(new BeamAnimation(b, laserFrames));
         }
 
         private void DrawAnimations<T>(HashSet<T> anims, PaintEventArgs e) where T : Animatable
