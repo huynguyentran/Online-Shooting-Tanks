@@ -12,154 +12,198 @@ using theMap;
 
 namespace View
 {
+    /// <summary>
+    /// A view of the Tank Wars game. 
+    /// </summary>
     public partial class Form1 : Form
     {
-        private GameController gController;
+        /// <summary>
+        /// The controller communicates between model, server, and the view. 
+        /// </summary>
+        private GameController gameController;
 
-
+        /// <summary>
+        /// Constant size of the game window and menu.
+        /// </summary>
         private const int menuSize = 40;
         private const int viewSize = 900;
+
+        /// <summary>
+        /// The drawing panel object that handles all drawing. 
+        /// </summary>
         private DrawingPanel drawingPanel;
         public Form1(GameController _gController)
         {
             InitializeComponent();
 
-            gController = _gController;
-            gController.AddErrorHandler(MessageBoxForError);
+            gameController = _gController;
 
-            gController.updateView += WorldUpdate;
+            //An event that comes from the Controller to notify the view of the error. 
+            gameController.AddErrorHandler(MessageBoxForError);
 
-            gController.deathEvent += OnDeath;
-         
-            drawingPanel = new  DrawingPanel(gController.world);
+            //Events that update the view on what happens in the game. 
+            gameController.updateView += WorldUpdate;
+            gameController.deathEvent += OnDeath;
+
+            //Initializing drawing panel object. 
+            drawingPanel = new DrawingPanel(gameController.world);
             drawingPanel.Location = new Point(0, menuSize);
             drawingPanel.Size = new Size(viewSize, viewSize);
             this.Controls.Add(drawingPanel);
 
-            //Handling Inputs
-            //this.KeyDown += gController.HandleMoveRequest;
+            //Registering events for movement of the client tank. 
             drawingPanel.KeyDown += TranslateKeyPress;
             drawingPanel.KeyUp += TranslateKeyUp;
             drawingPanel.MouseMove += MouseMovement;
 
+            //Registering events for attacks of the client tank. 
             drawingPanel.MouseDown += MouseFire;
             drawingPanel.MouseUp += MouseCancel;
 
+            //Creating the windom form. 
             ClientSize = new Size(viewSize, viewSize + menuSize);
-
-            //drawingPanel.MouseMove += gController.HandleMousePosition;
-
-            //drawingPanel.MouseDown += gController.HandleMouseRequest;
-            //drawingPanel.MouseUp += gController.CancelMouseRequest;
         }
 
-
-
+        /// <summary>
+        /// A message box that shows the client the error. 
+        /// </summary>
+        /// <param name="str">Errors</param>
         private void MessageBoxForError(string str)
         {
-            MessageBox.Show(str);
+            MessageBox.Show(str,"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
+
+   
+        /// <summary>
+        /// Updating the world on every frame. 
+        /// </summary>
         private void WorldUpdate()
         {
             Invoke(new MethodInvoker(() => this.Invalidate(true)));
-            gController.OnNewFrame();
+            gameController.OnNewFrame();
         }
 
+        /// <summary>
+        /// Register the client key. The client press Enter to connect to the server.
+        /// Indicating errors if one of the message box is empty. 
+        /// </summary>
         private void serverTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == (char)Keys.Enter && (serverTextBox.Text !="" && nameTextBox.Text != ""))
+            if (e.KeyChar == (char)Keys.Enter)
             {
-                //if both of them have something in it.
-                gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
-                drawingPanel.Focus();
+                if (serverTextBox.Text != "" && nameTextBox.Text != "")
+                {
+                    gameController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
+                    drawingPanel.Focus();
+                    e.Handled = true;
+                }
+                else
+                {
+                    MessageBoxForError("Can not have empty name or server address.");
+                }
             }
-         
+
         }
 
+        /// <summary>
+        /// Register the client key. The client press Enter to connect to the server.
+        /// Indicating errors if one of the message box is empty. 
+        /// </summary>
         private void nameTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == (char)Keys.Enter && (serverTextBox.Text != "" && nameTextBox.Text != ""))
-            {
-                gController.ConnectToServer(serverTextBox.Text, nameTextBox.Text);
-                drawingPanel.Focus();
-            }
-          
-
+            serverTextBox_KeyPress(sender, e);
         }
 
+        /// <summary>
+        /// Register the client keys to send to the controler for the client tank movements. 
+        /// </summary>
         private void TranslateKeyPress(object sender, KeyEventArgs e)
         {
-            switch(e.KeyCode)
+            switch (e.KeyCode)
             {
-              
                 case Keys.W:
-                    gController.HandleMoveRequest(GameController.MovementDirection.UP);
+                    gameController.HandleMoveRequest(GameController.MovementDirection.UP);
                     break;
                 case Keys.S:
-                    gController.HandleMoveRequest(GameController.MovementDirection.DOWN);
+                    gameController.HandleMoveRequest(GameController.MovementDirection.DOWN);
                     break;
                 case Keys.A:
-                    gController.HandleMoveRequest(GameController.MovementDirection.LEFT);
+                    gameController.HandleMoveRequest(GameController.MovementDirection.LEFT);
                     break;
                 case Keys.D:
-                    gController.HandleMoveRequest(GameController.MovementDirection.RIGHT);
+                    gameController.HandleMoveRequest(GameController.MovementDirection.RIGHT);
                     break;
             }
         }
 
+        /// <summary>
+        /// Register the client keys to request canceling the tank movement. 
+        /// </summary>
         private void TranslateKeyUp(object sender, KeyEventArgs e)
         {
-            switch(e.KeyCode)
+            switch (e.KeyCode)
             {
                 case Keys.W:
-                    gController.CancelMoveRequest(GameController.MovementDirection.UP);
+                    gameController.CancelMoveRequest(GameController.MovementDirection.UP);
                     break;
                 case Keys.S:
-                    gController.CancelMoveRequest(GameController.MovementDirection.DOWN);
+                    gameController.CancelMoveRequest(GameController.MovementDirection.DOWN);
                     break;
                 case Keys.A:
-                    gController.CancelMoveRequest(GameController.MovementDirection.LEFT);
+                    gameController.CancelMoveRequest(GameController.MovementDirection.LEFT);
                     break;
                 case Keys.D:
-                    gController.CancelMoveRequest(GameController.MovementDirection.RIGHT);
+                    gameController.CancelMoveRequest(GameController.MovementDirection.RIGHT);
                     break;
             }
         }
 
+        /// <summary>
+        /// Register the client mouse movement for the rotation of the client turret. 
+        /// </summary>
         private void MouseMovement(object sender, MouseEventArgs e)
         {
-            
-            gController.MouseMovementRequest(e.X-(viewSize/2), e.Y-(viewSize/2));
+
+            gameController.MouseMovementRequest(e.X - (viewSize / 2), e.Y - (viewSize / 2));
         }
 
+        /// <summary>
+        /// Register the client key for the attack of the client tank. 
+        /// </summary>
         private void MouseFire(object sender, MouseEventArgs e)
         {
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    gController.HandleMouseRequest(GameController.MouseClickRequest.main);
+                    gameController.HandleMouseRequest(GameController.MouseClickRequest.main);
                     break;
                 case MouseButtons.Right:
-                    gController.HandleMouseRequest(GameController.MouseClickRequest.alt);
+                    gameController.HandleMouseRequest(GameController.MouseClickRequest.alt);
                     break;
             }
         }
 
+        /// <summary>
+        /// Register the client keys to request canceling the client tank attack. 
+        /// </summary>
         private void MouseCancel(object sender, MouseEventArgs e)
         {
             switch (e.Button)
             {
                 case MouseButtons.Left:
-                    gController.MouseCancelRequest(GameController.MouseClickRequest.main);
+                    gameController.MouseCancelRequest(GameController.MouseClickRequest.main);
                     break;
                 case MouseButtons.Right:
-                    gController.MouseCancelRequest(GameController.MouseClickRequest.alt);
+                    gameController.MouseCancelRequest(GameController.MouseClickRequest.alt);
                     break;
-
             }
         }
 
+        /// <summary>
+        /// Notify the drawing pannel if an object has "died". 
+        /// </summary>
+        /// <param name="dead"></param>
         private void OnDeath(object dead)
         {
             if (dead is Tank t)
@@ -179,5 +223,7 @@ namespace View
                 drawingPanel.OnBeamArrive(b);
             }
         }
+
+    
     }
 }

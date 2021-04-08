@@ -16,6 +16,7 @@ namespace Controller
         private Model theWorld;
 
 
+
         private ControlCommands cmd;
 
         public Model world
@@ -39,7 +40,6 @@ namespace Controller
         public GameController()
         {
             theWorld = new Model(0);
-           
             cmd = new ControlCommands();
             cmd.Move = "none";
             cmd.Fire = "none";
@@ -78,7 +78,7 @@ namespace Controller
 
             ParsePlayerIDandMapSize(state);
 
-            if (theWorld.mapSize !=0 && theWorld.clientID != -1)
+            if (theWorld.mapSize != 0 && theWorld.clientID != -1)
             {
                 //Receive Walls and Stuff
                 //Almost everytime resets on network action. 
@@ -169,14 +169,32 @@ namespace Controller
 
                 if (died.Item1)
                 {
-                    deathEvent(died.Item2);
+                    try
+                    {
+                        deathEvent(died.Item2);
+                    }
+                    catch
+                    {
+                    }
+
                 }
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
             }
 
-            updateView();
+            try
+            {
+                updateView();
+
+            }
+            catch
+            {
+
+            }
+
+
+
         }
 
         public void OnNewFrame()
@@ -187,6 +205,7 @@ namespace Controller
             if (cmd.Fire.Equals("alt"))
                 cmd.Fire = "none";
         }
+
 
 
         public enum MovementDirection { UP, DOWN, LEFT, RIGHT };
@@ -248,7 +267,7 @@ namespace Controller
 
         public void HandleMouseRequest(MouseClickRequest m)
         {
-     
+
             cmd.Fire = MouseClickRequestToString(m);
         }
 

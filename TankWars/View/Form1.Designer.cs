@@ -33,6 +33,7 @@ namespace View
             this.serverTextBox = new System.Windows.Forms.TextBox();
             this.serverLable = new System.Windows.Forms.Label();
             this.nameLable = new System.Windows.Forms.Label();
+            this.EnterServerLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // nameTextBox
@@ -70,17 +71,28 @@ namespace View
             this.nameLable.TabIndex = 3;
             this.nameLable.Text = "Name";
             // 
+            // EnterServerLabel
+            // 
+            this.EnterServerLabel.AutoSize = true;
+            this.EnterServerLabel.Location = new System.Drawing.Point(404, 9);
+            this.EnterServerLabel.Name = "EnterServerLabel";
+            this.EnterServerLabel.Size = new System.Drawing.Size(240, 17);
+            this.EnterServerLabel.TabIndex = 4;
+            this.EnterServerLabel.Text = "Press Enter to connect to the server.";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.EnterServerLabel);
             this.Controls.Add(this.nameLable);
             this.Controls.Add(this.serverLable);
             this.Controls.Add(this.serverTextBox);
             this.Controls.Add(this.nameTextBox);
             this.Name = "Form1";
             this.Text = "Form1";
+
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -92,6 +104,7 @@ namespace View
         private System.Windows.Forms.TextBox serverTextBox;
         private System.Windows.Forms.Label serverLable;
         private System.Windows.Forms.Label nameLable;
+        private System.Windows.Forms.Label EnterServerLabel;
     }
 }
 

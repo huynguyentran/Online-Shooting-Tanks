@@ -11,96 +11,107 @@ using System.Text.RegularExpressions;
 
 namespace View
 {
+    /// <summary>
+    /// Drawing panel object that handles all drawing in the game. 
+    /// </summary>
     class DrawingPanel : Panel
     {
+        // Creating a model, which holds the information of object. 
         private Model model;
+
+        // A private instance variable that holds the client last position in the drawing panel. 
         private Vector2D lastClientPosition;
 
+        // A dictionary that contains the list of Tank sprites.
         private Dictionary<int, Tuple<Image, Image, Image>> spriteList;
+
+        //A queue that holds the Images. 
         private Queue<Tuple<Image, Image, Image>> queue;
 
-        Image world, wall;
+        //The background and the wall sprite. 
+        private Image world, wall;
 
+        //A HashSet of beam animation. 
         private HashSet<BeamAnimation> animationBeams;
 
+        //A HashSet of tank explosions. 
         private HashSet<TankExplosionAnimation> explosions;
 
+        /// <summary>
+        /// A constructor to initializing the drawing panel. 
+        /// </summary>
+        /// <param name="m">The model that contains the information</param>
         public DrawingPanel(Model m)
         {
             DoubleBuffered = true;
             model = m;
             lastClientPosition = new Vector2D(0, 0);
-
             animationBeams = new HashSet<BeamAnimation>();
             explosions = new HashSet<TankExplosionAnimation>();
 
+            //Taking images from the Resources folder. 
             string root = AppDomain.CurrentDomain.BaseDirectory;
             world = Image.FromFile(root + @"..\..\..\Resources\Image\Background.png");
             wall = Image.FromFile(root + @"..\..\..\Resources\Image\WallSprite.png");
 
+            //The queue will have a list of initial Tank, Turret, and Projectiles sprite.Every time sprite is use, we dequeue the sprite and immediately enqueue so it at the bottom of the list. With this we can make sure that the initial 8 Tanks are unique. 
             queue = new Queue<Tuple<Image, Image, Image>>();
-
+            //A dictionary that holds the Tuple of sprites with the color as its key. 
             Dictionary<string, Tuple<Image, Image, Image>> colorSpriteCollection = new Dictionary<string, Tuple<Image, Image, Image>>();
 
-            Regex tankRegex = new Regex(@"(.+)Tank\.png");
-
+            //These 3 loops will loop through every file object in the resources, and add them correctly into the Tuple Queue. For example, A red tank will have a red turret and a red projectile.
+            Regex tankRegex = new Regex(@"^.*\\(?'color'.+)Tank\.png$");
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Tanks", "*png"))
             {
                 Image image = Image.FromFile(file);
                 Tuple<Image, Image, Image> t = new Tuple<Image, Image, Image>(image, null, null);
-                
-                string[] directories = file.Split('\\');
-                string imageName = directories[directories.Length - 1];
-                Match nameMatch = tankRegex.Match(imageName);
-                string color = nameMatch.Groups[1].Value.ToUpper();
-
+                String color = GetColor(tankRegex, file);
                 colorSpriteCollection.Add(color, t);
             }
 
-            Regex turretRegex = new Regex(@"(.+)Turret\.png");
-
+            Regex turretRegex = new Regex(@"^.*\\(?'color'.+)Turret\.png$");
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Turrets", "*png"))
             {
                 Image image = Image.FromFile(file);
-
-                string[] directories = file.Split('\\');
-                string imageName = directories[directories.Length - 1];
-                Match nameMatch = turretRegex.Match(imageName);
-                string color = nameMatch.Groups[1].Value.ToUpper();
-
+                String color = GetColor(turretRegex, file);
                 colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, image, null);
             }
 
-            Regex projectileRegex = new Regex(@"shot[-_](?'color'.+)\.png");
-
+            Regex projectileRegex = new Regex(@"^.*\\shot[-_](?'color'.+)\.png$");
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Projectiles", "*png"))
             {
                 Image image = Image.FromFile(file);
-
-                string[] directories = file.Split('\\');
-                string imageName = directories[directories.Length - 1];
-                Match nameMatch = projectileRegex.Match(imageName);
-
-                string color ="";
-
-                foreach (Group g in nameMatch.Groups)
-                    if (g.Name.Equals("color"))
-                        color = g.Value;
-
-                color = color.ToUpper();
-
+                String color = GetColor(projectileRegex, file);
                 colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, colorSpriteCollection[color].Item2, image);
             }
 
             foreach (Tuple<Image, Image, Image> spriteGroup in colorSpriteCollection.Values)
+            {
                 queue.Enqueue(spriteGroup);
+            }
+               
 
-            spriteList = new Dictionary<int, Tuple<Image, Image, Image>>();    
+            spriteList = new Dictionary<int, Tuple<Image, Image, Image>>();
         }
 
 
+        /// <summary>
+        /// Get the color from the file name. This method is depended on the Regex, so the naming scheme of the file has to be correct;
+        /// </summary>
+        /// <param name="regex">The regex</param>
+        /// <param name="file">The name of the file</param>
+        /// <returns></returns>
+        private string GetColor(Regex regex, String file)
+        {
+            Match nameMatch = regex.Match(file);
+            string color = "";
+            foreach (Group g in nameMatch.Groups)
+                if (g.Name.Equals("color"))
+                    color = g.Value;
 
-
+            color = color.ToUpper();
+            return color;
+        }
 
         public void OnTankDeath(Tank t)
         {
@@ -139,11 +150,10 @@ namespace View
             e.Graphics.Transform = oldMatrix;
         }
 
-
         private void WallDrawer(object o, PaintEventArgs e)
         {
             Wall castWall = (Wall)o;
-
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             double totalWidth = Math.Abs(castWall.Start.GetX() - castWall.End.GetX());
             double totalHeight = Math.Abs(castWall.Start.GetY() - castWall.End.GetY());
 
@@ -177,30 +187,33 @@ namespace View
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
             int width = 60;
             int height = 60;
-            
+
             Rectangle rec = new Rectangle(-(width / 2), -(height / 2), width, height);
             if (!spriteList.ContainsKey(t.TankID))
             {
                 Tuple<Image, Image, Image> usedImage = queue.Dequeue();
                 spriteList.Add(t.TankID, usedImage);
                 e.Graphics.DrawImage(usedImage.Item1, rec);
+               
                 queue.Enqueue(usedImage);
             }
             else
             {
-                e.Graphics.DrawImage(spriteList[t.TankID].Item1,rec);
+                e.Graphics.DrawImage(spriteList[t.TankID].Item1, rec);
             }
         }
 
         private void TurretDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             int widthTurret = 50;
             int heightTurret = 50;
-            
+
             Rectangle tur = new Rectangle(-(widthTurret / 2), -(heightTurret / 2), widthTurret, heightTurret);
             e.Graphics.DrawImage(spriteList[t.TankID].Item2, tur);
         }
@@ -208,7 +221,7 @@ namespace View
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
             Projectile p = (Projectile)o;
-
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             int size = 30;
 
             Rectangle bounds = new Rectangle(-(size / 2), -(size / 2), size, size);
@@ -218,6 +231,7 @@ namespace View
         private void PowerupDrawer(object o, PaintEventArgs e)
         {
             Powerup p = (Powerup)o;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             int size = 10;
 
             Color c = Color.Orange;
@@ -232,6 +246,7 @@ namespace View
         public void WorldDrawer(object o, PaintEventArgs e)
         {
             int size = model.mapSize;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
             Rectangle bounds = new Rectangle(-(size / 2), -(size / 2), size, size);
             e.Graphics.DrawImage(world, bounds);
@@ -240,32 +255,34 @@ namespace View
         public void NameAndScoreDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             FontFamily fontFamily = new FontFamily("Arial");
             Font font = new Font(
                fontFamily,
                14,
                FontStyle.Regular,
                GraphicsUnit.Pixel);
-            using (Brush b  = new SolidBrush(Color.White))
+            using (Brush b = new SolidBrush(Color.White))
             {
                 StringFormat drawFormat = new StringFormat();
                 drawFormat.Alignment = StringAlignment.Center;
-                e.Graphics.DrawString("Player name: " +t.Name + "\nScore: " +t.Score,font,b,0,40,drawFormat);
+                e.Graphics.DrawString("Player name: " + t.Name + "\nScore: " + t.Score, font, b, 0, 40, drawFormat);
             }
         }
 
         public void HealthbarDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             Color c = new Color();
             int height = 5;
-            int width = 50*t.HitPoints/3;
+            int width = 50 * t.HitPoints / 3;
             int maxhealth = 3;
-            if (t.HitPoints > maxhealth * 2/3f)
+            if (t.HitPoints > maxhealth * 2 / 3f)
             {
                 c = Color.Green;
             }
-            else if (t.HitPoints <= maxhealth * 1/3f)
+            else if (t.HitPoints <= maxhealth * 1 / 3f)
             {
                 c = Color.Red;
             }
@@ -273,11 +290,11 @@ namespace View
             {
                 c = Color.Yellow;
             }
-            
+
             using (Brush b = new SolidBrush(c))
             {
                 Rectangle bounds = new Rectangle(-(width / 2), -(height / 2) - 40, width, height);
-                e.Graphics.FillRectangle(b, bounds);     
+                e.Graphics.FillRectangle(b, bounds);
             }
         }
 
@@ -308,8 +325,6 @@ namespace View
 
             DrawObjectWithTransform(e, world, 0, 0, 0, WorldDrawer);
 
-
-
             lock (model)
             {
                 // Draw the players
@@ -317,7 +332,6 @@ namespace View
                 {
                     DrawObjectWithTransform(e, w, (w.Start.GetX() + w.End.GetX()) / 2, (w.Start.GetY() + w.End.GetY()) / 2, 0, WallDrawer);
                 }
-
                 foreach (Tank t in model.Tanks.Values)
                 {
                     DrawObjectWithTransform(e, t, t.Location.GetX(), t.Location.GetY(), t.Orientation.ToAngle(), TankDrawer);
@@ -368,21 +382,4 @@ namespace View
         }
     }
 
-    //public static class ListExtension
-    //{
-    //    private static Random rng = new Random();
-    //    public static void Shuffle<T>(this IList<T> list)
-    //    {
-    //        int n = list.Count;
-    //        while (n > 1)
-    //        {
-    //            n--;
-    //            int k = rng.Next(n + 1);
-    //            T value = list[k];
-    //            list[k] = list[n];
-    //            list[n] = value;
-    //        }
-    //    }
-
-    //}
 }
