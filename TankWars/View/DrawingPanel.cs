@@ -25,7 +25,6 @@ namespace View
 
         private HashSet<TankExplosionAnimation> explosions;
 
-        private Image[] laserFrames;
         public DrawingPanel(Model m)
         {
             DoubleBuffered = true;
@@ -43,36 +42,52 @@ namespace View
 
             Dictionary<string, Tuple<Image, Image, Image>> colorSpriteCollection = new Dictionary<string, Tuple<Image, Image, Image>>();
 
-            Regex tankRegex = new Regex(@"^.*\\(?'color'.+)Tank\.png$");
+            Regex tankRegex = new Regex(@"(.+)Tank\.png");
 
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Tanks", "*png"))
             {
                 Image image = Image.FromFile(file);
                 Tuple<Image, Image, Image> t = new Tuple<Image, Image, Image>(image, null, null);
-
-                string color = GetInfoFromRegexGroup(tankRegex, file, "color").ToUpper();
+                
+                string[] directories = file.Split('\\');
+                string imageName = directories[directories.Length - 1];
+                Match nameMatch = tankRegex.Match(imageName);
+                string color = nameMatch.Groups[1].Value.ToUpper();
 
                 colorSpriteCollection.Add(color, t);
             }
 
-            Regex turretRegex = new Regex(@"^.*\\(?'color'.+)Turret\.png$");
+            Regex turretRegex = new Regex(@"(.+)Turret\.png");
 
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Turrets", "*png"))
             {
                 Image image = Image.FromFile(file);
 
-                string color = GetInfoFromRegexGroup(turretRegex, file, "color").ToUpper();
+                string[] directories = file.Split('\\');
+                string imageName = directories[directories.Length - 1];
+                Match nameMatch = turretRegex.Match(imageName);
+                string color = nameMatch.Groups[1].Value.ToUpper();
 
                 colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, image, null);
             }
 
-            Regex projectileRegex = new Regex(@"^.*\\shot[-_](?'color'.+)\.png$");
+            Regex projectileRegex = new Regex(@"shot[-_](?'color'.+)\.png");
 
             foreach (string file in System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Projectiles", "*png"))
             {
                 Image image = Image.FromFile(file);
 
-                string color = GetInfoFromRegexGroup(projectileRegex, file, "color").ToUpper();
+                string[] directories = file.Split('\\');
+                string imageName = directories[directories.Length - 1];
+                Match nameMatch = projectileRegex.Match(imageName);
+
+                string color ="";
+
+                foreach (Group g in nameMatch.Groups)
+                    if (g.Name.Equals("color"))
+                        color = g.Value;
+
+                color = color.ToUpper();
 
                 colorSpriteCollection[color] = new Tuple<Image, Image, Image>(colorSpriteCollection[color].Item1, colorSpriteCollection[color].Item2, image);
             }
@@ -80,32 +95,10 @@ namespace View
             foreach (Tuple<Image, Image, Image> spriteGroup in colorSpriteCollection.Values)
                 queue.Enqueue(spriteGroup);
 
-            spriteList = new Dictionary<int, Tuple<Image, Image, Image>>();
-
-            string[] laserFiles = System.IO.Directory.GetFiles(root + @"..\..\..\Resources\Image\Laser", "*png");
-            laserFrames = new Image[laserFiles.Length];
-
-            Regex laserRegex = new Regex(@"^.*\\laserAnimation[0]*(?'index'\d+)\.png$");
-
-            foreach(string laserFile in laserFiles)
-            {
-                Image laserFrame = Image.FromFile(laserFile);
-                int index = int.Parse(GetInfoFromRegexGroup(laserRegex, laserFile, "index")) - 1;
-                laserFrames[index] = laserFrame;
-            }
-
-
+            spriteList = new Dictionary<int, Tuple<Image, Image, Image>>();    
         }
 
-        private string GetInfoFromRegexGroup(Regex r, string file, string groupName)
-        {
-            Match nameMatch = r.Match(file);
-            string output = "";
-            foreach (Group g in nameMatch.Groups)
-                if (g.Name.Equals(groupName))
-                    output = g.Value;
-            return output;
-        }
+
 
 
 
@@ -355,7 +348,7 @@ namespace View
 
         public void OnBeamArrive(Beam b)
         {
-            animationBeams.Add(new BeamAnimation(b, laserFrames));
+            animationBeams.Add(new BeamAnimation(b));
         }
 
         private void DrawAnimations<T>(HashSet<T> anims, PaintEventArgs e) where T : Animatable
