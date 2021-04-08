@@ -9,6 +9,9 @@ using TankWars;
 
 namespace View
 {
+    /// <summary>
+    /// An abstract class that represents the life cycle of the animated object.
+    /// </summary>
     abstract class Animatable
     {
         private int age = 0;

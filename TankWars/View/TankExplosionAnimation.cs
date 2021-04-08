@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using theMap;
+using Model;
 using System.Drawing;
 using System.Windows.Forms;
 using TankWars;
 
 namespace View
 {
-    class TankExplosionAnimation : Animatable
+    /// <summary>
+    /// A class represents the tank explosion animation.
+    /// </summary>
+    class TankExplosionAnimation : FrameByFrameAnimation
     {
         private Vector2D location;
 
@@ -18,27 +21,25 @@ namespace View
 
         public override float Orientation => 0f;
 
-        private int lifeTime = 180;
-        private int radius = 30;
+        protected override int LifeTime { get => lifeTime; set => lifeTime= value; }
 
-        public TankExplosionAnimation(Tank toExplode)
+        private int lifeTime = 0;
+
+        public TankExplosionAnimation(Tank t, Image[] _frames) : base(_frames)
         {
-            location = toExplode.Location;
+            location = t.Location;
         }
 
+        /// <summary>
+        /// Draw the tank explosion current frame.
+        /// </summary>
         public override void Draw(object o, PaintEventArgs e)
         {
             float progress = Age / (float)lifeTime;
-
-            Color c = Color.FromArgb((int)(255 * progress), Color.Red);
-
-            float currentRadius = radius * progress;
-            RectangleF rect = new RectangleF(-(currentRadius), -(currentRadius), currentRadius*2, currentRadius*2);
-            
-            using(Brush b = new SolidBrush(c))
-            {
-                e.Graphics.FillEllipse(b, rect);
-            }
+            Image frame = CurrentFrame();
+            int size = 80;
+            RectangleF rect = new RectangleF(-(size/2), -(size/2), size, size);
+            e.Graphics.DrawImage(frame, rect);
         }
 
         public override bool HasFinished()

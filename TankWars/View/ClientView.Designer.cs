@@ -1,7 +1,7 @@
 ﻿
 namespace View
 {
-    partial class Form1
+    partial class ClientView
     {
         /// <summary>
         /// Required designer variable.
@@ -80,7 +80,7 @@ namespace View
             this.EnterServerLabel.TabIndex = 4;
             this.EnterServerLabel.Text = "Press Enter to connect to the server.";
             // 
-            // Form1
+            // ClientView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -90,9 +90,10 @@ namespace View
             this.Controls.Add(this.serverLable);
             this.Controls.Add(this.serverTextBox);
             this.Controls.Add(this.nameTextBox);
-            this.Name = "Form1";
+            this.Name = "ClientView";
             this.Text = "Form1";
-
+            this.Deactivate += new System.EventHandler(this.ClientView_Deactivate);
+         
             this.ResumeLayout(false);
             this.PerformLayout();
 
