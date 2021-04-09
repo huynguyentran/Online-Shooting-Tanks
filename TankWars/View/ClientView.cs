@@ -13,8 +13,11 @@ using Model;
 namespace View
 {
     /// <summary>
-    /// A view of the Tank Wars game. 
+    /// The view of the 2D Tank Wars game. 
     /// </summary>
+    /// <author>Huy Nguyen</author>
+    /// <author>William Erignac</author>
+    /// <version>04/09/2021</version>
     public partial class ClientView : Form
     {
         /// <summary>

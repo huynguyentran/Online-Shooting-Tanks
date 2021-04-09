@@ -8,6 +8,13 @@ namespace Model
     /// The model that holds all the information of the game objects. 
     /// The model will aslo Deserialize the information send by the server.
     /// </summary>
+
+    /// <summary>
+    ///  The model of the 2D Tank Wars game. 
+    /// </summary>
+    /// <author>Huy Nguyen</author>
+    /// <author>William Erignac</author>
+    /// <version>04/09/2021</version>
     public class ClientModel
     {
         /// <summary>

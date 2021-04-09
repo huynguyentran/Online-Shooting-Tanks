@@ -6,6 +6,9 @@ using TankWars;
 
 namespace Model
 {
+    /// <summary>
+    /// A class that represents the projectile.
+    /// </summary>
     public class Projectile
     {
         [JsonProperty(PropertyName = "proj")]
@@ -28,7 +31,11 @@ namespace Model
             get { return orientation; }
         }
 
-
+        /// <summary>
+        /// Desrialize the projectile object. 
+        /// </summary>
+        /// <param name="input">The string input by the server</param>
+        /// <returns>The projectile object</returns>
         [JsonProperty(PropertyName = "died")]
         private bool died = false;
         [JsonIgnore]

@@ -156,7 +156,7 @@ namespace View
             {
                 lastClientPosition = t.Location;
             }
-            explosions.Add(new TankExplosionAnimation(t,tankExplosionFrames));
+            explosions.Add(new TankExplosionAnimation(t,tankExplosionFrames,220));
         }
 
         // A delegate for DrawObjectWithTransform

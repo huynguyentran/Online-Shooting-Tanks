@@ -6,9 +6,11 @@ using TankWars;
 
 namespace Model
 {
+    /// <summary>
+    /// A class represents a Beam object. 
+    /// </summary>
     public class Beam
     {
-
 
         [JsonProperty(PropertyName = "beam")]
         private int ID;
@@ -31,6 +33,11 @@ namespace Model
         [JsonProperty(PropertyName = "owner")]
         private int playerID;
 
+        /// <summary>
+        /// Desrialize the beam object. 
+        /// </summary>
+        /// <param name="input">The string input by the server</param>
+        /// <returns>The beam object</returns>
         public static Beam Deserialize(string input)
         {
             return JsonConvert.DeserializeObject<Beam>(input);

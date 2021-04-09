@@ -25,7 +25,7 @@ namespace View
 
         private int lifeTime = 0;
 
-        public TankExplosionAnimation(Tank t, Image[] _frames) : base(_frames)
+        public TankExplosionAnimation(Tank t, Image[] _frames, int _lifetime) : base(_frames,_lifetime)
         {
             location = t.Location;
         }
@@ -37,7 +37,7 @@ namespace View
         {
             float progress = Age / (float)lifeTime;
             Image frame = CurrentFrame();
-            int size = 80;
+            int size = 160;
             RectangleF rect = new RectangleF(-(size/2), -(size/2), size, size);
             e.Graphics.DrawImage(frame, rect);
         }

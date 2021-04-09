@@ -15,7 +15,6 @@ Date: 04/08/2021
   To demonstrate this feature, we added a disco tank to the list of sprites
 +Custom laser and tank explosion animations.
 
-
 <Design decisions>
 _We created enums to translate button presses into movements and firing actions for the GameController.
 
@@ -43,8 +42,14 @@ _The controller holds a private instance of a Control Command that is updated as
 _We use a string to keep track of the last movement direction of the tank before its direction is changed by a button press. When we revert to string (i.e. when the overriding button is lifted), we set the string to "none".
   _If the string is not none and the button corresponding to the string's direction is lifted before the overriding button has been lifted, then the string is set to "none" (i.e. press A and S, lift A then S).
 
+_Deserilization proecess was put in the Model while the Serialization process was put in the Controller for seperation of concern. Deserilization process was in charge of creating the game object, while Serialization was for sending command/request back to the server.
+
+_Some color sprites that were given are very hard to see with the background. We use more contrasting color that does not match its tank (Each tank still has its unique projectile color).
+
 <External code and resources> 
+-Some methods were based on Labs and Lectures.
 -Our own PS7 NetworkController. 
+-To get the images from the resouces folder, we use System.IO.Directory.GetFiles
 
 <Problems>
 ()Can not run the program.																												(Fixed by installing the Json package)
@@ -60,4 +65,4 @@ _We use a string to keep track of the last movement direction of the tank before
 ()Closing the application results in an extra message box popping up (view is called by the controller, but the view is disposed).      (Put a try/catch block around calls to the view from the controller)
 ()The tanks no longer explode and the player's view is no longer kept after dying.                                                      (Fixed by implementing LifeTime property in TankExplosionAnimation)
 ()Every time the player types something in one of the two input boxes, the view displays an error                                       (Fixed by moving the error message box into an if statement checking that the enter key is the button pressed)
-complaining one of the two boxes is empty.
+  complaining one of the two boxes is empty.

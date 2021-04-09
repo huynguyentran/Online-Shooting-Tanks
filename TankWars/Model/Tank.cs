@@ -6,7 +6,9 @@ using TankWars;
 
 namespace Model
 {
-    [JsonObject(MemberSerialization.OptIn)]
+    /// <summary>
+    /// A class that represents the tank object.
+    /// </summary>
     public class Tank
     {
         [JsonProperty(PropertyName = "tank")]
@@ -96,11 +98,11 @@ namespace Model
         [JsonProperty(PropertyName = "join")]
         private bool joined = false;
 
-        public Tank()
-        {
-
-        }
-
+        /// <summary>
+        /// Desrialize the tank object. 
+        /// </summary>
+        /// <param name="input">The string input by the server</param>
+        /// <returns>The tank object</returns>
         public static Tank Deserialize(string input)
         {
             return JsonConvert.DeserializeObject<Tank>(input);

@@ -9,6 +9,12 @@ using Model;
 namespace Controller
 {
 
+    /// <summary>
+    ///  The controller of the 2D Tank Wars game. 
+    /// </summary>
+    /// <author>Huy Nguyen</author>
+    /// <author>William Erignac</author>
+    /// <version>04/09/2021</version>
     public class GameController
     {
         //An event to handle all the errors.

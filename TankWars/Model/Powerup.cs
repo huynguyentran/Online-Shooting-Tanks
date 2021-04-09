@@ -6,6 +6,9 @@ using TankWars;
 
 namespace Model
 {
+    /// <summary>
+    /// A class that represents the powerup. 
+    /// </summary>
     public class Powerup
     {
 
@@ -32,8 +35,11 @@ namespace Model
             get { return died; }
         }
 
-      
-
+        /// <summary>
+        /// Desrialize the powerup object. 
+        /// </summary>
+        /// <param name="input">The string input by the server</param>
+        /// <returns>The powerup object</returns>
         public static Powerup Deserialize(string input)
         {
             return JsonConvert.DeserializeObject<Powerup>(input);
