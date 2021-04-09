@@ -52,7 +52,7 @@ _We use a string to keep track of the last movement direction of the tank before
 ()The turret is not rotating full 360 degrees.																							(Fixed by subtracting half the drawing panel size from the cordinates of the mouse)
 ()The projectiles stay on the map after they have "died"																			    (Fixed by removing dead objects from the model (see above))
 ()When moving the tank, when holding a key then holding another key, after releasing the second key that we hold, the tank would stop.  (Fixed by using a string to keep track of the last movement direction (see above))
-()When moving and click on the form(outside of drawing panel), the tank will move forward.                                              (Fixed by )
+()When moving and click on the form(outside of drawing panel), the tank will move forward.                                              (Fixed by using Form Deactivate property to remove all request)
 ()When playing the game, clicking on the box will have make the form focus on the boxes, and the player lose controls.                  (Fixed by disabling the text boxes after connecting to the server)
 ()Invisible bullet (actually just bullets that blend in really well with the background)                                                (Fixed by changing the colors of the sprites)
 ()The health bar is not chanigng color.                                                                                                 (Fixed by correctly calculating the percentage of health a tank has)
