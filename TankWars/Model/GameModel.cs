@@ -58,6 +58,11 @@ namespace Model
             }
         }
 
+        public void AddTank(Tank tank)
+        {
+            //Add tank to model dictionary.
+        }
+
         //The map size 
         private int size;
         public int MapSize

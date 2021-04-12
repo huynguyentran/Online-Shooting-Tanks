@@ -14,6 +14,13 @@ namespace Controller
     [JsonObject(MemberSerialization.OptIn)]
     public class ControlCommands
     {
+        public ControlCommands()
+        {
+            movement = "none";
+            fireType = "none";
+            direction = new Vector2D(0, 1);
+        }
+
         /// <summary>
         /// Json of the tank's movement with getter and setter for easy modification
         /// </summary>
