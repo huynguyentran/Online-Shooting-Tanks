@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
 using TankWars;
+using Newtonsoft.Json.Linq;
 
-namespace Controller
+namespace Model
 {
     /// <summary>
     /// Control Command class that send the JSon requests to the server.
@@ -83,6 +84,19 @@ namespace Controller
         public static string Serialize(ControlCommands command)
         {
             return JsonConvert.SerializeObject(command);
+        }
+
+        public static ControlCommands Deserialize(string input)
+        {
+            JObject gObj = JObject.Parse(input);
+            if (gObj["moving"] != null && gObj["fire"] != null && gObj["tdir"] != null)
+            {
+                ControlCommands commands = (ControlCommands)JsonConvert.DeserializeObject(input);
+                return commands;
+            }
+
+            return null;
+
         }
 
     }

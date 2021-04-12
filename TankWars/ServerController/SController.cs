@@ -13,7 +13,7 @@ namespace ServerController
 {
     class SController
     {
-        private Dictionary<long, Tuple<SocketState, ControlCommands>> clientInfo;
+        private Dictionary<int, Tuple<SocketState, ControlCommands>> clientInfo;
 
         private GameConstants consts;
 
@@ -44,12 +44,19 @@ namespace ServerController
 
         private void UpdateWorld()
         {
-            
+            //Access the commands that we have. 
+            foreach (KeyValuePair<int, Tuple<SocketState, ControlCommands>> pair in clientInfo)
+            {
+                serverModel.UpdateTank(pair.Key,pair.Value.Item2);
+            }
+
+            serverModel.UpdateGameObject;
+
         }
 
         public SController()
         {
-            clientInfo = new Dictionary<long, Tuple<SocketState, ControlCommands>>();
+            clientInfo = new Dictionary<int, Tuple<SocketState, ControlCommands>>();
             consts = new GameConstants();
 
             
@@ -81,7 +88,7 @@ namespace ServerController
         {
             if (state.ErrorOccurred)
             {
-                //
+                return;
             }
 
 
@@ -106,7 +113,7 @@ namespace ServerController
 
                 lock (clientInfo)
                 {
-                    clientInfo[state.ID] = new Tuple<SocketState, ControlCommands>(state, new ControlCommands());
+                    clientInfo[(int)state.ID] = new Tuple<SocketState, ControlCommands>(state, new ControlCommands());
                 }
 
                 SendingFirstData(state);
@@ -147,7 +154,12 @@ namespace ServerController
                     //Get rid of extra newline character.
                     string trimmedCommand = command.Substring(0, command.Length - 1);
 
-                    ControlCommands deserializedCommand = ControlCommands.Deserialize(command);
+
+                    ControlCommands deserializedCommand = new ControlCommands();
+                    if(ControlCommands.Deserialize(command) != null)
+                    {
+                        deserializedCommand = ControlCommands.Deserialize(command);
+                    }
 
                     clientInfo[state.ID] = new Tuple<SocketState, ControlCommands>(state, deserializedCommand);
                     

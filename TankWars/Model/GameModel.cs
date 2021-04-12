@@ -187,6 +187,30 @@ namespace Model
         }
 
 
+
+        public void UpdateTank(int id, ControlCommands cmd)
+        {
+            
+            Tank t = tanks[id];
+            t.UpdatingTank(cmd);
+            ////Collision check
+            ///
+           switch (cmd.Fire)
+            {
+                case "alt":
+                    {
+                        break;
+                    }
+                case "main":
+                    {
+                        break;
+                    }
+                default "none";
+            }
+        }
+
+        public void UpdateGameObject()
+
     }
 
 

@@ -113,6 +113,11 @@ namespace Model
             ID = (int)stateID;
             name = playerName;
         }
+
+        public void UpdatingTank(ControlCommands cmd)
+        {
+            aiming = cmd.directionOfTank;
+        }
     }
 
 }
