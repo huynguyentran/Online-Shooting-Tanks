@@ -15,7 +15,7 @@ namespace Model
     /// <author>Huy Nguyen</author>
     /// <author>William Erignac</author>
     /// <version>04/09/2021</version>
-    public class ClientModel
+    public class GameModel
     {
         /// <summary>
         /// A HashSet of player IDs. The player IDs should be unique.
@@ -76,7 +76,7 @@ namespace Model
         /// Assigns the map size of the tank war game.
         /// </summary>
         /// <param name="_size">The map size that sent by the server</param>
-        public ClientModel(int _size)
+        public GameModel(int _size)
         {
             size = _size;
             tanks = new Dictionary<int, Tank>();

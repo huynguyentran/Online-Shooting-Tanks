@@ -17,7 +17,7 @@ namespace View
     class DrawingPanel : Panel
     {
         // Creating a model, which holds the information of object. 
-        private ClientModel model;
+        private GameModel model;
 
         // A private instance variable that holds the client last position in the drawing panel. 
         private Vector2D lastClientPosition;
@@ -45,7 +45,7 @@ namespace View
         /// A constructor to initializing the drawing panel. 
         /// </summary>
         /// <param name="m">The model that contains the information</param>
-        public DrawingPanel(ClientModel m)
+        public DrawingPanel(GameModel m)
         {
             DoubleBuffered = true;
             model = m;

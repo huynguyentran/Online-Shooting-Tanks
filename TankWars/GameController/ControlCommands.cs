@@ -12,7 +12,7 @@ namespace Controller
     /// the tank's movement, and the tank's fire type.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    class ControlCommands
+    public class ControlCommands
     {
         /// <summary>
         /// Json of the tank's movement with getter and setter for easy modification

@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vector2D", "Vector2D\Vector
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{5CA89C98-C4B7-4E9E-AF19-67720550E058}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerController", "ServerController\ServerController.csproj", "{C247963A-137F-4C4B-B22C-37FF9346E983}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constants", "Constants\Constants.csproj", "{B577560D-E5ED-41C5-974F-3C9F40C42F0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +48,14 @@ Global
 		{5CA89C98-C4B7-4E9E-AF19-67720550E058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5CA89C98-C4B7-4E9E-AF19-67720550E058}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CA89C98-C4B7-4E9E-AF19-67720550E058}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C247963A-137F-4C4B-B22C-37FF9346E983}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C247963A-137F-4C4B-B22C-37FF9346E983}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C247963A-137F-4C4B-B22C-37FF9346E983}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C247963A-137F-4C4B-B22C-37FF9346E983}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B577560D-E5ED-41C5-974F-3C9F40C42F0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B577560D-E5ED-41C5-974F-3C9F40C42F0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B577560D-E5ED-41C5-974F-3C9F40C42F0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B577560D-E5ED-41C5-974F-3C9F40C42F0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

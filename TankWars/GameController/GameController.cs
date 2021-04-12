@@ -21,13 +21,13 @@ namespace Controller
         private event Action<string> errorEvent;
 
         //The ClientModel/Model object that holds all information sent by the server. 
-        private ClientModel clientWorld;
+        private GameModel clientWorld;
 
         //A Control Commands that send the client's control to the server.
         private ControlCommands cmd;
 
         //A getter to return the ClientModel/Model object.
-        public ClientModel world
+        public GameModel world
         {
             get { return clientWorld; }
         }
@@ -54,7 +54,7 @@ namespace Controller
         /// </summary>
         public GameController()
         {
-            clientWorld = new ClientModel(0);
+            clientWorld = new GameModel(0);
             cmd = new ControlCommands();
             cmd.Move = "none";
             cmd.Fire = "none";
