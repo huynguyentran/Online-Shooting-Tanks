@@ -107,6 +107,12 @@ namespace Model
         {
             return JsonConvert.DeserializeObject<Tank>(input);
         }
+
+        public Tank(long stateID, string playerName)
+        {
+            ID = (int)stateID;
+            name = playerName;
+        }
     }
 
 }

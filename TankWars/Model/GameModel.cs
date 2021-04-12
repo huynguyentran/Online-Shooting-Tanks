@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Model
 {
@@ -168,6 +169,16 @@ namespace Model
             }
 
             return new Tuple<bool, object>(false, null);
+        }
+
+        public string Serialization<T>(Dictionary<int, T> d) 
+        {
+            String json = "";
+            foreach(T values in d.Values)
+            {
+               json += JsonConvert.SerializeObject(values) + "\n";
+            }
+            return json;
         }
 
 
