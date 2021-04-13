@@ -96,44 +96,109 @@ namespace Model
         /// </summary>
         /// <param name="input">The information string sent by the server</param>
         /// <returns>The tuple of the game object, this tuple will indicate if the game objects has died or not.</returns>
-        public Tuple<bool, object> DeserializeGameObject(string input)
+        //public Tuple<bool, object> DeserializeGameObject(string input)
+        //{
+        //    JObject gObj = JObject.Parse(input);
+        //    lock (this)
+        //    {
+        //        //If the game object is a tank.
+        //        if (gObj["tank"] != null)
+        //        {
+        //            //Deserialize the string that sent by the server. 
+        //            Tank t = Tank.Deserialize(input);
+        //            //Save the unique id of each tank into the model.
+        //            int id = gObj.Value<int>("tank");
+        //            //If the tank is not died.
+        //            if (!t.Died && t.HitPoints > 0)
+        //                //Register the tank to the list and keep drawing the tank.
+        //                tanks[id] = t;
+        //            else
+        //            //We temporary remove the tank from the list so that the tank disappears on the screen.
+        //                if (tanks.ContainsKey(id))
+        //                    tanks.Remove(id);
+        //            //Return the tuple object.
+        //            return new Tuple<bool, object>(t.Died, t);
+        //        }
+        //        //If the game object is a wall.
+        //        else if (gObj["wall"] != null)
+        //        {
+        //            //Deserialize the string that sent by the server. 
+        //            Wall w = Wall.Deserialize(input);
+        //            //Save the information of the wall into the model.
+        //            walls[gObj.Value<int>("wall")] = w;
+        //        }
+        //        //If the game object is a projectile.
+        //        else if (gObj["proj"] != null)
+        //        {
+        //            //Deserialize the string that sent by the server. 
+        //            Projectile pr = Projectile.Deserialize(input);
+        //            // Save the unique id of each porojectile into the model.
+        //            int id = gObj.Value<int>("proj");
+        //            //If the projectile is not died.
+        //            if (!pr.Died)
+        //                //Register the projectile to the list and keep drawing the projectile
+        //                projectiles[id] = pr;
+        //            else
+        //                //Remove the projectile from the list.
+        //                projectiles.Remove(id);
+        //            //Return the tuple object.
+        //            return new Tuple<bool, object>(pr.Died, pr);
+        //        }
+        //        //If the game object is a powerup.
+        //        else if (gObj["power"] != null)
+        //        {
+        //            Powerup pu = Powerup.Deserialize(input);
+        //            int id = gObj.Value<int>("power");
+        //            //If the powerup is not died.
+        //            if (!pu.Died)
+        //                //Register the powerup to the list and keep drawing the powerup.
+        //                powerups[id] = pu;
+        //            else
+        //                //Remove the powerup from the list.
+        //                powerups.Remove(id);
+        //            //Return the tuple object.
+        //            return new Tuple<bool, object>(pu.Died, pu);
+        //        }
+        //        //If the game object is a beam.
+        //        else if (gObj["beam"] != null)
+        //        {
+        //            Beam b = Beam.Deserialize(input);
+        //            //Return the tuple object. Since the beam is only sent on one frame, and animation is handle by the view, we do not need
+        //            //A list to contain it.
+        //            return new Tuple<bool, object>(true, b);
+
+        //        }
+        //        //Throw an excpetion if the server sent invalid information.
+        //        else
+        //            throw new ArgumentException("Unrecognized game object received: " + input);
+        //    }
+
+        //    return new Tuple<bool, object>(false, null);
+        //}
+
+
+
+        public void AddingToDictionary(object obj,int id)
         {
-            JObject gObj = JObject.Parse(input);
             lock (this)
             {
-                //If the game object is a tank.
-                if (gObj["tank"] != null)
+                if (obj is Tank t)
                 {
-                    //Deserialize the string that sent by the server. 
-                    Tank t = Tank.Deserialize(input);
-                    //Save the unique id of each tank into the model.
-                    int id = gObj.Value<int>("tank");
                     //If the tank is not died.
                     if (!t.Died && t.HitPoints > 0)
                         //Register the tank to the list and keep drawing the tank.
-                        tanks[id] = t;
+                      tanks[id] = t;
                     else
-                    //We temporary remove the tank from the list so that the tank disappears on the screen.
-                        if (tanks.ContainsKey(id))
-                            tanks.Remove(id);
-                    //Return the tuple object.
-                    return new Tuple<bool, object>(t.Died, t);
+                   //We temporary remove the tank from the list so that the tank disappears on the screen.
+                   if (tanks.ContainsKey(id))
+                        tanks.Remove(id);
                 }
-                //If the game object is a wall.
-                else if (gObj["wall"] != null)
+                else if (obj is Wall w)
                 {
-                    //Deserialize the string that sent by the server. 
-                    Wall w = Wall.Deserialize(input);
-                    //Save the information of the wall into the model.
-                    walls[gObj.Value<int>("wall")] = w;
+                    walls[id] = w;
                 }
-                //If the game object is a projectile.
-                else if (gObj["proj"] != null)
+                else if (obj is Projectile pr)
                 {
-                    //Deserialize the string that sent by the server. 
-                    Projectile pr = Projectile.Deserialize(input);
-                    // Save the unique id of each porojectile into the model.
-                    int id = gObj.Value<int>("proj");
                     //If the projectile is not died.
                     if (!pr.Died)
                         //Register the projectile to the list and keep drawing the projectile
@@ -141,39 +206,19 @@ namespace Model
                     else
                         //Remove the projectile from the list.
                         projectiles.Remove(id);
-                    //Return the tuple object.
-                    return new Tuple<bool, object>(pr.Died, pr);
                 }
-                //If the game object is a powerup.
-                else if (gObj["power"] != null)
+                else if (obj is Powerup pu)
                 {
-                    Powerup pu = Powerup.Deserialize(input);
-                    int id = gObj.Value<int>("power");
-                    //If the powerup is not died.
                     if (!pu.Died)
                         //Register the powerup to the list and keep drawing the powerup.
                         powerups[id] = pu;
                     else
                         //Remove the powerup from the list.
                         powerups.Remove(id);
-                    //Return the tuple object.
-                    return new Tuple<bool, object>(pu.Died, pu);
                 }
-                //If the game object is a beam.
-                else if (gObj["beam"] != null)
-                {
-                    Beam b = Beam.Deserialize(input);
-                    //Return the tuple object. Since the beam is only sent on one frame, and animation is handle by the view, we do not need
-                    //A list to contain it.
-                    return new Tuple<bool, object>(true, b);
-
-                }
-                //Throw an excpetion if the server sent invalid information.
-                else
-                    throw new ArgumentException("Unrecognized game object received: " + input);
             }
+          
 
-            return new Tuple<bool, object>(false, null);
         }
 
         public string Serialization<T>(Dictionary<int, T> d) 
@@ -188,28 +233,28 @@ namespace Model
 
 
 
-        public void UpdateTank(int id, ControlCommands cmd)
-        {
+        //public void UpdateTank(int id, ControlCommands cmd)
+        //{
             
-            Tank t = tanks[id];
-            t.UpdatingTank(cmd);
-            ////Collision check
-            ///
-           switch (cmd.Fire)
-            {
-                case "alt":
-                    {
-                        break;
-                    }
-                case "main":
-                    {
-                        break;
-                    }
-                default "none";
-            }
-        }
+        //    Tank t = tanks[id];
+        //    t.UpdatingTank(cmd);
+        //    ////Collision check
+        //    ///
+        //   switch (cmd.Fire)
+        //    {
+        //        case "alt":
+        //            {
+        //                break;
+        //            }
+        //        case "main":
+        //            {
+        //                break;
+        //            }
+        //        default "none";
+        //    }
+        //}
 
-        public void UpdateGameObject()
+        //public void UpdateGameObject()
 
     }
 

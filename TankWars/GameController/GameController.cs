@@ -5,6 +5,7 @@ using NetworkUtil;
 using Newtonsoft.Json.Linq;
 using TankWars;
 using Model;
+using Newtonsoft.Json;
 
 namespace Controller
 {
@@ -203,7 +204,7 @@ namespace Controller
                 string trimmedPart = p.Substring(0, p.Length - 1);
 
                 //A Tuple to register that if the object has died or not.
-                Tuple<bool, object> died = clientWorld.DeserializeGameObject(trimmedPart);
+                Tuple<bool, object> died = DeserializeGameObject(trimmedPart);
 
                 //If a game object has died, call the death Event.
                 if (died.Item1)
@@ -371,5 +372,69 @@ namespace Controller
             tdir.Normalize();
             cmd.directionOfTank = tdir;
         }
+
+
+        private Tuple<bool, object> DeserializeGameObject(string input)
+        {
+            JObject gObj = JObject.Parse(input);
+            int id;
+            if (gObj["tank"] != null)
+            {
+                Tank t = JsonConvert.DeserializeObject<Tank>(input);
+                //Save the unique id of each tank into the model.
+                 id = gObj.Value<int>("tank");
+                clientWorld.AddingToDictionary(t, id); 
+                //Return the tuple object.
+                return new Tuple<bool, object>(t.Died, t);
+            }
+            else if (gObj["wall"] != null)
+            {
+                //Deserialize the string that sent by the server. 
+                Wall w = Wall.Deserialize(input);
+                 id = gObj.Value<int>("wall");
+                //Save the information of the wall into the model.
+                clientWorld.AddingToDictionary(w, id);
+            }
+            //If the game object is a projectile.
+            else if (gObj["proj"] != null)
+            {
+                //Deserialize the string that sent by the server. 
+                Projectile pr = Projectile.Deserialize(input);
+                // Save the unique id of each porojectile into the model.
+                 id = gObj.Value<int>("proj");
+                clientWorld.AddingToDictionary(pr, id);
+                //Return the tuple object.
+                return new Tuple<bool, object>(pr.Died, pr);
+            }
+            //If the game object is a powerup.
+            else if (gObj["power"] != null)
+            {
+                Powerup pu = Powerup.Deserialize(input);
+                id = gObj.Value<int>("power");
+                //If the powerup is not died.
+                clientWorld.AddingToDictionary(pu, id);
+                //Return the tuple object.
+                return new Tuple<bool, object>(pu.Died, pu);
+            }
+            //If the game object is a beam.
+            else if (gObj["beam"] != null)
+            {
+                Beam b = Beam.Deserialize(input);
+                //Return the tuple object. Since the beam is only sent on one frame, and animation is handle by the view, we do not need
+                //A list to contain it.
+                return new Tuple<bool, object>(true, b);
+
+            }
+            //Throw an excpetion if the server sent invalid information.
+            else
+            {
+                throw new ArgumentException("Unrecognized game object received: " + input);
+            }
+   
+
+            return new Tuple<bool, object>(false, null);
+        }
+
+
     }
 }
