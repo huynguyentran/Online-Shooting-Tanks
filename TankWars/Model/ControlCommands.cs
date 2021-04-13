@@ -76,28 +76,7 @@ namespace Model
             }
         }
 
-        /// <summary>
-        /// Serialize the command then send to the server.
-        /// </summary>
-        /// <param name="command">ControlCommands object</param>
-        /// <returns>A serialized Json command</returns>
-        public static string Serialize(ControlCommands command)
-        {
-            return JsonConvert.SerializeObject(command);
-        }
-
-        public static ControlCommands Deserialize(string input)
-        {
-            JObject gObj = JObject.Parse(input);
-            if (gObj["moving"] != null && gObj["fire"] != null && gObj["tdir"] != null)
-            {
-                ControlCommands commands = (ControlCommands)JsonConvert.DeserializeObject(input);
-                return commands;
-            }
-
-            return null;
-
-        }
+    
 
     }
 

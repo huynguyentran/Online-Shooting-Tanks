@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NetworkUtil;
 using Newtonsoft.Json.Linq;
@@ -239,7 +238,7 @@ namespace Controller
         /// </summary>
         public void OnNewFrame()
         {
-            string serializedCommand = ControlCommands.Serialize(cmd);
+            string serializedCommand = JsonConvert.SerializeObject(cmd);
             Networking.Send(connectionState.TheSocket, serializedCommand + "\n");
             if (cmd.Fire.Equals("alt"))
                 cmd.Fire = "none";
@@ -390,7 +389,7 @@ namespace Controller
             else if (gObj["wall"] != null)
             {
                 //Deserialize the string that sent by the server. 
-                Wall w = Wall.Deserialize(input);
+                Wall w = JsonConvert.DeserializeObject<Wall>(input);
                  id = gObj.Value<int>("wall");
                 //Save the information of the wall into the model.
                 clientWorld.AddingToDictionary(w, id);
@@ -399,7 +398,7 @@ namespace Controller
             else if (gObj["proj"] != null)
             {
                 //Deserialize the string that sent by the server. 
-                Projectile pr = Projectile.Deserialize(input);
+                Projectile pr = JsonConvert.DeserializeObject<Projectile>(input);
                 // Save the unique id of each porojectile into the model.
                  id = gObj.Value<int>("proj");
                 clientWorld.AddingToDictionary(pr, id);
@@ -409,7 +408,7 @@ namespace Controller
             //If the game object is a powerup.
             else if (gObj["power"] != null)
             {
-                Powerup pu = Powerup.Deserialize(input);
+                Powerup pu = JsonConvert.DeserializeObject<Powerup>(input);
                 id = gObj.Value<int>("power");
                 //If the powerup is not died.
                 clientWorld.AddingToDictionary(pu, id);
@@ -419,7 +418,7 @@ namespace Controller
             //If the game object is a beam.
             else if (gObj["beam"] != null)
             {
-                Beam b = Beam.Deserialize(input);
+                Beam b = JsonConvert.DeserializeObject<Beam>(input);
                 //Return the tuple object. Since the beam is only sent on one frame, and animation is handle by the view, we do not need
                 //A list to contain it.
                 return new Tuple<bool, object>(true, b);

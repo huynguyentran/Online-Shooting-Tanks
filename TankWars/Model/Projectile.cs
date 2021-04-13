@@ -52,9 +52,6 @@ namespace Model
             get { return playerID; }
         }
 
-        public static Projectile Deserialize(string input)
-        {
-            return JsonConvert.DeserializeObject<Projectile>(input);
-        }
+
     }
 }

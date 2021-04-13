@@ -26,12 +26,12 @@ namespace Model
         /// <summary>
         /// A group of dictionaries for each different type of the game objects. 
         /// </summary>
-        
+
         //A dictionary for tanks and their ids.
         private Dictionary<int, Tank> tanks;
         public Dictionary<int, Tank> Tanks { get { return tanks; } }
 
-       ///A dictionary for projectiles and their ids.
+        ///A dictionary for projectiles and their ids.
         private Dictionary<int, Projectile> projectiles;
         public Dictionary<int, Projectile> Projectiles { get { return projectiles; } }
 
@@ -91,94 +91,8 @@ namespace Model
             walls = new Dictionary<int, Wall>();
         }
 
-        /// <summary>
-        /// A method that desrialize the game objects.
-        /// </summary>
-        /// <param name="input">The information string sent by the server</param>
-        /// <returns>The tuple of the game object, this tuple will indicate if the game objects has died or not.</returns>
-        //public Tuple<bool, object> DeserializeGameObject(string input)
-        //{
-        //    JObject gObj = JObject.Parse(input);
-        //    lock (this)
-        //    {
-        //        //If the game object is a tank.
-        //        if (gObj["tank"] != null)
-        //        {
-        //            //Deserialize the string that sent by the server. 
-        //            Tank t = Tank.Deserialize(input);
-        //            //Save the unique id of each tank into the model.
-        //            int id = gObj.Value<int>("tank");
-        //            //If the tank is not died.
-        //            if (!t.Died && t.HitPoints > 0)
-        //                //Register the tank to the list and keep drawing the tank.
-        //                tanks[id] = t;
-        //            else
-        //            //We temporary remove the tank from the list so that the tank disappears on the screen.
-        //                if (tanks.ContainsKey(id))
-        //                    tanks.Remove(id);
-        //            //Return the tuple object.
-        //            return new Tuple<bool, object>(t.Died, t);
-        //        }
-        //        //If the game object is a wall.
-        //        else if (gObj["wall"] != null)
-        //        {
-        //            //Deserialize the string that sent by the server. 
-        //            Wall w = Wall.Deserialize(input);
-        //            //Save the information of the wall into the model.
-        //            walls[gObj.Value<int>("wall")] = w;
-        //        }
-        //        //If the game object is a projectile.
-        //        else if (gObj["proj"] != null)
-        //        {
-        //            //Deserialize the string that sent by the server. 
-        //            Projectile pr = Projectile.Deserialize(input);
-        //            // Save the unique id of each porojectile into the model.
-        //            int id = gObj.Value<int>("proj");
-        //            //If the projectile is not died.
-        //            if (!pr.Died)
-        //                //Register the projectile to the list and keep drawing the projectile
-        //                projectiles[id] = pr;
-        //            else
-        //                //Remove the projectile from the list.
-        //                projectiles.Remove(id);
-        //            //Return the tuple object.
-        //            return new Tuple<bool, object>(pr.Died, pr);
-        //        }
-        //        //If the game object is a powerup.
-        //        else if (gObj["power"] != null)
-        //        {
-        //            Powerup pu = Powerup.Deserialize(input);
-        //            int id = gObj.Value<int>("power");
-        //            //If the powerup is not died.
-        //            if (!pu.Died)
-        //                //Register the powerup to the list and keep drawing the powerup.
-        //                powerups[id] = pu;
-        //            else
-        //                //Remove the powerup from the list.
-        //                powerups.Remove(id);
-        //            //Return the tuple object.
-        //            return new Tuple<bool, object>(pu.Died, pu);
-        //        }
-        //        //If the game object is a beam.
-        //        else if (gObj["beam"] != null)
-        //        {
-        //            Beam b = Beam.Deserialize(input);
-        //            //Return the tuple object. Since the beam is only sent on one frame, and animation is handle by the view, we do not need
-        //            //A list to contain it.
-        //            return new Tuple<bool, object>(true, b);
 
-        //        }
-        //        //Throw an excpetion if the server sent invalid information.
-        //        else
-        //            throw new ArgumentException("Unrecognized game object received: " + input);
-        //    }
-
-        //    return new Tuple<bool, object>(false, null);
-        //}
-
-
-
-        public void AddingToDictionary(object obj,int id)
+        public void AddingToDictionary(object obj, int id)
         {
             lock (this)
             {
@@ -187,7 +101,7 @@ namespace Model
                     //If the tank is not died.
                     if (!t.Died && t.HitPoints > 0)
                         //Register the tank to the list and keep drawing the tank.
-                      tanks[id] = t;
+                        tanks[id] = t;
                     else
                    //We temporary remove the tank from the list so that the tank disappears on the screen.
                    if (tanks.ContainsKey(id))
@@ -217,44 +131,116 @@ namespace Model
                         powerups.Remove(id);
                 }
             }
-          
+
 
         }
 
-        public string Serialization<T>(Dictionary<int, T> d) 
+        public string Serialization<T>(Dictionary<int, T> d)
         {
             String json = "";
-            foreach(T values in d.Values)
+            foreach (T values in d.Values)
             {
-               json += JsonConvert.SerializeObject(values) + "\n";
+                json += JsonConvert.SerializeObject(values) + "\n";
             }
             return json;
         }
 
 
 
-        //public void UpdateTank(int id, ControlCommands cmd)
-        //{
-            
-        //    Tank t = tanks[id];
-        //    t.UpdatingTank(cmd);
-        //    ////Collision check
-        //    ///
-        //   switch (cmd.Fire)
-        //    {
-        //        case "alt":
-        //            {
-        //                break;
-        //            }
-        //        case "main":
-        //            {
-        //                break;
-        //            }
-        //        default "none";
-        //    }
-        //}
+        public Beam UpdateTank(int id, ControlCommands cmd)
+        {
 
-        //public void UpdateGameObject()
+            Tank t = tanks[id];
+            t.UpdatingTank(cmd);
+            /// if tank 
+            ///
+            switch (cmd.Move)
+            {
+                case "Up":
+                    {
+                        break;
+                    }
+                case "Down:":
+                    {
+                        break;
+                    }
+                case "Left":
+                    {
+                        break;
+                    }
+                case "Right":
+                    {
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }      
+
+            switch (cmd.Fire)
+            {
+                case "main":
+                    {
+
+                        break;
+                    }
+                case "alt":
+                    {
+                        if (t.Powers > 0)
+                        {
+                            Beam b = new Beam();
+                            //pass into update game object
+                            // pass into the controller
+
+                            t.Powers--;
+                            return b;
+                        }
+
+
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            //Collision  walls and powerups 
+            return null;
+        }
+
+
+
+        public void UpdatingWorld(IEnumerable<KeyValuePair<int, ControlCommands>> clientsInfo)
+        {
+            List<Beam> beams = new List<Beam>();
+            foreach (KeyValuePair<int, ControlCommands> pair in clientsInfo)
+            {
+                Beam b = UpdateTank(pair.Key, pair.Value);
+                if (b != null)
+                {
+                    beams.Add(b);
+                }
+            }
+   
+            // Collisions when adding in the powerup. Checking for the collsion between the powerup and tank and wall has been checked once in updateTank method  
+            // powerups
+
+            foreach (Beam b in beams)
+            {
+                // process the beam, send back to the controller. 
+            }
+
+
+            //projectiles
+
+
+            //Collision;
+
+
+
+        }
+
+
 
     }
 

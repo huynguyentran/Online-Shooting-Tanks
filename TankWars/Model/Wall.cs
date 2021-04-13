@@ -31,15 +31,7 @@ namespace Model
             get { return endpoint; }
         }
 
-        /// <summary>
-        /// Desrialize the wall object. 
-        /// </summary>
-        /// <param name="input">The string input by the server</param>
-        /// <returns>The wall object</returns>
-        public static Wall Deserialize(string input)
-        {
-            return JsonConvert.DeserializeObject<Wall>(input);
-        }
+
     }
 
 }

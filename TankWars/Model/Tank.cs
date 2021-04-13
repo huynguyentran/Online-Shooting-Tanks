@@ -98,14 +98,13 @@ namespace Model
         [JsonProperty(PropertyName = "join")]
         private bool joined = false;
 
-        /// <summary>
-        /// Desrialize the tank object. 
-        /// </summary>
-        /// <param name="input">The string input by the server</param>
-        /// <returns>The tank object</returns>
-        public static Tank Deserialize(string input)
+        [JsonIgnore]
+        private int powerups = 0;
+        [JsonIgnore]
+        public int Powers
         {
-            return JsonConvert.DeserializeObject<Tank>(input);
+            get { return powerups; }
+            set { powerups = value; }
         }
 
         public Tank(long stateID, string playerName)

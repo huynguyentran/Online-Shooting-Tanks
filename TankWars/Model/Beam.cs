@@ -33,14 +33,5 @@ namespace Model
         [JsonProperty(PropertyName = "owner")]
         private int playerID;
 
-        /// <summary>
-        /// Desrialize the beam object. 
-        /// </summary>
-        /// <param name="input">The string input by the server</param>
-        /// <returns>The beam object</returns>
-        public static Beam Deserialize(string input)
-        {
-            return JsonConvert.DeserializeObject<Beam>(input);
-        }
     }
 }

@@ -4,16 +4,19 @@ using System.Collections;
 using System.Collections.Generic;
 using Model;
 using Constants;
-
+using Newtonsoft.Json;
 using Controller;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 
 namespace ServerController
 {
     class SController
     {
         private Dictionary<int, Tuple<SocketState, ControlCommands>> clientInfo;
+
+        private Dictionary<int, ControlCommands> clientCommands;
 
         private GameConstants consts;
 
@@ -37,7 +40,11 @@ namespace ServerController
                 while(waitFrame.ElapsedMilliseconds - lastTime >= controller.consts.FrameRate){ }
                 lastTime = waitFrame.ElapsedMilliseconds;
 
+
+
+
                 controller.UpdateWorld();
+
             }
             //Update World loop.
         }
@@ -45,12 +52,8 @@ namespace ServerController
         private void UpdateWorld()
         {
             //Access the commands that we have. 
-            foreach (KeyValuePair<int, Tuple<SocketState, ControlCommands>> pair in clientInfo)
-            {
-                serverModel.UpdateTank(pair.Key,pair.Value.Item2);
-            }
 
-            serverModel.UpdateGameObject;
+            serverModel.UpdatingWorld(clientCommands);
 
         }
 
@@ -58,6 +61,8 @@ namespace ServerController
         {
             clientInfo = new Dictionary<int, Tuple<SocketState, ControlCommands>>();
             consts = new GameConstants();
+
+            clientCommands = new Dictionary<int, ControlCommands>();
 
             
             Networking.StartServer(OnConnection, 11000);
@@ -114,6 +119,7 @@ namespace ServerController
                 lock (clientInfo)
                 {
                     clientInfo[(int)state.ID] = new Tuple<SocketState, ControlCommands>(state, new ControlCommands());
+                    clientCommands[(int)state.ID] = new ControlCommands();
                 }
 
                 SendingFirstData(state);
@@ -156,22 +162,46 @@ namespace ServerController
 
 
                     ControlCommands deserializedCommand = new ControlCommands();
-                    if(ControlCommands.Deserialize(command) != null)
+                    if(Deserialize(command) != null)
                     {
-                        deserializedCommand = ControlCommands.Deserialize(command);
+                        deserializedCommand = Deserialize(command);
                     }
 
-                    clientInfo[state.ID] = new Tuple<SocketState, ControlCommands>(state, deserializedCommand);
-                    
+                    clientInfo[(int)state.ID] = new Tuple<SocketState, ControlCommands>(state, deserializedCommand);
+                    clientCommands[(int)state.ID] = deserializedCommand;
+
                     // Then remove it from the SocketState's growable buffer
                     state.RemoveData(0, command.Length);
                 }
+
+
+               
             }
 
             //Extract commands from the state.s
             //Replace command in clientInfo.
 
             Networking.GetData(state);
+        }
+
+
+        /// <summary>
+        /// Serialize the command then send to the server.
+        /// </summary>
+        /// <param name="command">ControlCommands object</param>
+        /// <returns>A serialized Json command</returns>
+
+        private static ControlCommands Deserialize(string input)
+        {
+            JObject gObj = JObject.Parse(input);
+            if (gObj["moving"] != null && gObj["fire"] != null && gObj["tdir"] != null)
+            {
+                ControlCommands commands = (ControlCommands)JsonConvert.DeserializeObject(input);
+                return commands;
+            }
+
+            return null;
+
         }
 
 
