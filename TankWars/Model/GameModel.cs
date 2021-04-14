@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using TankWars;
 
 namespace Model
 {
@@ -152,31 +153,84 @@ namespace Model
 
             Tank t = tanks[id];
             t.UpdatingTank(cmd);
-            /// if tank 
-            ///
+
+            Vector2D movementDirection;
             switch (cmd.Move)
             {
-                case "Up":
+                case "up":
                     {
+                        movementDirection = new Vector2D(0, 1);
                         break;
                     }
-                case "Down:":
+                case "down":
                     {
+                        movementDirection = new Vector2D(0, -1);
                         break;
                     }
-                case "Left":
+                case "left":
                     {
+                        movementDirection = new Vector2D(-1, 0);
                         break;
                     }
-                case "Right":
+                case "right":
                     {
+                        movementDirection = new Vector2D(1, 0);
                         break;
                     }
                 default:
                     {
+                        movementDirection = new Vector2D(0, 0);
                         break;
                     }
-            }      
+            }
+
+            //We need to look at the Constants object (and possibly the time passed).
+            double speed = 1.0; //Velocity * Time passed between frames
+            movementDirection *= speed;
+
+            Vector2D expectedLocation = t.Location + movementDirection;
+
+            foreach(Wall wall in walls.Values)
+            {
+                int border = 25 + 30; //Constant
+
+                Vector2D lower;
+                Vector2D higher;
+                if (wall.Start.GetY() > wall.End.GetY())
+                {
+                    lower = wall.End;
+                    higher = wall.Start;
+                }
+                else
+                {
+                    lower = wall.Start;
+                    higher = wall.End;
+                }
+
+                Vector2D leftMost;
+                Vector2D rightMost;
+                if (wall.Start.GetX() > wall.End.GetX())
+                {
+                    leftMost = wall.End;
+                    rightMost = wall.Start;
+                }
+                else
+                {
+                    leftMost = wall.Start;
+                    rightMost = wall.End;
+                }
+
+                bool collision = (expectedLocation.GetX() < (rightMost.GetX() + border) && expectedLocation.GetX() > (leftMost.GetX() - border))
+                    && (expectedLocation.GetY() < (higher.GetY() + border) && expectedLocation.GetY() > (lower.GetY() - border));
+
+                if (collision)
+                {
+                    expectedLocation = t.Location;
+                    break;
+                }
+            }
+
+            t.Location = expectedLocation;
 
             switch (cmd.Fire)
             {

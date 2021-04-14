@@ -26,6 +26,8 @@ namespace Model
             {
                 return location;
             }
+            set
+            { location = value; }
         }
 
         [JsonProperty(PropertyName = "bdir")]
