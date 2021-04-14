@@ -14,6 +14,15 @@ namespace Model
         [JsonProperty(PropertyName = "proj")]
         private int ID;
 
+        private static int nextID =0;
+        private static object mutexProjID = new object();
+
+
+        public int ProjID
+        {
+            get { return ID; }
+        }
+
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
 
@@ -52,6 +61,18 @@ namespace Model
             get { return playerID; }
         }
 
+        public  Projectile(Vector2D _location, Vector2D _orientation, int _playerID)
+        {
+            location = _location;
+            orientation = _orientation;
+            playerID = _playerID;
+            lock (mutexProjID)
+            {
+                ID = nextID;
+                nextID++;
+            }
+       
+        }
 
     }
 }

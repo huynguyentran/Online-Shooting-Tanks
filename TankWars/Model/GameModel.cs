@@ -232,18 +232,43 @@ namespace Model
 
             t.Location = expectedLocation;
 
+            //Collision  tanks and powerups 
+
+            foreach (Powerup powerup in Powerups.Values)
+            {
+                if (!powerup.Died)
+                {
+                    bool collision = (powerup.Location - t.Location).Length() <= 30;
+
+                    if (collision)
+                    {
+                        t.Powers++;
+                        powerup.Died = true;
+
+                    }
+                }
+   
+            }
+
+            cmd.directionOfTank.Normalize();
             switch (cmd.Fire)
             {
                 case "main":
                     {
-
+                      
+                        Vector2D projetileDir = new Vector2D(cmd.directionOfTank.GetX(), cmd.directionOfTank.GetY());
+                        Projectile newProjectile = new Projectile(t.Location, projetileDir, t.TankID);
+                        projectiles[newProjectile.ProjID]= newProjectile;
                         break;
                     }
                 case "alt":
                     {
                         if (t.Powers > 0)
                         {
-                            Beam b = new Beam();
+                          
+                            Vector2D beamDir= new Vector2D(cmd.directionOfTank.GetX(), cmd.directionOfTank.GetY());
+                            Beam b = new Beam(t.Location,beamDir, t.TankID);
+                            
                             //pass into update game object
                             // pass into the controller
 
@@ -258,7 +283,6 @@ namespace Model
                     break;
             }
 
-            //Collision  walls and powerups 
             return null;
         }
 

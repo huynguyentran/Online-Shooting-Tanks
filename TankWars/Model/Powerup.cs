@@ -33,6 +33,7 @@ namespace Model
         public bool Died
         {
             get { return died; }
+            set { died = value; }
         }
 
  

@@ -15,6 +15,15 @@ namespace Model
         [JsonProperty(PropertyName = "beam")]
         private int ID;
 
+        private static object mutexBeamID;
+
+        private static int nextID = 0;
+        public int BeamID
+        {
+            get { return ID; }
+            set { ID = value; }
+        }
+
         [JsonProperty(PropertyName = "org")]
         private Vector2D shootLocaiton;
 
@@ -33,5 +42,18 @@ namespace Model
         [JsonProperty(PropertyName = "owner")]
         private int playerID;
 
+        public Beam(Vector2D _origin, Vector2D _direction, int _playerID)
+        {
+            shootLocaiton  = _origin;
+            direction = _direction;
+            playerID = _playerID;
+
+            lock (mutexBeamID)
+            {
+                ID = nextID;
+                nextID++;
+            }
+          
+        }
     }
 }
