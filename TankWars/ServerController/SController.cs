@@ -9,6 +9,7 @@ using Controller;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace ServerController
 {
@@ -44,17 +45,47 @@ namespace ServerController
 
 
                 controller.UpdateWorld();
-
             }
             //Update World loop.
         }
 
         private void UpdateWorld()
         {
-            //Access the commands that we have. 
+            string frameJsonComposite;
+            lock (serverModel)
+            {
+                //Access the commands that we have. 
 
-            serverModel.UpdatingWorld(clientCommands);
+                IList<Beam> beams = serverModel.UpdatingWorld(clientCommands);
 
+                frameJsonComposite = "";
+
+                frameJsonComposite += JsonSerializationComposite(serverModel.Tanks.Values);
+                frameJsonComposite += JsonSerializationComposite(serverModel.Projectiles.Values);
+                frameJsonComposite += JsonSerializationComposite(beams);
+                frameJsonComposite += JsonSerializationComposite(serverModel.Powerups.Values);
+            }
+
+            lock(clientInfo)
+            {
+                foreach(Tuple<SocketState, ControlCommands> statePair in clientInfo.Values)
+                {
+                    Networking.Send(statePair.Item1.TheSocket, frameJsonComposite);
+                }
+            }
+
+        }
+
+        private static string JsonSerializationComposite<T>(IEnumerable<T> gameObjects)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach(T gameObject in gameObjects)
+            {
+                sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
+            }
+
+            return sb.ToString();
         }
 
         public SController()
@@ -63,7 +94,7 @@ namespace ServerController
             consts = new GameConstants();
 
             clientCommands = new Dictionary<int, ControlCommands>();
-
+            serverModel = new GameModel(consts.Size);
             
             Networking.StartServer(OnConnection, 11000);
             //Initialize Server w/ TCP Listener
@@ -80,7 +111,7 @@ namespace ServerController
 
             if (state.ErrorOccurred)
             {
-                return; 
+                throw new Exception("Something bad happened: " + state.ErrorMessage);
             }
 
             ////On connection.
@@ -93,7 +124,7 @@ namespace ServerController
         {
             if (state.ErrorOccurred)
             {
-                return;
+                throw new Exception("Something bad happened: " + state.ErrorMessage);
             }
 
 
@@ -107,7 +138,7 @@ namespace ServerController
             else
             {
                 clientName = clientName.Substring(0, newlineIndex);
-                state.RemoveData(0, clientName.Length);
+                state.RemoveData(0, clientName.Length + 1);
 
                 Tank tank = new Tank(state.ID, clientName);
 
@@ -128,8 +159,8 @@ namespace ServerController
 
         private void SendingFirstData(SocketState state)
         {
-            Networking.Send(state.TheSocket, ""+state.ID+"\n"+consts.Size+"\n");
-            Networking.Send(state.TheSocket,serverModel.Serialization(serverModel.Walls));
+            Networking.Send(state.TheSocket, ""+(int)state.ID+"\n"+consts.Size+"\n");
+            Networking.Send(state.TheSocket,JsonSerializationComposite(serverModel.Walls.Values));
 
             state.OnNetworkAction = GetClientCommand;
             Networking.GetData(state);
@@ -139,7 +170,7 @@ namespace ServerController
         {
             if (state.ErrorOccurred)
             {
-
+                throw new Exception("Something bad happened: " + state.ErrorMessage);
             }
 
             string[] commands = Regex.Split(state.GetData(), @"(?<=[\n])");

@@ -61,7 +61,7 @@ namespace Model
 
         public void AddTank(Tank tank)
         {
-            //Add tank to model dictionary.
+            tanks[tank.TankID] = tank;
         }
 
         //The map size 
@@ -134,16 +134,6 @@ namespace Model
             }
 
 
-        }
-
-        public string Serialization<T>(Dictionary<int, T> d)
-        {
-            String json = "";
-            foreach (T values in d.Values)
-            {
-                json += JsonConvert.SerializeObject(values) + "\n";
-            }
-            return json;
         }
 
 
@@ -288,7 +278,7 @@ namespace Model
 
 
 
-        public void UpdatingWorld(IEnumerable<KeyValuePair<int, ControlCommands>> clientsInfo)
+        public IList<Beam> UpdatingWorld(IEnumerable<KeyValuePair<int, ControlCommands>> clientsInfo)
         {
             List<Beam> beams = new List<Beam>();
             foreach (KeyValuePair<int, ControlCommands> pair in clientsInfo)
@@ -314,8 +304,7 @@ namespace Model
 
             //Collision;
 
-
-
+            return beams;
         }
 
 
