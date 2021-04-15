@@ -9,6 +9,9 @@ namespace Model
     /// <summary>
     /// A class that represents wall object.
     /// </summary>
+    /// 
+
+
     public class Wall
     {
 
@@ -17,20 +20,29 @@ namespace Model
 
         [JsonProperty(PropertyName = "p1")]
         private Vector2D startpoint;
-
+        [JsonIgnore]
         public Vector2D Start
         {
             get { return startpoint; }
+        
         }
 
         [JsonProperty(PropertyName = "p2")]
         private Vector2D endpoint;
 
+        [JsonIgnore]
         public Vector2D End
         {
             get { return endpoint; }
+     
         }
 
+        public Wall(Vector2D start,Vector2D end, int _id)
+        {
+            ID = _id;
+            startpoint = start;
+            endpoint = end;
+        }
 
     }
 

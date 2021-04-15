@@ -38,8 +38,8 @@ namespace ServerController
 
             while (serverActive)
             {
-                while(waitFrame.ElapsedMilliseconds - lastTime >= controller.consts.FrameRate){ }
-                lastTime = waitFrame.ElapsedMilliseconds;
+               // while(waitFrame.ElapsedMilliseconds - lastTime <= controller.consts.FrameRate){ }
+              // lastTime = waitFrame.ElapsedMilliseconds;
 
 
 
@@ -54,9 +54,13 @@ namespace ServerController
             string frameJsonComposite;
             lock (serverModel)
             {
+                IList<Beam> beams;
                 //Access the commands that we have. 
+                lock (clientInfo)
+                {
+                    beams = serverModel.UpdatingWorld(clientCommands);
 
-                IList<Beam> beams = serverModel.UpdatingWorld(clientCommands);
+                }
 
                 frameJsonComposite = "";
 
@@ -85,6 +89,10 @@ namespace ServerController
                 sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
             }
 
+            if(sb.Length == 0)
+            {
+                sb.Append("\n");
+            }
             return sb.ToString();
         }
 
@@ -159,7 +167,7 @@ namespace ServerController
 
         private void SendingFirstData(SocketState state)
         {
-            Networking.Send(state.TheSocket, ""+(int)state.ID+"\n"+consts.Size+"\n");
+            Networking.Send(state.TheSocket, ""+(int)state.ID +"\n" + consts.Size + "\n");
             Networking.Send(state.TheSocket,JsonSerializationComposite(serverModel.Walls.Values));
 
             state.OnNetworkAction = GetClientCommand;
@@ -227,7 +235,7 @@ namespace ServerController
             JObject gObj = JObject.Parse(input);
             if (gObj["moving"] != null && gObj["fire"] != null && gObj["tdir"] != null)
             {
-                ControlCommands commands = (ControlCommands)JsonConvert.DeserializeObject(input);
+                ControlCommands commands = JsonConvert.DeserializeObject<ControlCommands>(input);
                 return commands;
             }
 

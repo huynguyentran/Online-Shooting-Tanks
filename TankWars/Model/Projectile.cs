@@ -17,7 +17,7 @@ namespace Model
         private static int nextID =0;
         private static object mutexProjID = new object();
 
-
+        [JsonIgnore]
         public int ProjID
         {
             get { return ID; }

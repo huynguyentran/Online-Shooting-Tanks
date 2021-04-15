@@ -86,10 +86,18 @@ namespace Model
         public GameModel(int _size)
         {
             size = _size;
-            tanks = new Dictionary<int, Tank>();
+            tanks = new Dictionary<int, Tank>(); 
             projectiles = new Dictionary<int, Projectile>();
             powerups = new Dictionary<int, Powerup>();
             walls = new Dictionary<int, Wall>();
+            Wall testwall = new Wall(new Vector2D(-100,-100),new Vector2D(100,-100),0);
+            Wall testwall2 = new Wall(new Vector2D(-100, 100), new Vector2D(100, 100),1);
+            Wall testwall3 = new Wall(new Vector2D(-100, 100), new Vector2D(-100, -100),2);
+            Wall testwall4 = new Wall(new Vector2D(100, -100), new Vector2D(100, 100),3);
+            walls.Add(0,testwall);
+            walls.Add(1, testwall2);
+            walls.Add(2, testwall3);
+            walls.Add(3, testwall4);
         }
 
 
@@ -281,14 +289,17 @@ namespace Model
         public IList<Beam> UpdatingWorld(IEnumerable<KeyValuePair<int, ControlCommands>> clientsInfo)
         {
             List<Beam> beams = new List<Beam>();
-            foreach (KeyValuePair<int, ControlCommands> pair in clientsInfo)
-            {
-                Beam b = UpdateTank(pair.Key, pair.Value);
-                if (b != null)
+         
+                foreach (KeyValuePair<int, ControlCommands> pair in clientsInfo)
                 {
-                    beams.Add(b);
+                    Beam b = UpdateTank(pair.Key, pair.Value);
+                    if (b != null)
+                    {
+                        beams.Add(b);
+                    }
                 }
-            }
+            
+        
    
             // Collisions when adding in the powerup. Checking for the collsion between the powerup and tank and wall has been checked once in updateTank method  
             // powerups

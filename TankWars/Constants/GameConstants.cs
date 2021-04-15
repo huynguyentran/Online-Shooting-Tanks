@@ -10,8 +10,8 @@ namespace Constants
             get { return mapSize; }
         }
 
-        private readonly int frameRate;
-        public int FrameRate
+        private readonly int frameRate = 17;
+        public int FrameRate 
         {
             get { return frameRate; }
         }

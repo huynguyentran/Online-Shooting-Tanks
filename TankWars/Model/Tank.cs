@@ -13,6 +13,7 @@ namespace Model
     {
         [JsonProperty(PropertyName = "tank")]
         private int ID;
+        [JsonIgnore]
         public int TankID
         {
             get { return ID; }
@@ -20,6 +21,7 @@ namespace Model
 
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
+        [JsonIgnore]
         public Vector2D Location
         {
             get
@@ -32,7 +34,7 @@ namespace Model
 
         [JsonProperty(PropertyName = "bdir")]
         private Vector2D orientation;
-
+        [JsonIgnore]
         public Vector2D Orientation
         {
             get
@@ -43,7 +45,7 @@ namespace Model
 
         [JsonProperty(PropertyName = "tdir")]
         private Vector2D aiming = new Vector2D(0, -1);
-
+        [JsonIgnore]
         public Vector2D TurretDirection
         {
             get
@@ -58,8 +60,9 @@ namespace Model
         }
 
         [JsonProperty(PropertyName = "name")]
-        private string name;
-
+        private string name = "default";
+       
+        [JsonIgnore]
         public string Name
         {
             get
@@ -69,7 +72,9 @@ namespace Model
         }
 
         [JsonProperty(PropertyName = "hp")]
-        private int hitPoints = 0;
+        private int hitPoints = 3;
+
+        [JsonIgnore]
         public int HitPoints
         {
             get { return hitPoints; }
@@ -78,6 +83,8 @@ namespace Model
         [JsonProperty(PropertyName = "score")]
         private int score = 0;
 
+
+        [JsonIgnore]
         public int Score
         {
             get
@@ -98,7 +105,7 @@ namespace Model
         private bool disconnected = false;
 
         [JsonProperty(PropertyName = "join")]
-        private bool joined = false;
+        private bool joined =true;
 
         [JsonIgnore]
         private int powerups = 0;
@@ -113,6 +120,8 @@ namespace Model
         {
             ID = (int)stateID;
             name = playerName;
+            location = new Vector2D(0, 0);
+            orientation = new Vector2D(1, 0);
         }
 
         public void UpdatingTank(ControlCommands cmd)

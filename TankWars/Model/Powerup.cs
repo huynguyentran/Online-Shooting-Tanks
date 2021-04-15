@@ -17,7 +17,7 @@ namespace Model
 
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
-
+        [JsonIgnore]
         public Vector2D Location
         {
             get

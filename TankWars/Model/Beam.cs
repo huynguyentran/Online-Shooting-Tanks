@@ -14,10 +14,11 @@ namespace Model
 
         [JsonProperty(PropertyName = "beam")]
         private int ID;
-
+        [JsonIgnore]
         private static object mutexBeamID;
-
+        [JsonIgnore]
         private static int nextID = 0;
+        [JsonIgnore]
         public int BeamID
         {
             get { return ID; }
@@ -26,7 +27,7 @@ namespace Model
 
         [JsonProperty(PropertyName = "org")]
         private Vector2D shootLocaiton;
-
+        [JsonIgnore]
         public Vector2D origin
         {
             get { return shootLocaiton; }
@@ -34,8 +35,8 @@ namespace Model
 
         [JsonProperty(PropertyName = "dir")]
         private Vector2D direction;
-
-         public Vector2D Direction
+        [JsonIgnore]
+        public Vector2D Direction
         {
             get { return direction; }
         }
