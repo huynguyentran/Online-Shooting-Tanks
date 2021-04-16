@@ -290,14 +290,14 @@ namespace Model
         {
             List<Beam> beams = new List<Beam>();
          
-                foreach (KeyValuePair<int, ControlCommands> pair in clientsInfo)
+            foreach (KeyValuePair<int, ControlCommands> pair in clientsInfo)
+            {
+                Beam b = UpdateTank(pair.Key, pair.Value);
+                if (b != null)
                 {
-                    Beam b = UpdateTank(pair.Key, pair.Value);
-                    if (b != null)
-                    {
-                        beams.Add(b);
-                    }
+                    beams.Add(b);
                 }
+            }
             
         
    

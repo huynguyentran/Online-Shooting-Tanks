@@ -38,11 +38,8 @@ namespace ServerController
 
             while (serverActive)
             {
-               // while(waitFrame.ElapsedMilliseconds - lastTime <= controller.consts.FrameRate){ }
-              // lastTime = waitFrame.ElapsedMilliseconds;
-
-
-
+                while(waitFrame.ElapsedMilliseconds - lastTime <= controller.consts.FrameRate){ }
+               lastTime = waitFrame.ElapsedMilliseconds;
 
                 controller.UpdateWorld();
             }
@@ -68,6 +65,14 @@ namespace ServerController
                 frameJsonComposite += JsonSerializationComposite(serverModel.Projectiles.Values);
                 frameJsonComposite += JsonSerializationComposite(beams);
                 frameJsonComposite += JsonSerializationComposite(serverModel.Powerups.Values);
+
+                foreach(Tank t in serverModel.Tanks.Values)
+                {
+                    if (t.Joined)
+                        t.Joined = false;
+                    if (t.Died)
+                        t.Died = false;
+                }
             }
 
             lock(clientInfo)
@@ -89,10 +94,6 @@ namespace ServerController
                 sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
             }
 
-            if(sb.Length == 0)
-            {
-                sb.Append("\n");
-            }
             return sb.ToString();
         }
 
@@ -168,7 +169,13 @@ namespace ServerController
         private void SendingFirstData(SocketState state)
         {
             Networking.Send(state.TheSocket, ""+(int)state.ID +"\n" + consts.Size + "\n");
-            Networking.Send(state.TheSocket,JsonSerializationComposite(serverModel.Walls.Values));
+
+            string walls = JsonSerializationComposite(serverModel.Walls.Values);
+
+            if (walls.Length == 0)
+                walls = "\n";
+
+            Networking.Send(state.TheSocket,walls);
 
             state.OnNetworkAction = GetClientCommand;
             Networking.GetData(state);

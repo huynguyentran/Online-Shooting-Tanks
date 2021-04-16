@@ -99,6 +99,7 @@ namespace Model
         public bool Died
         {
             get { return died; }
+            set { died = false; }
         }
 
         [JsonProperty(PropertyName = "dc")]
@@ -106,6 +107,12 @@ namespace Model
 
         [JsonProperty(PropertyName = "join")]
         private bool joined =true;
+        [JsonIgnore]
+        public bool Joined
+        {
+            get { return joined; }
+            set { joined = value; }
+        }
 
         [JsonIgnore]
         private int powerups = 0;
