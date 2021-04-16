@@ -87,6 +87,19 @@ namespace ServerController
                 {
                     serverModel.Projectiles.Remove(proj.ProjID);
                 }
+                HashSet<Powerup> powerupsToRemove = new HashSet<Powerup>();
+                foreach (Powerup powerup in serverModel.Powerups.Values)
+                {
+                    if (powerup.Died)
+                    {
+                        powerupsToRemove.Add(powerup);
+                    }
+
+                }
+                foreach(Powerup powerup in powerupsToRemove )
+                {
+                    serverModel.Powerups.Remove(powerup.puID);
+                }
             }
 
             lock(clientInfo)

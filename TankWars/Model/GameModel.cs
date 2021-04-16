@@ -92,9 +92,13 @@ namespace Model
             walls = new Dictionary<int, Wall>();
             Wall testwall = new Wall(new Vector2D(-100, -100), new Vector2D(100, -100), 0);
             Wall testwall2 = new Wall(new Vector2D(-100, 100), new Vector2D(100, 100), 1);
+            Powerup powerup = new Powerup(0,new Vector2D(-50,0));
+
             //Wall testwall3 = new Wall(new Vector2D(-100, 100), new Vector2D(-100, -100), 2);
             //Wall testwall4 = new Wall(new Vector2D(100, -100), new Vector2D(100, 100), 3);
             walls.Add(0, testwall);
+            powerups.Add(0, powerup);
+               
             walls.Add(1, testwall2);
             //walls.Add(2, testwall3);
             //walls.Add(3, testwall4);
@@ -249,8 +253,8 @@ namespace Model
                         if (t.Powers > 0)
                         {
 
-                            Vector2D beamDir = new Vector2D(cmd.directionOfTank.GetX(), cmd.directionOfTank.GetY());
-                            Beam b = new Beam(t.Location, beamDir, t.TankID);
+                            Vector2D beamDir = t.TurretDirection;
+                            Beam b = new Beam(t.Location + beamDir*30, beamDir, t.TankID);
 
                             //pass into update game object
                             // pass into the controller

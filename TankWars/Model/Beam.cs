@@ -15,7 +15,7 @@ namespace Model
         [JsonProperty(PropertyName = "beam")]
         private int ID;
         [JsonIgnore]
-        private static object mutexBeamID;
+        private static object mutexBeamID = new object();
         [JsonIgnore]
         private static int nextID = 0;
         [JsonIgnore]

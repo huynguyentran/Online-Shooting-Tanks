@@ -13,7 +13,13 @@ namespace Model
     {
 
         [JsonProperty(PropertyName = "power")]
-        private int ID;
+        private int ID =0;
+        [JsonIgnore]
+        public int puID
+        {
+            get { return ID; }
+           
+        }
 
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
@@ -36,6 +42,11 @@ namespace Model
             set { died = value; }
         }
 
+        public Powerup(int _id, Vector2D loc)
+        {
+            location = loc;
+            ID = _id;
+        }
  
     }
 }
