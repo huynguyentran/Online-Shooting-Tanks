@@ -128,6 +128,15 @@ namespace Model
             set { powerups = value; }
         }
 
+        [JsonIgnore]
+        private float tankCoolDown = 0f;
+        [JsonIgnore]
+        public float TankCoolDown
+        {
+            get { return tankCoolDown; }
+            set { tankCoolDown = value; }
+        }
+
         public Tank(long stateID, string playerName)
         {
             ID = (int)stateID;

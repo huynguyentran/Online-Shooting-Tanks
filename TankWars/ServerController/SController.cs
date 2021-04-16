@@ -34,19 +34,21 @@ namespace ServerController
             long lastTime = 0;
             Stopwatch waitFrame = new Stopwatch();
             waitFrame.Start();
-
+            //The amount of time that passed between frames in seconds.
+            float deltaTime = 0;
 
             while (serverActive)
             {
                 while(waitFrame.ElapsedMilliseconds - lastTime <= controller.consts.FrameRate){ }
-               lastTime = waitFrame.ElapsedMilliseconds;
+                deltaTime = ((float)(waitFrame.ElapsedMilliseconds - lastTime)) / 1000f;
+                lastTime = waitFrame.ElapsedMilliseconds;
 
-                controller.UpdateWorld();
+                controller.UpdateWorld(deltaTime);
             }
             //Update World loop.
         }
 
-        private void UpdateWorld()
+        private void UpdateWorld(float deltaTime)
         {
             string frameJsonComposite;
             lock (serverModel)
@@ -55,7 +57,7 @@ namespace ServerController
                 //Access the commands that we have. 
                 lock (clientInfo)
                 {
-                    beams = serverModel.UpdatingWorld(clientCommands);
+                    beams = serverModel.UpdatingWorld(clientCommands, deltaTime);
 
                 }
 

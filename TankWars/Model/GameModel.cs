@@ -146,7 +146,7 @@ namespace Model
 
 
 
-        public Beam UpdateTank(int id, ControlCommands cmd)
+        public Beam UpdateTank(int id, ControlCommands cmd, float deltaTime)
         {
 
             Tank t = tanks[id];
@@ -224,14 +224,24 @@ namespace Model
 
             }
 
+            if (t.TankCoolDown > 0)
+            {
+                t.TankCoolDown -= deltaTime;
+            }
+
             cmd.directionOfTank.Normalize();
             switch (cmd.Fire)
             {
                 case "main":
                     {
-                        Vector2D projetileDir = t.TurretDirection;
-                        Projectile newProjectile = new Projectile(t.Location+projetileDir*30, projetileDir, t.TankID);
-                        projectiles[newProjectile.ProjID] = newProjectile;
+                        if(t.TankCoolDown <= 0)
+                        {
+                            Vector2D projetileDir = t.TurretDirection;
+                            Projectile newProjectile = new Projectile(t.Location + projetileDir * 30, projetileDir, t.TankID);
+                            projectiles[newProjectile.ProjID] = newProjectile;
+                            t.TankCoolDown = 1f; // Constant fire rate
+                        }
+
                         break;
                     }
                 case "alt":
@@ -261,13 +271,13 @@ namespace Model
 
 
 
-        public IList<Beam> UpdatingWorld(IEnumerable<KeyValuePair<int, ControlCommands>> clientsInfo)
+        public IList<Beam> UpdatingWorld(IEnumerable<KeyValuePair<int, ControlCommands>> clientsInfo, float deltaTime)
         {
             List<Beam> beams = new List<Beam>();
 
             foreach (KeyValuePair<int, ControlCommands> pair in clientsInfo)
             {
-                Beam b = UpdateTank(pair.Key, pair.Value);
+                Beam b = UpdateTank(pair.Key, pair.Value, deltaTime);
                 if (b != null)
                 {
                     beams.Add(b);
@@ -288,7 +298,7 @@ namespace Model
            
             foreach (Projectile proj in projectiles.Values)
             {
-                proj.Location = proj.Location + proj.Orientation * 2;
+                proj.Location = proj.Location + proj.Orientation * 0.25;
 
                 foreach (Wall wall in walls.Values)
                 {
@@ -300,7 +310,7 @@ namespace Model
 
                 foreach (Tank t in tanks.Values)
                 {
-                    if((proj.Location - t.Location).Length() <=30)
+                    if(t.HitPoints > 0 && (proj.Location - t.Location).Length() <=30 && t.TankID != proj.PlayerID)
                     {
                         t.HitPoints--;
                         proj.Died = true;
