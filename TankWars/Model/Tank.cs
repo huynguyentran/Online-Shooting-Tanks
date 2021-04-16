@@ -41,6 +41,10 @@ namespace Model
             {
                 return orientation;
             }
+            set
+            {
+                orientation = value;
+            }
         }
 
         [JsonProperty(PropertyName = "tdir")]
@@ -78,6 +82,7 @@ namespace Model
         public int HitPoints
         {
             get { return hitPoints; }
+            set { hitPoints = value; }
         }
 
         [JsonProperty(PropertyName = "score")]
@@ -133,7 +138,11 @@ namespace Model
 
         public void UpdatingTank(ControlCommands cmd)
         {
-            aiming = cmd.directionOfTank;
+            if (cmd.directionOfTank.Length()>= 0.05)
+            {
+                aiming = cmd.directionOfTank;
+            }
+     
         }
     }
 

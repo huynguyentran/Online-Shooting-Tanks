@@ -86,18 +86,18 @@ namespace Model
         public GameModel(int _size)
         {
             size = _size;
-            tanks = new Dictionary<int, Tank>(); 
+            tanks = new Dictionary<int, Tank>();
             projectiles = new Dictionary<int, Projectile>();
             powerups = new Dictionary<int, Powerup>();
             walls = new Dictionary<int, Wall>();
-            Wall testwall = new Wall(new Vector2D(-100,-100),new Vector2D(100,-100),0);
-            Wall testwall2 = new Wall(new Vector2D(-100, 100), new Vector2D(100, 100),1);
-            Wall testwall3 = new Wall(new Vector2D(-100, 100), new Vector2D(-100, -100),2);
-            Wall testwall4 = new Wall(new Vector2D(100, -100), new Vector2D(100, 100),3);
-            walls.Add(0,testwall);
+            Wall testwall = new Wall(new Vector2D(-100, -100), new Vector2D(100, -100), 0);
+            Wall testwall2 = new Wall(new Vector2D(-100, 100), new Vector2D(100, 100), 1);
+            //Wall testwall3 = new Wall(new Vector2D(-100, 100), new Vector2D(-100, -100), 2);
+            //Wall testwall4 = new Wall(new Vector2D(100, -100), new Vector2D(100, 100), 3);
+            walls.Add(0, testwall);
             walls.Add(1, testwall2);
-            walls.Add(2, testwall3);
-            walls.Add(3, testwall4);
+            //walls.Add(2, testwall3);
+            //walls.Add(3, testwall4);
         }
 
 
@@ -157,12 +157,13 @@ namespace Model
             {
                 case "up":
                     {
-                        movementDirection = new Vector2D(0, 1);
+                        movementDirection = new Vector2D(0, -1);
+
                         break;
                     }
                 case "down":
                     {
-                        movementDirection = new Vector2D(0, -1);
+                        movementDirection = new Vector2D(0, 1);
                         break;
                     }
                 case "left":
@@ -182,46 +183,21 @@ namespace Model
                     }
             }
 
+            if (movementDirection.Length() != 0)
+            {
+                t.Orientation = movementDirection;
+            }
+
+
             //We need to look at the Constants object (and possibly the time passed).
             double speed = 1.0; //Velocity * Time passed between frames
             movementDirection *= speed;
 
             Vector2D expectedLocation = t.Location + movementDirection;
 
-            foreach(Wall wall in walls.Values)
+            foreach (Wall wall in walls.Values)
             {
-                int border = 25 + 30; //Constant
-
-                Vector2D lower;
-                Vector2D higher;
-                if (wall.Start.GetY() > wall.End.GetY())
-                {
-                    lower = wall.End;
-                    higher = wall.Start;
-                }
-                else
-                {
-                    lower = wall.Start;
-                    higher = wall.End;
-                }
-
-                Vector2D leftMost;
-                Vector2D rightMost;
-                if (wall.Start.GetX() > wall.End.GetX())
-                {
-                    leftMost = wall.End;
-                    rightMost = wall.Start;
-                }
-                else
-                {
-                    leftMost = wall.Start;
-                    rightMost = wall.End;
-                }
-
-                bool collision = (expectedLocation.GetX() < (rightMost.GetX() + border) && expectedLocation.GetX() > (leftMost.GetX() - border))
-                    && (expectedLocation.GetY() < (higher.GetY() + border) && expectedLocation.GetY() > (lower.GetY() - border));
-
-                if (collision)
+                if (WallCollisionCheck(30, wall, expectedLocation))
                 {
                     expectedLocation = t.Location;
                     break;
@@ -245,7 +221,7 @@ namespace Model
 
                     }
                 }
-   
+
             }
 
             cmd.directionOfTank.Normalize();
@@ -253,20 +229,19 @@ namespace Model
             {
                 case "main":
                     {
-                      
-                        Vector2D projetileDir = new Vector2D(cmd.directionOfTank.GetX(), cmd.directionOfTank.GetY());
-                        Projectile newProjectile = new Projectile(t.Location, projetileDir, t.TankID);
-                        projectiles[newProjectile.ProjID]= newProjectile;
+                        Vector2D projetileDir = t.TurretDirection;
+                        Projectile newProjectile = new Projectile(t.Location+projetileDir*30, projetileDir, t.TankID);
+                        projectiles[newProjectile.ProjID] = newProjectile;
                         break;
                     }
                 case "alt":
                     {
                         if (t.Powers > 0)
                         {
-                          
-                            Vector2D beamDir= new Vector2D(cmd.directionOfTank.GetX(), cmd.directionOfTank.GetY());
-                            Beam b = new Beam(t.Location,beamDir, t.TankID);
-                            
+
+                            Vector2D beamDir = new Vector2D(cmd.directionOfTank.GetX(), cmd.directionOfTank.GetY());
+                            Beam b = new Beam(t.Location, beamDir, t.TankID);
+
                             //pass into update game object
                             // pass into the controller
 
@@ -289,7 +264,7 @@ namespace Model
         public IList<Beam> UpdatingWorld(IEnumerable<KeyValuePair<int, ControlCommands>> clientsInfo)
         {
             List<Beam> beams = new List<Beam>();
-         
+
             foreach (KeyValuePair<int, ControlCommands> pair in clientsInfo)
             {
                 Beam b = UpdateTank(pair.Key, pair.Value);
@@ -298,9 +273,9 @@ namespace Model
                     beams.Add(b);
                 }
             }
-            
-        
-   
+
+
+
             // Collisions when adding in the powerup. Checking for the collsion between the powerup and tank and wall has been checked once in updateTank method  
             // powerups
 
@@ -310,8 +285,30 @@ namespace Model
             }
 
 
-            //projectiles
+           
+            foreach (Projectile proj in projectiles.Values)
+            {
+                proj.Location = proj.Location + proj.Orientation * 2;
 
+                foreach (Wall wall in walls.Values)
+                {
+                    if (WallCollisionCheck(15, wall, proj.Location))
+                    {
+                        proj.Died = true;
+                    }
+                }
+
+                foreach (Tank t in tanks.Values)
+                {
+                    if((proj.Location - t.Location).Length() <=30)
+                    {
+                        t.HitPoints--;
+                        proj.Died = true;
+                    }
+                }
+            }
+
+        
 
             //Collision;
 
@@ -319,6 +316,44 @@ namespace Model
         }
 
 
+
+        private bool WallCollisionCheck(int objLength, Wall wall, Vector2D expectedLocation)
+        {
+            ///
+            int border = 25 + objLength; //Constant
+
+            Vector2D lower;
+            Vector2D higher;
+            if (wall.Start.GetY() > wall.End.GetY())
+            {
+                lower = wall.End;
+                higher = wall.Start;
+            }
+            else
+            {
+                lower = wall.Start;
+                higher = wall.End;
+            }
+
+            Vector2D leftMost;
+            Vector2D rightMost;
+            if (wall.Start.GetX() > wall.End.GetX())
+            {
+                leftMost = wall.End;
+                rightMost = wall.Start;
+            }
+            else
+            {
+                leftMost = wall.Start;
+                rightMost = wall.End;
+            }
+
+            bool collision = (expectedLocation.GetX() < (rightMost.GetX() + border) && expectedLocation.GetX() > (leftMost.GetX() - border))
+                && (expectedLocation.GetY() < (higher.GetY() + border) && expectedLocation.GetY() > (lower.GetY() - border));
+
+            return collision;
+
+        }
 
     }
 

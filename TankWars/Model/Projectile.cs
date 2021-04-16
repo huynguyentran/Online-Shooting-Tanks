@@ -30,6 +30,7 @@ namespace Model
         public Vector2D Location
         {
             get { return location; }
+            set { location = value; }
         }
 
         [JsonProperty(PropertyName = "dir")]
@@ -38,6 +39,7 @@ namespace Model
         public Vector2D Orientation
         {
             get { return orientation; }
+  
         }
 
         /// <summary>
@@ -51,6 +53,7 @@ namespace Model
         public bool Died
         {
             get { return died; }
+            set { died = value; }
         }
 
         [JsonProperty(PropertyName = "owner")]

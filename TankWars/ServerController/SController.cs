@@ -68,10 +68,22 @@ namespace ServerController
 
                 foreach(Tank t in serverModel.Tanks.Values)
                 {
-                    if (t.Joined)
-                        t.Joined = false;
+                    //if (t.Joined)
+                    //    t.Joined = false;
                     if (t.Died)
                         t.Died = false;
+                }
+                HashSet<Projectile> projToRemove = new HashSet<Projectile>();
+                foreach(Projectile proj in serverModel.Projectiles.Values)
+                {
+                    if (proj.Died)
+                    {
+                        projToRemove.Add(proj);
+                    }
+                }
+                foreach(Projectile proj in projToRemove)
+                {
+                    serverModel.Projectiles.Remove(proj.ProjID);
                 }
             }
 
