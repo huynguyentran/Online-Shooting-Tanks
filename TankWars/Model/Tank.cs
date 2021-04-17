@@ -104,7 +104,7 @@ namespace Model
         public bool Died
         {
             get { return died; }
-            set { died = false; }
+            set { died = value; }
         }
 
         [JsonProperty(PropertyName = "dc")]
@@ -135,6 +135,15 @@ namespace Model
         {
             get { return tankCoolDown; }
             set { tankCoolDown = value; }
+        }
+
+        [JsonIgnore]
+        private float respawnCD = 0f;
+        [JsonIgnore]
+        public float RespawnCD
+        {
+            get { return respawnCD;}
+            set { respawnCD = value; }
         }
 
         public Tank(int stateID, string playerName, Vector2D _location)

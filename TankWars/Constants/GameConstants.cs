@@ -15,6 +15,12 @@ namespace Constants
         {
             get { return frameRate; }
         }
+
+        private readonly int respawnRate = 5;
+        public int RespawnRate
+        {
+            get { return respawnRate; }
+        }
         public GameConstants()
         {
 

@@ -176,120 +176,156 @@ namespace Model
         {
 
             Tank t = tanks[id];
-            t.UpdatingTank(cmd);
-
-            Vector2D movementDirection;
-            switch (cmd.Move)
+            if (t.Died == false && t.HitPoints > 0)
             {
-                case "up":
-                    {
-                        movementDirection = new Vector2D(0, -1);
-
-                        break;
-                    }
-                case "down":
-                    {
-                        movementDirection = new Vector2D(0, 1);
-                        break;
-                    }
-                case "left":
-                    {
-                        movementDirection = new Vector2D(-1, 0);
-                        break;
-                    }
-                case "right":
-                    {
-                        movementDirection = new Vector2D(1, 0);
-                        break;
-                    }
-                default:
-                    {
-                        movementDirection = new Vector2D(0, 0);
-                        break;
-                    }
-            }
-
-            if (movementDirection.Length() != 0)
-            {
-                t.Orientation = movementDirection;
-            }
-
-
-            //We need to look at the Constants object (and possibly the time passed).
-            double speed = 5.0; //Velocity * Time passed between frames
-            movementDirection *= speed;
-
-            Vector2D expectedLocation = t.Location + movementDirection;
-
-            foreach (Wall wall in walls.Values)
-            {
-                if (WallCollisionCheck(30, wall, expectedLocation))
+                t.UpdatingTank(cmd);
+                Vector2D movementDirection;
+                switch (cmd.Move)
                 {
-                    expectedLocation = t.Location;
-                    break;
+                    case "up":
+                        {
+                            movementDirection = new Vector2D(0, -1);
+
+                            break;
+                        }
+                    case "down":
+                        {
+                            movementDirection = new Vector2D(0, 1);
+                            break;
+                        }
+                    case "left":
+                        {
+                            movementDirection = new Vector2D(-1, 0);
+                            break;
+                        }
+                    case "right":
+                        {
+                            movementDirection = new Vector2D(1, 0);
+                            break;
+                        }
+                    default:
+                        {
+                            movementDirection = new Vector2D(0, 0);
+                            break;
+                        }
                 }
-            }
 
-            t.Location = expectedLocation;
-
-            //Collision  tanks and powerups 
-
-            foreach (Powerup powerup in Powerups.Values)
-            {
-                if (!powerup.Died)
+                if (movementDirection.Length() != 0)
                 {
-                    bool collision = (powerup.Location - t.Location).Length() <= 30;
+                    t.Orientation = movementDirection;
+                }
 
-                    if (collision)
+
+                //We need to look at the Constants object (and possibly the time passed).
+                double speed = 5.0; //Velocity * Time passed between frames
+                movementDirection *= speed;
+
+                Vector2D expectedLocation = t.Location + movementDirection;
+
+                foreach (Wall wall in walls.Values)
+                {
+                    if (WallCollisionCheck(30, wall, expectedLocation))
                     {
-                        t.Powers++;
-                        powerup.Died = true;
-
+                        expectedLocation = t.Location;
+                        break;
                     }
                 }
 
-            }
+                t.Location = expectedLocation;
 
-            if (t.TankCoolDown > 0)
-            {
-                t.TankCoolDown -= deltaTime;
-            }
+                //Collision  tanks and powerups 
 
-            cmd.directionOfTank.Normalize();
-            switch (cmd.Fire)
-            {
-                case "main":
+                foreach (Powerup powerup in Powerups.Values)
+                {
+                    if (!powerup.Died)
                     {
-                        if (t.TankCoolDown <= 0)
+                        bool collision = (powerup.Location - t.Location).Length() <= 30;
+
+                        if (collision)
                         {
-                            Vector2D projetileDir = t.TurretDirection;
-                            Projectile newProjectile = new Projectile(t.Location + projetileDir * 30, projetileDir, t.TankID);
-                            projectiles[newProjectile.ProjID] = newProjectile;
-                            t.TankCoolDown = 1f; // Constant fire rate
+                            t.Powers++;
+                            powerup.Died = true;
+
+                        }
+                    }
+
+                }
+
+                if (t.TankCoolDown > 0)
+                {
+                    t.TankCoolDown -= deltaTime;
+                }
+
+                cmd.directionOfTank.Normalize();
+                switch (cmd.Fire)
+                {
+                    case "main":
+                        {
+                            if (t.TankCoolDown <= 0)
+                            {
+                                Vector2D projetileDir = t.TurretDirection;
+                                Projectile newProjectile = new Projectile(t.Location + projetileDir * 30, projetileDir, t.TankID);
+                                projectiles[newProjectile.ProjID] = newProjectile;
+                                t.TankCoolDown = 1f; // Constant fire rate
+                            }
+
+                            break;
+                        }
+                    case "alt":
+                        {
+                            if (t.Powers > 0)
+                            {
+
+                                Vector2D beamDir = t.TurretDirection;
+                                Beam b = new Beam(t.Location + beamDir * 30, beamDir, t.TankID);
+
+                                //pass into update game object
+                                // pass into the controller
+
+                                t.Powers--;
+                                return b;
+                            }
+
+
+                            break;
+                        }
+                    default:
+                        break;
+                }
+
+                return null;
+            }
+            else
+            {
+                if (t.RespawnCD > 0)
+                {
+                    t.RespawnCD -= deltaTime;
+                }
+                else
+                {
+                    t.HitPoints = 3; // const
+                    bool checkCollision;
+                    Vector2D loc;
+                    do
+                    {
+                        Random rnd = new Random();
+                        int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
+                        int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
+                        loc = new Vector2D(VecX, VecY);
+                        checkCollision = false;
+                        foreach (Wall w in walls.Values)
+                        {
+                            if (WallCollisionCheck(30, w, loc))
+                            {
+                                checkCollision = true;
+                            }
                         }
 
-                        break;
                     }
-                case "alt":
-                    {
-                        if (t.Powers > 0)
-                        {
+                    while (checkCollision);
 
-                            Vector2D beamDir = t.TurretDirection;
-                            Beam b = new Beam(t.Location + beamDir * 30, beamDir, t.TankID);
-
-                            //pass into update game object
-                            // pass into the controller
-
-                            t.Powers--;
-                            return b;
-                        }
-
-
-                        break;
-                    }
-                default:
-                    break;
+                    t.Location = loc;
+                }
             }
 
             return null;
@@ -317,7 +353,15 @@ namespace Model
 
             foreach (Beam b in beams)
             {
-                // process the beam, send back to the controller. 
+                foreach (Tank t in tanks.Values)
+                {
+                    if (Intersects(b.origin, b.Direction, t.Location, 30) && b.OwnerID != t.TankID)
+                    {
+                        t.Died = true;
+                        t.HitPoints = 0;
+                    }
+                }
+          
             }
 
 
@@ -340,6 +384,11 @@ namespace Model
                     {
                         t.HitPoints--;
                         proj.Died = true;
+                        if (t.HitPoints == 0)
+                        {
+                            t.Died = true;
+                        }
+
                     }
                 }
             }
@@ -389,6 +438,47 @@ namespace Model
 
             return collision;
 
+        }
+
+
+        /// <summary>
+        /// Determines if a ray interescts a circle
+        /// </summary>
+        /// <param name="rayOrig">The origin of the ray</param>
+        /// <param name="rayDir">The direction of the ray</param>
+        /// <param name="center">The center of the circle</param>
+        /// <param name="r">The radius of the circle</param>
+        /// <returns></returns>
+        public static bool Intersects(Vector2D rayOrig, Vector2D rayDir, Vector2D center, double r)
+        {
+            // ray-circle intersection test
+            // P: hit point
+            // ray: P = O + tV
+            // circle: (P-C)dot(P-C)-r^2 = 0
+            // substituting to solve for t gives a quadratic equation:
+            // a = VdotV
+            // b = 2(O-C)dotV
+            // c = (O-C)dot(O-C)-r^2
+            // if the discriminant is negative, miss (no solution for P)
+            // otherwise, if both roots are positive, hit
+
+            double a = rayDir.Dot(rayDir);
+            double b = ((rayOrig - center) * 2.0).Dot(rayDir);
+            double c = (rayOrig - center).Dot(rayOrig - center) - r * r;
+
+            // discriminant
+            double disc = b * b - 4.0 * a * c;
+
+            if (disc < 0.0)
+                return false;
+
+            // find the signs of the roots
+            // technically we should also divide by 2a
+            // but all we care about is the sign, not the magnitude
+            double root1 = -b + Math.Sqrt(disc);
+            double root2 = -b - Math.Sqrt(disc);
+
+            return (root1 > 0.0 && root2 > 0.0);
         }
 
     }

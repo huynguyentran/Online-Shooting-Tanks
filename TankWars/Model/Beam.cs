@@ -43,6 +43,13 @@ namespace Model
         [JsonProperty(PropertyName = "owner")]
         private int playerID;
 
+        [JsonIgnore]
+        public int OwnerID
+        {
+            get { return playerID; }
+            set { playerID = value; }
+        }
+
         public Beam(Vector2D _origin, Vector2D _direction, int _playerID)
         {
             shootLocaiton  = _origin;
