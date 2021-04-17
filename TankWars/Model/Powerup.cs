@@ -13,13 +13,15 @@ namespace Model
     {
 
         [JsonProperty(PropertyName = "power")]
-        private int ID =0;
+        private int ID;
         [JsonIgnore]
         public int puID
         {
             get { return ID; }
-           
         }
+
+        private static int nextID = 0;
+        private static object mutexPowerupID = new object();
 
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
@@ -42,10 +44,14 @@ namespace Model
             set { died = value; }
         }
 
-        public Powerup(int _id, Vector2D loc)
+        public Powerup(Vector2D loc)
         {
             location = loc;
-            ID = _id;
+            lock (mutexPowerupID)
+            {
+                ID = nextID;
+                nextID++;
+            }
         }
  
     }

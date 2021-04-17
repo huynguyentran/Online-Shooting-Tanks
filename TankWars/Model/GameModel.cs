@@ -44,6 +44,10 @@ namespace Model
         private Dictionary<int, Wall> walls;
         public Dictionary<int, Wall> Walls { get { return walls; } }
 
+        private readonly uint maxNumberOfActivePowerups = 100;
+        private readonly float maxPowerupRespawnTime = 0;
+        private float timeUntilNextPowerupRespawn;
+
         //The intial client player ID, -1 is an invalid number.
         private int playerID = -1;
         public int clientID
@@ -114,12 +118,12 @@ namespace Model
             Wall testwall = new Wall(new Vector2D(-100, -100), new Vector2D(100, -100), 0);
             Wall testwall2 = new Wall(new Vector2D(-100, 100), new Vector2D(100, 100), 1);
            
-            Powerup powerup = new Powerup(0, new Vector2D(-50, 0));
+            //Powerup powerup = new Powerup(new Vector2D(-50, 0));
 
             Wall testwall3 = new Wall(new Vector2D(-100, 100), new Vector2D(-100, -100), 2);
             Wall testwall4 = new Wall(new Vector2D(100, -100), new Vector2D(100, 100), 3);
             walls.Add(0, testwall);
-            powerups.Add(0, powerup);
+            //powerups.Add(powerup.puID, powerup);
 
             walls.Add(1, testwall2);
             walls.Add(2, testwall3);
@@ -314,6 +318,41 @@ namespace Model
 
             // Collisions when adding in the powerup. Checking for the collsion between the powerup and tank and wall has been checked once in updateTank method  
             // powerups
+
+            if (timeUntilNextPowerupRespawn <= 0 && powerups.Count < maxNumberOfActivePowerups)
+            {
+                //Spawn Powerup
+                bool checkCollision;
+                Vector2D loc;
+                Random rnd = new Random();
+                do
+                {
+                    int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
+                    int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
+                    loc = new Vector2D(VecX, VecY);
+
+                    checkCollision = false;
+                    foreach (Wall w in walls.Values)
+                    {
+                        checkCollision = checkCollision || WallCollisionCheck(15, w, loc);
+                    }
+
+                    foreach (Tank t in tanks.Values)
+                    {
+                        checkCollision = checkCollision || ((loc - t.Location).Length() <= (30 + 15));
+                    }
+                }
+                while (checkCollision);
+
+                Powerup pu = new Powerup(loc);
+                powerups.Add(pu.puID, pu);
+
+                timeUntilNextPowerupRespawn = (float) rnd.NextDouble()* maxPowerupRespawnTime;
+            }
+            else
+            {
+                timeUntilNextPowerupRespawn -= deltaTime;
+            }
 
             foreach (Beam b in beams)
             {

@@ -96,6 +96,7 @@ namespace Model
             {
                 return score;
             }
+            set { score = value; }
         }
 
         [JsonProperty(PropertyName = "died")]
