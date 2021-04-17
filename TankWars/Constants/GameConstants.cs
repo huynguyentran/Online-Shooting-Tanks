@@ -4,7 +4,7 @@ namespace Constants
 {
     public class GameConstants
     {
-        private readonly int mapSize = 2000;
+        private readonly int mapSize = 250;
         public int Size
         {
             get { return mapSize; }

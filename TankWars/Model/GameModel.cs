@@ -59,8 +59,29 @@ namespace Model
             }
         }
 
-        public void AddTank(Tank tank)
+        public void AddTank(int stateID, string clientName)
         {
+            bool checkCollision;
+            Vector2D loc;
+            do
+            {
+                Random rnd = new Random();
+                int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
+                int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
+                loc = new Vector2D(VecX, VecY);
+                checkCollision = false;
+                foreach (Wall w in walls.Values)
+                {
+                    if (WallCollisionCheck(30, w, loc))
+                    {
+                        checkCollision = true;
+                    }
+                }
+
+            }
+            while (checkCollision);
+
+            Tank tank = new Tank(stateID, clientName, loc);
             tanks[tank.TankID] = tank;
         }
 
@@ -92,16 +113,17 @@ namespace Model
             walls = new Dictionary<int, Wall>();
             Wall testwall = new Wall(new Vector2D(-100, -100), new Vector2D(100, -100), 0);
             Wall testwall2 = new Wall(new Vector2D(-100, 100), new Vector2D(100, 100), 1);
-            Powerup powerup = new Powerup(0,new Vector2D(-50,0));
+           
+            Powerup powerup = new Powerup(0, new Vector2D(-50, 0));
 
-            //Wall testwall3 = new Wall(new Vector2D(-100, 100), new Vector2D(-100, -100), 2);
-            //Wall testwall4 = new Wall(new Vector2D(100, -100), new Vector2D(100, 100), 3);
+            Wall testwall3 = new Wall(new Vector2D(-100, 100), new Vector2D(-100, -100), 2);
+            Wall testwall4 = new Wall(new Vector2D(100, -100), new Vector2D(100, 100), 3);
             walls.Add(0, testwall);
             powerups.Add(0, powerup);
-               
+
             walls.Add(1, testwall2);
-            //walls.Add(2, testwall3);
-            //walls.Add(3, testwall4);
+            walls.Add(2, testwall3);
+            walls.Add(3, testwall4);
         }
 
 
@@ -194,7 +216,7 @@ namespace Model
 
 
             //We need to look at the Constants object (and possibly the time passed).
-            double speed = 1.0; //Velocity * Time passed between frames
+            double speed = 5.0; //Velocity * Time passed between frames
             movementDirection *= speed;
 
             Vector2D expectedLocation = t.Location + movementDirection;
@@ -238,7 +260,7 @@ namespace Model
             {
                 case "main":
                     {
-                        if(t.TankCoolDown <= 0)
+                        if (t.TankCoolDown <= 0)
                         {
                             Vector2D projetileDir = t.TurretDirection;
                             Projectile newProjectile = new Projectile(t.Location + projetileDir * 30, projetileDir, t.TankID);
@@ -254,7 +276,7 @@ namespace Model
                         {
 
                             Vector2D beamDir = t.TurretDirection;
-                            Beam b = new Beam(t.Location + beamDir*30, beamDir, t.TankID);
+                            Beam b = new Beam(t.Location + beamDir * 30, beamDir, t.TankID);
 
                             //pass into update game object
                             // pass into the controller
@@ -299,10 +321,10 @@ namespace Model
             }
 
 
-           
+
             foreach (Projectile proj in projectiles.Values)
             {
-                proj.Location = proj.Location + proj.Orientation * 0.25;
+                proj.Location = proj.Location + proj.Orientation * 10;
 
                 foreach (Wall wall in walls.Values)
                 {
@@ -314,7 +336,7 @@ namespace Model
 
                 foreach (Tank t in tanks.Values)
                 {
-                    if(t.HitPoints > 0 && (proj.Location - t.Location).Length() <=30 && t.TankID != proj.PlayerID)
+                    if (t.HitPoints > 0 && (proj.Location - t.Location).Length() <= 30 && t.TankID != proj.PlayerID)
                     {
                         t.HitPoints--;
                         proj.Died = true;
@@ -322,7 +344,7 @@ namespace Model
                 }
             }
 
-        
+
 
             //Collision;
 

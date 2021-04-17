@@ -137,11 +137,11 @@ namespace Model
             set { tankCoolDown = value; }
         }
 
-        public Tank(long stateID, string playerName)
+        public Tank(int stateID, string playerName, Vector2D _location)
         {
-            ID = (int)stateID;
+            ID = stateID;
             name = playerName;
-            location = new Vector2D(0, 0);
+            location = _location;
             orientation = new Vector2D(1, 0);
         }
 

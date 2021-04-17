@@ -176,11 +176,11 @@ namespace ServerController
                 clientName = clientName.Substring(0, newlineIndex);
                 state.RemoveData(0, clientName.Length + 1);
 
-                Tank tank = new Tank(state.ID, clientName);
+             
 
                 lock (serverModel)
                 {
-                    serverModel.AddTank(tank);
+                    serverModel.AddTank((int)state.ID, clientName);
                 }
 
                 lock (clientInfo)
