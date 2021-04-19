@@ -68,44 +68,7 @@ namespace ServerController
                 frameJsonComposite += JsonSerializationComposite(beams);
                 frameJsonComposite += JsonSerializationComposite(serverModel.Powerups.Values);
 
-                foreach(Tank t in serverModel.Tanks.Values)
-                {
-                    if (t.Joined)
-                    {
-                        t.Joined = false;
-                    }
-                    if (t.Died)
-                    {
-                        t.Died = false;
-                        t.RespawnCD = consts.RespawnRate;
-                    }
-               
-                }
-                HashSet<Projectile> projToRemove = new HashSet<Projectile>();
-                foreach(Projectile proj in serverModel.Projectiles.Values)
-                {
-                    if (proj.Died)
-                    {
-                        projToRemove.Add(proj);
-                    }
-                }
-                foreach(Projectile proj in projToRemove)
-                {
-                    serverModel.Projectiles.Remove(proj.ProjID);
-                }
-                HashSet<Powerup> powerupsToRemove = new HashSet<Powerup>();
-                foreach (Powerup powerup in serverModel.Powerups.Values)
-                {
-                    if (powerup.Died)
-                    {
-                        powerupsToRemove.Add(powerup);
-                    }
-
-                }
-                foreach(Powerup powerup in powerupsToRemove )
-                {
-                    serverModel.Powerups.Remove(powerup.puID);
-                }
+                serverModel.postUpdateWorld();
             }
 
             lock(clientInfo)
@@ -131,12 +94,14 @@ namespace ServerController
         }
 
         public SController()
+
         {
+            string root = AppDomain.CurrentDomain.BaseDirectory;
             clientInfo = new Dictionary<int, Tuple<SocketState, ControlCommands>>();
-            consts = new GameConstants();
+            consts = new GameConstants(root + @"..\..\..\..\Resources\settings.XML");
 
             clientCommands = new Dictionary<int, ControlCommands>();
-            serverModel = new GameModel(consts.Size);
+            serverModel = new GameModel(consts.Size, consts);
             
             Networking.StartServer(OnConnection, 11000);
             //Initialize Server w/ TCP Listener

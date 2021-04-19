@@ -247,6 +247,7 @@
     <Content Include="Image\Turrets\YellowTurret.png" />
     <Content Include="README.txt" />
     <Content Include="README2.txt" />
+    <Content Include="settings.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

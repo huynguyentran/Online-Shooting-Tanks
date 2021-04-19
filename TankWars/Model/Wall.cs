@@ -17,6 +17,11 @@ namespace Model
 
         [JsonProperty(PropertyName = "wall")]
         private int ID;
+        [JsonIgnore]
+        public int WallID
+        {
+            get { return ID; }
+        }
 
         [JsonProperty(PropertyName = "p1")]
         private Vector2D startpoint;

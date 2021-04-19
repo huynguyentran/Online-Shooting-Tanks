@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using TankWars;
+using Constants;
 
 namespace Model
 {
@@ -44,9 +45,15 @@ namespace Model
         private Dictionary<int, Wall> walls;
         public Dictionary<int, Wall> Walls { get { return walls; } }
 
+        private GameConstants gameConstants;
+
         private readonly uint maxNumberOfActivePowerups = 100;
         private readonly float maxPowerupRespawnTime = 0;
         private float timeUntilNextPowerupRespawn;
+
+        private readonly float numOfFramePerSec;
+
+    
 
         //The intial client player ID, -1 is an invalid number.
         private int playerID = -1;
@@ -108,26 +115,38 @@ namespace Model
         /// Assigns the map size of the tank war game.
         /// </summary>
         /// <param name="_size">The map size that sent by the server</param>
-        public GameModel(int _size)
-        {
+        public GameModel(int _size, GameConstants _const)
+        {       
             size = _size;
             tanks = new Dictionary<int, Tank>();
             projectiles = new Dictionary<int, Projectile>();
             powerups = new Dictionary<int, Powerup>();
             walls = new Dictionary<int, Wall>();
-            Wall testwall = new Wall(new Vector2D(-100, -100), new Vector2D(100, -100), 0);
-            Wall testwall2 = new Wall(new Vector2D(-100, 100), new Vector2D(100, 100), 1);
-           
-            //Powerup powerup = new Powerup(new Vector2D(-50, 0));
+            gameConstants = _const;
+            foreach (Tuple<Vector2D, Vector2D> points in _const.WallList)
+            {
+                
+                Wall wall = new Wall(points.Item1, points.Item2, walls.Count);
+                walls.Add(wall.WallID, wall);
+            }
 
-            Wall testwall3 = new Wall(new Vector2D(-100, 100), new Vector2D(-100, -100), 2);
-            Wall testwall4 = new Wall(new Vector2D(100, -100), new Vector2D(100, 100), 3);
-            walls.Add(0, testwall);
-            //powerups.Add(powerup.puID, powerup);
+            numOfFramePerSec = 1000 / (gameConstants.FrameRate);
+            maxNumberOfActivePowerups = (uint)gameConstants.ActivePUs;
+            maxPowerupRespawnTime = (gameConstants.PURespawn)/numOfFramePerSec;
 
-            walls.Add(1, testwall2);
-            walls.Add(2, testwall3);
-            walls.Add(3, testwall4);
+        }
+
+        public GameModel(int _size)
+        {
+
+
+            size = _size;
+            tanks = new Dictionary<int, Tank>();
+            projectiles = new Dictionary<int, Projectile>();
+            powerups = new Dictionary<int, Powerup>();
+            walls = new Dictionary<int, Wall>();
+
+     
         }
 
 
@@ -226,6 +245,25 @@ namespace Model
 
                 Vector2D expectedLocation = t.Location + movementDirection;
 
+                if (expectedLocation.GetX() < -(MapSize / 2))
+                {
+                    expectedLocation = new Vector2D((MapSize / 2) + (expectedLocation.GetX() + MapSize / 2), expectedLocation.GetY());
+                }
+                if (expectedLocation.GetX() > MapSize / 2)
+                {
+                    expectedLocation = new Vector2D(-(MapSize / 2) + (expectedLocation.GetX() - MapSize / 2), expectedLocation.GetY());
+                }
+
+                if (expectedLocation.GetY() > MapSize / 2)
+                {
+                    expectedLocation = new Vector2D(expectedLocation.GetX(), -(MapSize / 2) + (expectedLocation.GetY() - MapSize / 2));
+                }
+
+                if (expectedLocation.GetY() < -(MapSize / 2))
+                {
+                    expectedLocation = new Vector2D(expectedLocation.GetX(), (MapSize / 2) + (expectedLocation.GetY() + MapSize / 2));
+                }
+
                 foreach (Wall wall in walls.Values)
                 {
                     if (WallCollisionCheck(30, wall, expectedLocation))
@@ -235,8 +273,11 @@ namespace Model
                     }
                 }
 
+           
+
                 t.Location = expectedLocation;
 
+              
                 //Collision  tanks and powerups 
 
                 foreach (Powerup powerup in Powerups.Values)
@@ -270,7 +311,7 @@ namespace Model
                                 Vector2D projetileDir = t.TurretDirection;
                                 Projectile newProjectile = new Projectile(t.Location + projetileDir * 30, projetileDir, t.TankID);
                                 projectiles[newProjectile.ProjID] = newProjectile;
-                                t.TankCoolDown = 1f; // Constant fire rate
+                                t.TankCoolDown = gameConstants.FramePerShot / numOfFramePerSec; // Constant fire rate
                             }
 
                             break;
@@ -387,7 +428,11 @@ namespace Model
             }
             else
             {
-                timeUntilNextPowerupRespawn -= deltaTime;
+                if (powerups.Count < maxNumberOfActivePowerups)
+                {
+                    timeUntilNextPowerupRespawn -= deltaTime;
+                }
+               
             }
 
             foreach (Beam b in beams)
@@ -414,6 +459,11 @@ namespace Model
                     if (WallCollisionCheck(15, wall, proj.Location))
                     {
                         proj.Died = true;
+                    }
+
+                    if (Math.Abs(proj.Location.GetX()) >= MapSize / 2 || Math.Abs(proj.Location.GetY()) >= MapSize/2)
+                    {
+                        proj.Died = true; 
                     }
                 }
 
@@ -477,6 +527,48 @@ namespace Model
 
             return collision;
 
+        }
+
+        public void postUpdateWorld()
+        {
+            foreach (Tank t in tanks.Values)
+            {
+                if (t.Joined)
+                {
+                    t.Joined = false;
+                }
+                if (t.Died)
+                {
+                    t.Died = false;
+                    t.RespawnCD = gameConstants.RespawnRate / (1000 / gameConstants.FrameRate);
+                }
+
+            }
+            HashSet<Projectile> projToRemove = new HashSet<Projectile>();
+            foreach (Projectile proj in projectiles.Values)
+            {
+                if (proj.Died)
+                {
+                    projToRemove.Add(proj);
+                }
+            }
+            foreach (Projectile proj in projToRemove)
+            {
+                projectiles.Remove(proj.ProjID);
+            }
+            HashSet<Powerup> powerupsToRemove = new HashSet<Powerup>();
+            foreach (Powerup powerup in powerups.Values)
+            {
+                if (powerup.Died)
+                {
+                    powerupsToRemove.Add(powerup);
+                }
+
+            }
+            foreach (Powerup powerup in powerupsToRemove)
+            {
+                powerups.Remove(powerup.puID);
+            }
         }
 
 
