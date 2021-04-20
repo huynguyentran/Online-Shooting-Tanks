@@ -55,6 +55,36 @@ namespace Constants
             get { return puRespawn; }
         }
 
+        private readonly uint tankHP;
+        public uint TankHP
+        {
+            get { return tankHP; }
+        }
+
+        private readonly uint tankSize;
+        public uint TankSize
+        {
+            get { return tankSize; }
+        }
+
+        private readonly uint tankSpeed;
+        public uint TankSpeed
+        {
+            get { return tankSpeed; }
+        }
+
+        private readonly uint wallSize;
+        public uint WallSize
+        {
+            get { return wallSize; }
+        }
+        private readonly uint projSpeed;
+        public uint ProjSpeed
+        {
+            get { return projSpeed; }
+        }
+
+
         public GameConstants(string filepath)
         {
 
@@ -113,6 +143,26 @@ namespace Constants
                             case "FramePerPowerUpRespawn":
                                 reader.Read();
                                 puRespawn = uint.Parse(reader.Value);
+                                break;
+                            case "TankHitPoints":
+                                reader.Read();
+                                tankHP = uint.Parse(reader.Value);
+                                break;
+                            case "TankSize":
+                                reader.Read();
+                                tankSize = uint.Parse(reader.Value);
+                                break;
+                            case "TankSpeed":
+                                reader.Read();
+                                tankSpeed= uint.Parse(reader.Value);
+                                break;
+                            case "WallSize":
+                                reader.Read();
+                                wallSize = uint.Parse(reader.Value);
+                                break;
+                            case "ProjectileSpeed":
+                                reader.Read();
+                                projSpeed = uint.Parse(reader.Value);
                                 break;
                         }
                     }

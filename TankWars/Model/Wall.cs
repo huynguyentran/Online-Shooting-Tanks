@@ -42,6 +42,14 @@ namespace Model
      
         }
 
+        [JsonIgnore]
+        private static uint wallSize;
+        [JsonIgnore]
+        public static uint WallSize
+        {
+            get { return wallSize; }
+        }
+
         public Wall(Vector2D start,Vector2D end, int _id)
         {
             ID = _id;
@@ -49,6 +57,11 @@ namespace Model
             endpoint = end;
         }
 
+
+        public static void SetWallParam(uint _wallSize)
+        {
+            wallSize = _wallSize;
+        }
     }
 
 }

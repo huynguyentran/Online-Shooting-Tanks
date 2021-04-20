@@ -1,11 +1,17 @@
 <GameSettings>
-	<UniverseSize>200</UniverseSize>
+	<UniverseSize>2000</UniverseSize>
 	<MSPerFrame>17</MSPerFrame>
 	<FramesPerShot>80</FramesPerShot>
 	<RespawnRate>300</RespawnRate>
 	<MaxNumberOfActivePowerups>1</MaxNumberOfActivePowerups>
 	<FramePerPowerUpRespawn>300</FramePerPowerUpRespawn>
 
+	<TankHitPoints>3</TankHitPoints>
+	<ProjectileSpeed>25</ProjectileSpeed>
+	<TankSpeed>3</TankSpeed>
+	<TankSize>60</TankSize>
+	<WallSize>50</WallSize>
+	
 
 
 

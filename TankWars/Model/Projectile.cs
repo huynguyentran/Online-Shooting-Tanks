@@ -64,6 +64,13 @@ namespace Model
             get { return playerID; }
         }
 
+        private static uint projSpeed;
+        public static uint ProjSpeed
+        {
+            get { return projSpeed; }
+        }
+
+    
         public  Projectile(Vector2D _location, Vector2D _orientation, int _playerID)
         {
             location = _location;
@@ -75,6 +82,10 @@ namespace Model
                 nextID++;
             }
        
+        }
+        public static void SetProjParam(uint speed)
+        {
+            projSpeed = speed;
         }
 
     }

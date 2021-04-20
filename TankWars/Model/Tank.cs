@@ -19,6 +19,7 @@ namespace Model
             get { return ID; }
         }
 
+
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
         [JsonIgnore]
@@ -65,7 +66,7 @@ namespace Model
 
         [JsonProperty(PropertyName = "name")]
         private string name = "default";
-       
+
         [JsonIgnore]
         public string Name
         {
@@ -76,7 +77,7 @@ namespace Model
         }
 
         [JsonProperty(PropertyName = "hp")]
-        private int hitPoints = 3;
+        private int hitPoints;
 
         [JsonIgnore]
         public int HitPoints
@@ -84,6 +85,32 @@ namespace Model
             get { return hitPoints; }
             set { hitPoints = value; }
         }
+        [JsonIgnore]
+        private static uint maxHitPoints;
+
+        [JsonIgnore]
+        private static uint tankSize;
+        [JsonIgnore]
+        public static uint TankSize
+        {
+            get { return tankSize; }
+        }
+        [JsonIgnore]
+        public static uint MaxHP
+        {
+        get{ return maxHitPoints; }
+        }
+
+        [JsonIgnore]
+        private static uint tankSpeed;
+        [JsonIgnore]
+        public static uint TankSpeed
+        {
+            get { return tankSpeed; }
+        }
+
+
+
 
         [JsonProperty(PropertyName = "score")]
         private int score = 0;
@@ -147,12 +174,16 @@ namespace Model
             set { respawnCD = value; }
         }
 
+    
+
         public Tank(int stateID, string playerName, Vector2D _location)
         {
             ID = stateID;
             name = playerName;
             location = _location;
             orientation = new Vector2D(1, 0);
+            hitPoints = (int)maxHitPoints;
+
         }
 
         public void UpdatingTank(ControlCommands cmd)
@@ -162,6 +193,13 @@ namespace Model
                 aiming = cmd.directionOfTank;
             }
      
+        }
+
+        public static void SetTankParam(uint _hitpoints, uint _size, uint _speed)
+        {
+            maxHitPoints =  _hitpoints;
+            tankSize = _size;
+            tankSpeed = _speed;
         }
     }
 

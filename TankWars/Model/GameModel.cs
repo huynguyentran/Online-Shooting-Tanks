@@ -133,6 +133,9 @@ namespace Model
             numOfFramePerSec = 1000 / (gameConstants.FrameRate);
             maxNumberOfActivePowerups = (uint)gameConstants.ActivePUs;
             maxPowerupRespawnFrames = gameConstants.PURespawn;
+            Tank.SetTankParam(gameConstants.TankHP,gameConstants.TankSize,gameConstants.TankSpeed);
+            Wall.SetWallParam(gameConstants.WallSize);
+            Projectile.SetProjParam(gameConstants.ProjSpeed);
 
         }
 
@@ -240,7 +243,7 @@ namespace Model
 
 
                 //We need to look at the Constants object (and possibly the time passed).
-                double speed = 5.0; //Velocity * Time passed between frames
+                double speed = (Tank.TankSpeed*numOfFramePerSec)*deltaTime; //Velocity * Time passed between frames
                 movementDirection *= speed;
 
                 Vector2D expectedLocation = t.Location + movementDirection;
@@ -284,7 +287,7 @@ namespace Model
                 {
                     if (!powerup.Died)
                     {
-                        bool collision = (powerup.Location - t.Location).Length() <= 30;
+                        bool collision = (powerup.Location - t.Location).Length() <= (Tank.TankSize/2);
 
                         if (collision)
                         {
@@ -309,7 +312,7 @@ namespace Model
                             if (t.TankCoolDown <= 0)
                             {
                                 Vector2D projetileDir = t.TurretDirection;
-                                Projectile newProjectile = new Projectile(t.Location + projetileDir * 30, projetileDir, t.TankID);
+                                Projectile newProjectile = new Projectile(t.Location + projetileDir * (Tank.TankSize / 2), projetileDir, t.TankID);
                                 projectiles[newProjectile.ProjID] = newProjectile;
                                 t.TankCoolDown = gameConstants.FramePerShot / numOfFramePerSec; // Constant fire rate
                             }
@@ -322,7 +325,7 @@ namespace Model
                             {
 
                                 Vector2D beamDir = t.TurretDirection;
-                                Beam b = new Beam(t.Location + beamDir * 30, beamDir, t.TankID);
+                                Beam b = new Beam(t.Location + beamDir * (Tank.TankSize / 2), beamDir, t.TankID);
 
                                 //pass into update game object
                                 // pass into the controller
@@ -348,7 +351,7 @@ namespace Model
                 }
                 else
                 {
-                    t.HitPoints = 3; // const
+                    t.HitPoints = (int)Tank.MaxHP; 
                     bool checkCollision;
                     Vector2D loc;
                     do
@@ -360,7 +363,7 @@ namespace Model
                         checkCollision = false;
                         foreach (Wall w in walls.Values)
                         {
-                            if (WallCollisionCheck(30, w, loc))
+                            if (WallCollisionCheck((int)Tank.TankSize/2, w, loc))
                             {
                                 checkCollision = true;
                             }
@@ -416,7 +419,7 @@ namespace Model
 
                     foreach (Tank t in tanks.Values)
                     {
-                        checkCollision = checkCollision || ((loc - t.Location).Length() <= (30 + 15));
+                        checkCollision = checkCollision || ((loc - t.Location).Length() <= ((int)(Tank.TankSize/2) + 15));
                     }
                 }
                 while (checkCollision);
@@ -435,7 +438,7 @@ namespace Model
             {
                 foreach (Tank t in tanks.Values)
                 {
-                    if (Intersects(b.origin, b.Direction, t.Location, 30) && b.OwnerID != t.TankID)
+                    if (Intersects(b.origin, b.Direction, t.Location, (int)(Tank.TankSize / 2)) && b.OwnerID != t.TankID)
                     {
                         t.Died = true;
                         t.HitPoints = 0;
@@ -448,7 +451,7 @@ namespace Model
 
             foreach (Projectile proj in projectiles.Values)
             {
-                proj.Location = proj.Location + proj.Orientation * 10;
+                proj.Location = proj.Location + proj.Orientation * Projectile.ProjSpeed * numOfFramePerSec*deltaTime;
 
                 foreach (Wall wall in walls.Values)
                 {
@@ -465,7 +468,7 @@ namespace Model
 
                 foreach (Tank t in tanks.Values)
                 {
-                    if (t.HitPoints > 0 && (proj.Location - t.Location).Length() <= 30 && t.TankID != proj.PlayerID)
+                    if (t.HitPoints > 0 && (proj.Location - t.Location).Length() <= (int)(Tank.TankSize / 2) && t.TankID != proj.PlayerID)
                     {
                         t.HitPoints--;
                         proj.Died = true;
@@ -490,7 +493,7 @@ namespace Model
         private bool WallCollisionCheck(int objLength, Wall wall, Vector2D expectedLocation)
         {
             ///
-            int border = 25 + objLength; //Constant
+            int border = (int)(Wall.WallSize/2) + objLength; //Constant
 
             Vector2D lower;
             Vector2D higher;
