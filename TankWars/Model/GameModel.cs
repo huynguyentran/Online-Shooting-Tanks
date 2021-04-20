@@ -48,7 +48,7 @@ namespace Model
         private GameConstants gameConstants;
 
         private readonly uint maxNumberOfActivePowerups = 100;
-        private readonly float maxPowerupRespawnTime = 0;
+        private readonly uint maxPowerupRespawnFrames = 0;
         private float timeUntilNextPowerupRespawn;
 
         private readonly float numOfFramePerSec;
@@ -132,7 +132,7 @@ namespace Model
 
             numOfFramePerSec = 1000 / (gameConstants.FrameRate);
             maxNumberOfActivePowerups = (uint)gameConstants.ActivePUs;
-            maxPowerupRespawnTime = (gameConstants.PURespawn)/numOfFramePerSec;
+            maxPowerupRespawnFrames = gameConstants.PURespawn;
 
         }
 
@@ -424,15 +424,11 @@ namespace Model
                 Powerup pu = new Powerup(loc);
                 powerups.Add(pu.puID, pu);
 
-                timeUntilNextPowerupRespawn = (float) rnd.NextDouble()* maxPowerupRespawnTime;
+                timeUntilNextPowerupRespawn = rnd.Next(0, (int)maxPowerupRespawnFrames) / numOfFramePerSec;
             }
-            else
+            else if (powerups.Count < maxNumberOfActivePowerups)
             {
-                if (powerups.Count < maxNumberOfActivePowerups)
-                {
-                    timeUntilNextPowerupRespawn -= deltaTime;
-                }
-               
+                timeUntilNextPowerupRespawn -= deltaTime;
             }
 
             foreach (Beam b in beams)

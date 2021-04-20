@@ -1,5 +1,5 @@
 <GameSettings>
-	<UniverseSize>2000</UniverseSize>
+	<UniverseSize>200</UniverseSize>
 	<MSPerFrame>17</MSPerFrame>
 	<FramesPerShot>80</FramesPerShot>
 	<RespawnRate>300</RespawnRate>
@@ -10,6 +10,17 @@
 
 
 	<!-- upper left 'L' piece -->
+  <Wall>
+    <p1>
+      <y>-100</y>
+      <x>0</x>
+    </p1>
+    <p2>
+      <y>-100</y>
+      <x>100</x>
+    </p2>
+  </Wall>
+  
 	<Wall>
 		<p1>
 			<x>-425</x>
