@@ -110,8 +110,6 @@ namespace Model
         }
 
 
-
-
         [JsonProperty(PropertyName = "score")]
         private int score = 0;
 
@@ -172,6 +170,15 @@ namespace Model
         {
             get { return respawnCD;}
             set { respawnCD = value; }
+        }
+
+        [JsonIgnore]
+        private bool isHotPotato;
+        [JsonIgnore]
+        public bool IsHotPotato
+        {
+            get { return isHotPotato; }
+            set { isHotPotato = value; }
         }
 
     

@@ -50,10 +50,13 @@ namespace Model
         private readonly uint maxNumberOfActivePowerups = 100;
         private readonly uint maxPowerupRespawnFrames = 0;
         private float timeUntilNextPowerupRespawn;
-
         private readonly float numOfFramePerSec;
 
-    
+        private readonly bool hotPotatoGameMode = false;
+
+        private bool hotPotatoMatchDone = false;
+
+
 
         //The intial client player ID, -1 is an invalid number.
         private int playerID = -1;
@@ -116,7 +119,7 @@ namespace Model
         /// </summary>
         /// <param name="_size">The map size that sent by the server</param>
         public GameModel(int _size, GameConstants _const)
-        {       
+        {
             size = _size;
             tanks = new Dictionary<int, Tank>();
             projectiles = new Dictionary<int, Projectile>();
@@ -125,7 +128,7 @@ namespace Model
             gameConstants = _const;
             foreach (Tuple<Vector2D, Vector2D> points in _const.WallList)
             {
-                
+
                 Wall wall = new Wall(points.Item1, points.Item2, walls.Count);
                 walls.Add(wall.WallID, wall);
             }
@@ -133,7 +136,7 @@ namespace Model
             numOfFramePerSec = 1000 / (gameConstants.FrameRate);
             maxNumberOfActivePowerups = (uint)gameConstants.ActivePUs;
             maxPowerupRespawnFrames = gameConstants.PURespawn;
-            Tank.SetTankParam(gameConstants.TankHP,gameConstants.TankSize,gameConstants.TankSpeed);
+            Tank.SetTankParam(gameConstants.TankHP, gameConstants.TankSize, gameConstants.TankSpeed);
             Wall.SetWallParam(gameConstants.WallSize);
             Projectile.SetProjParam(gameConstants.ProjSpeed);
 
@@ -149,7 +152,7 @@ namespace Model
             powerups = new Dictionary<int, Powerup>();
             walls = new Dictionary<int, Wall>();
 
-     
+
         }
 
 
@@ -243,7 +246,7 @@ namespace Model
 
 
                 //We need to look at the Constants object (and possibly the time passed).
-                double speed = (Tank.TankSpeed*numOfFramePerSec)*deltaTime; //Velocity * Time passed between frames
+                double speed = (Tank.TankSpeed * numOfFramePerSec) * deltaTime; //Velocity * Time passed between frames
                 movementDirection *= speed;
 
                 Vector2D expectedLocation = t.Location + movementDirection;
@@ -269,25 +272,25 @@ namespace Model
 
                 foreach (Wall wall in walls.Values)
                 {
-                    if (WallCollisionCheck(30, wall, expectedLocation))
+                    if (WallCollisionCheck((int)Tank.TankSize / 2, wall, expectedLocation))
                     {
                         expectedLocation = t.Location;
                         break;
                     }
                 }
 
-           
+
 
                 t.Location = expectedLocation;
 
-              
+
                 //Collision  tanks and powerups 
 
                 foreach (Powerup powerup in Powerups.Values)
                 {
                     if (!powerup.Died)
                     {
-                        bool collision = (powerup.Location - t.Location).Length() <= (Tank.TankSize/2);
+                        bool collision = (powerup.Location - t.Location).Length() <= (Tank.TankSize / 2);
 
                         if (collision)
                         {
@@ -305,75 +308,142 @@ namespace Model
                 }
 
                 cmd.directionOfTank.Normalize();
-                switch (cmd.Fire)
+                if (!hotPotatoGameMode)
                 {
-                    case "main":
-                        {
-                            if (t.TankCoolDown <= 0)
+                    switch (cmd.Fire)
+                    {
+                        case "main":
                             {
-                                Vector2D projetileDir = t.TurretDirection;
-                                Projectile newProjectile = new Projectile(t.Location + projetileDir * (Tank.TankSize / 2), projetileDir, t.TankID);
-                                projectiles[newProjectile.ProjID] = newProjectile;
-                                t.TankCoolDown = gameConstants.FramePerShot / numOfFramePerSec; // Constant fire rate
-                            }
+                                if (t.TankCoolDown <= 0)
+                                {
+                                    Vector2D projetileDir = t.TurretDirection;
+                                    Projectile newProjectile = new Projectile(t.Location + projetileDir * (Tank.TankSize / 2), projetileDir, t.TankID);
+                                    projectiles[newProjectile.ProjID] = newProjectile;
+                                    t.TankCoolDown = gameConstants.FramePerShot / numOfFramePerSec; // Constant fire rate
+                                }
 
-                            break;
-                        }
-                    case "alt":
-                        {
-                            if (t.Powers > 0)
+                                break;
+                            }
+                        case "alt":
                             {
+                                if (t.Powers > 0)
+                                {
 
-                                Vector2D beamDir = t.TurretDirection;
-                                Beam b = new Beam(t.Location + beamDir * (Tank.TankSize / 2), beamDir, t.TankID);
-
-                                //pass into update game object
-                                // pass into the controller
-
-                                t.Powers--;
-                                return b;
+                                    Vector2D beamDir = t.TurretDirection;
+                                    Beam b = new Beam(t.Location + beamDir * (Tank.TankSize / 2), beamDir, t.TankID);
+                                    t.Powers--;
+                                    return b;
+                                }
+                                break;
                             }
-
-
+                        default:
                             break;
-                        }
-                    default:
-                        break;
+                    }
                 }
+                else
+                {
+                    if (t.IsHotPotato)
+                    {
+                        switch (cmd.Fire)
+                        {
+                            case "main":
+                                {
+                                    if (t.TankCoolDown <= 0)
+                                    {
+                                        Vector2D projetileDir = t.TurretDirection;
+                                        Projectile newProjectile = new Projectile(t.Location + projetileDir * (Tank.TankSize / 2), projetileDir, t.TankID);
+                                        projectiles[newProjectile.ProjID] = newProjectile;
+                                        t.TankCoolDown = gameConstants.FramePerShot / numOfFramePerSec; // Constant fire rate
+                                    }
+
+                                    break;
+                                }
+                            default:
+                                break;
+                        }
+                    }
+                }
+
 
                 return null;
             }
             else
             {
-                if (t.RespawnCD > 0)
+                if (!hotPotatoGameMode)
                 {
-                    t.RespawnCD -= deltaTime;
+                    if (t.RespawnCD > 0)
+                    {
+                        t.RespawnCD -= deltaTime;
+                    }
+                    else
+                    {
+                        t.HitPoints = (int)Tank.MaxHP;
+                        bool checkCollision;
+                        Vector2D loc;
+                        do
+                        {
+                            Random rnd = new Random();
+                            int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
+                            int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
+                            loc = new Vector2D(VecX, VecY);
+                            checkCollision = false;
+                            foreach (Wall w in walls.Values)
+                            {
+                                if (WallCollisionCheck((int)Tank.TankSize / 2, w, loc))
+                                {
+                                    checkCollision = true;
+                                }
+                            }
+
+                        }
+                        while (checkCollision);
+                        t.Location = loc;
+                    }
                 }
                 else
                 {
-                    t.HitPoints = (int)Tank.MaxHP; 
-                    bool checkCollision;
-                    Vector2D loc;
-                    do
+                    int i = 0;
+                    if (!hotPotatoMatchDone)
                     {
-                        Random rnd = new Random();
-                        int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
-                        int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
-                        loc = new Vector2D(VecX, VecY);
-                        checkCollision = false;
-                        foreach (Wall w in walls.Values)
+                        foreach (Tank _tank in tanks.Values)
                         {
-                            if (WallCollisionCheck((int)Tank.TankSize/2, w, loc))
+                            if (_tank.HitPoints == 0)
                             {
-                                checkCollision = true;
+                                i++;
                             }
                         }
-
                     }
-                    while (checkCollision);
 
-                    t.Location = loc;
+                    if (i == (tanks.Count - 1) || hotPotatoMatchDone)
+                    {
+                        hotPotatoMatchDone = true;
+                        t.HitPoints = (int)Tank.MaxHP;
+                        bool checkCollision;
+                        Vector2D loc;
+                        do
+                        {
+                            Random rnd = new Random();
+                            int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
+                            int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
+                            loc = new Vector2D(VecX, VecY);
+                            checkCollision = false;
+                            foreach (Wall w in walls.Values)
+                            {
+                                if (WallCollisionCheck((int)Tank.TankSize / 2, w, loc))
+                                {
+                                    checkCollision = true;
+                                }
+                            }
+
+                        }
+                        while (checkCollision);
+                        t.Location = loc;
+                        //Set a bool lean 
+                        //Respawn. 
+                        //Delay until next game
+                    }
                 }
+               
             }
 
             return null;
@@ -393,9 +463,6 @@ namespace Model
                     beams.Add(b);
                 }
             }
-
-
-
             // Collisions when adding in the powerup. Checking for the collsion between the powerup and tank and wall has been checked once in updateTank method  
             // powerups
 
@@ -419,7 +486,7 @@ namespace Model
 
                     foreach (Tank t in tanks.Values)
                     {
-                        checkCollision = checkCollision || ((loc - t.Location).Length() <= ((int)(Tank.TankSize/2) + 15));
+                        checkCollision = checkCollision || ((loc - t.Location).Length() <= ((int)(Tank.TankSize / 2) + 15));
                     }
                 }
                 while (checkCollision);
@@ -444,45 +511,89 @@ namespace Model
                         t.HitPoints = 0;
                     }
                 }
-          
+
             }
 
 
-
-            foreach (Projectile proj in projectiles.Values)
+            if (!hotPotatoGameMode)
             {
-                proj.Location = proj.Location + proj.Orientation * Projectile.ProjSpeed * numOfFramePerSec*deltaTime;
-
-                foreach (Wall wall in walls.Values)
+                foreach (Projectile proj in projectiles.Values)
                 {
-                    if (WallCollisionCheck(15, wall, proj.Location))
-                    {
-                        proj.Died = true;
-                    }
+                    proj.Location = proj.Location + proj.Orientation * Projectile.ProjSpeed * numOfFramePerSec * deltaTime;
 
-                    if (Math.Abs(proj.Location.GetX()) >= MapSize / 2 || Math.Abs(proj.Location.GetY()) >= MapSize/2)
+                    foreach (Wall wall in walls.Values)
                     {
-                        proj.Died = true; 
-                    }
-                }
-
-                foreach (Tank t in tanks.Values)
-                {
-                    if (t.HitPoints > 0 && (proj.Location - t.Location).Length() <= (int)(Tank.TankSize / 2) && t.TankID != proj.PlayerID)
-                    {
-                        t.HitPoints--;
-                        proj.Died = true;
-                        if (t.HitPoints == 0)
+                        if (WallCollisionCheck(15, wall, proj.Location))
                         {
-                            t.Died = true;
+                            proj.Died = true;
                         }
 
+                        if (Math.Abs(proj.Location.GetX()) >= MapSize / 2 || Math.Abs(proj.Location.GetY()) >= MapSize / 2)
+                        {
+                            proj.Died = true;
+                        }
+                    }
+
+                    foreach (Tank t in tanks.Values)
+                    {
+                        if (t.HitPoints > 0 && (proj.Location - t.Location).Length() <= (int)(Tank.TankSize / 2) && t.TankID != proj.PlayerID)
+                        {
+                            t.HitPoints--;
+                            proj.Died = true;
+                            if (t.HitPoints == 0)
+                            {
+                                t.Died = true;
+                            }
+
+                        }
                     }
                 }
             }
+            else
+            {
+                foreach (Projectile proj in projectiles.Values)
+                {
+                    proj.Location = proj.Location + proj.Orientation * Projectile.ProjSpeed * numOfFramePerSec * deltaTime;
+
+                    foreach (Wall wall in walls.Values)
+                    {
+                        if (WallCollisionCheck(15, wall, proj.Location))
+                        {
+                            proj.Died = true;
+                        }
+
+                        if (Math.Abs(proj.Location.GetX()) >= MapSize / 2 || Math.Abs(proj.Location.GetY()) >= MapSize / 2)
+                        {
+                            proj.Died = true;
+                        }
+                    }
+
+                    foreach (Tank t in tanks.Values)
+                    {
+                        if (t.HitPoints > 0 && (proj.Location - t.Location).Length() <= (int)(Tank.TankSize / 2) && t.TankID != proj.PlayerID)
+                        {
+                            if (tanks[proj.PlayerID].IsHotPotato)
+                            {
+                                tanks[proj.PlayerID].IsHotPotato = false;
+                                t.IsHotPotato = true;
+                            }
+
+                            proj.Died = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (hotPotatoMatchDone)
+                {
+                    hotPotatoMatchDone = false;
+                    ///Chose new hotpotato here 
+                }
+               
 
 
 
+            }
             //Collision;
 
             return beams;
@@ -493,7 +604,7 @@ namespace Model
         private bool WallCollisionCheck(int objLength, Wall wall, Vector2D expectedLocation)
         {
             ///
-            int border = (int)(Wall.WallSize/2) + objLength; //Constant
+            int border = (int)(Wall.WallSize / 2) + objLength; //Constant
 
             Vector2D lower;
             Vector2D higher;
