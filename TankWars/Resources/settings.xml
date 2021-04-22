@@ -11,6 +11,12 @@
 	<TankSpeed>3</TankSpeed>
 	<TankSize>60</TankSize>
 	<WallSize>50</WallSize>
+
+	<!-- true to enable the game mode/ false to disable the game mode -->
+	<HotPotatoGameMode>true</HotPotatoGameMode>
+
+	<!-- Alive time of a hot potato -->
+	<TimeForHotPotato>5</TimeForHotPotato>
 	
 
 

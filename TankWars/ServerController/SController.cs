@@ -197,49 +197,67 @@ namespace ServerController
         {
             if (state.ErrorOccurred)
             {
-                throw new Exception("Something bad happened: " + state.ErrorMessage);
-            }
-
-            string[] commands = Regex.Split(state.GetData(), @"(?<=[\n])");
-
-            lock (clientInfo)
-            {
-                // Loop until we have processed all messages.
-                foreach (string command in commands)
+                lock (clientInfo)
                 {
-                    if (command.Length == 0)
-                        continue;
+                    clientInfo.Remove((int)state.ID);
+                    clientCommands.Remove((int)state.ID);
+           
+        
+                   
+                }
+                lock (serverModel)
+                {
+                    serverModel.Tanks[(int)state.ID].DC = true;
+                    serverModel.Tanks[(int)state.ID].Died = true;
+                    serverModel.Tanks[(int)state.ID].HitPoints = 0;
+                }
+                state.TheSocket.Close();
 
-                    // The regex splitter will include the last string even if it doesn't end with a '\n',
-                    // So we need to ignore it if this happens. 
-                    if (command[command.Length - 1] != '\n')
-                        break;
+            }
+            else
+            {
+                string[] commands = Regex.Split(state.GetData(), @"(?<=[\n])");
 
-                    //Get rid of extra newline character.
-                    string trimmedCommand = command.Substring(0, command.Length - 1);
-
-
-                    ControlCommands deserializedCommand = new ControlCommands();
-                    if(Deserialize(command) != null)
+                lock (clientInfo)
+                {
+                    // Loop until we have processed all messages.
+                    foreach (string command in commands)
                     {
-                        deserializedCommand = Deserialize(command);
+                        if (command.Length == 0)
+                            continue;
+
+                        // The regex splitter will include the last string even if it doesn't end with a '\n',
+                        // So we need to ignore it if this happens. 
+                        if (command[command.Length - 1] != '\n')
+                            break;
+
+                        //Get rid of extra newline character.
+                        string trimmedCommand = command.Substring(0, command.Length - 1);
+
+
+                        ControlCommands deserializedCommand = new ControlCommands();
+                        if (Deserialize(command) != null)
+                        {
+                            deserializedCommand = Deserialize(command);
+                        }
+
+                        clientInfo[(int)state.ID] = new Tuple<SocketState, ControlCommands>(state, deserializedCommand);
+                        clientCommands[(int)state.ID] = deserializedCommand;
+
+                        // Then remove it from the SocketState's growable buffer
+                        state.RemoveData(0, command.Length);
                     }
 
-                    clientInfo[(int)state.ID] = new Tuple<SocketState, ControlCommands>(state, deserializedCommand);
-                    clientCommands[(int)state.ID] = deserializedCommand;
-
-                    // Then remove it from the SocketState's growable buffer
-                    state.RemoveData(0, command.Length);
                 }
 
+                Networking.GetData(state);
 
-               
             }
 
             //Extract commands from the state.s
             //Replace command in clientInfo.
 
-            Networking.GetData(state);
+        
         }
 
 

@@ -84,6 +84,20 @@ namespace Constants
             get { return projSpeed; }
         }
 
+        private readonly bool gameMode;
+
+        public bool GameMode
+        {
+            get { return gameMode; }
+        }
+
+        private readonly uint gameModeTimer;
+
+        public uint GameModeTimer
+        {
+            get { return gameModeTimer; }
+        }
+
 
         public GameConstants(string filepath)
         {
@@ -163,6 +177,14 @@ namespace Constants
                             case "ProjectileSpeed":
                                 reader.Read();
                                 projSpeed = uint.Parse(reader.Value);
+                                break;
+                            case "HotPotatoGameMode":
+                                reader.Read();
+                                gameMode = bool.Parse(reader.Value);
+                                break;
+                            case "TimeForHotPotato":
+                                reader.Read();
+                                gameModeTimer = uint.Parse(reader.Value);
                                 break;
                         }
                     }

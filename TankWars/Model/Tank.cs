@@ -136,6 +136,12 @@ namespace Model
 
         [JsonProperty(PropertyName = "dc")]
         private bool disconnected = false;
+        [JsonIgnore]
+        public bool DC
+        {
+            get { return disconnected; }
+            set { disconnected = value; }
+        }
 
         [JsonProperty(PropertyName = "join")]
         private bool joined =true;
