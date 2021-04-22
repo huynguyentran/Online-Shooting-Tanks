@@ -103,132 +103,126 @@ namespace Constants
         {
 
             wallList = new List<Tuple<Vector2D, Vector2D>>();
-            //try
-            //{
-
-            using (XmlReader reader = XmlReader.Create(filepath))
-            {
-                //Queue: <-x <-y  
-
-                double x = 0;
-                bool hasY = false;
-                double y = 0;
-                bool hasX = false;
-                Vector2D p1 = null;
-                Vector2D p2 = null;
-                while (reader.Read())
+                using (XmlReader reader = XmlReader.Create(filepath))
                 {
-                    if (reader.IsStartElement())
-                    {
-                        switch (reader.Name)
-                        {
-                            case "GameSettings":
-                                continue;
-                            case "UniverseSize":
-                                reader.Read();
-                                mapSize = uint.Parse(reader.Value);
-                                break;
-                            case "MSPerFrame":
-                                reader.Read();
-                                frameRate = uint.Parse(reader.Value);
-                                break;
-                            case "FramesPerShot":
-                                reader.Read();
-                                framePerShot = uint.Parse(reader.Value);
-                                break;
-                            case "RespawnRate":
-                                reader.Read();
-                                respawnRate = uint.Parse(reader.Value);
-                                break;
-                            case "x":
-                                hasX = true;
-                                reader.Read();
-                                x = int.Parse(reader.Value);
-                                break;
-                            case "y":
-                                hasY = true;
-                                reader.Read();
-                                y = int.Parse(reader.Value);
-                                break;
-                            case "MaxNumberOfActivePowerups":
-                                reader.Read();
-                                activePUs = uint.Parse(reader.Value);
-                                break;
-                            case "FramePerPowerUpRespawn":
-                                reader.Read();
-                                puRespawn = uint.Parse(reader.Value);
-                                break;
-                            case "TankHitPoints":
-                                reader.Read();
-                                tankHP = uint.Parse(reader.Value);
-                                break;
-                            case "TankSize":
-                                reader.Read();
-                                tankSize = uint.Parse(reader.Value);
-                                break;
-                            case "TankSpeed":
-                                reader.Read();
-                                tankSpeed= uint.Parse(reader.Value);
-                                break;
-                            case "WallSize":
-                                reader.Read();
-                                wallSize = uint.Parse(reader.Value);
-                                break;
-                            case "ProjectileSpeed":
-                                reader.Read();
-                                projSpeed = uint.Parse(reader.Value);
-                                break;
-                            case "HotPotatoGameMode":
-                                reader.Read();
-                                gameMode = bool.Parse(reader.Value);
-                                break;
-                            case "TimeForHotPotato":
-                                reader.Read();
-                                gameModeTimer = uint.Parse(reader.Value);
-                                break;
-                        }
-                    }
+                    //Queue: <-x <-y  
 
-                    else
+                    double x = 0;
+                    bool hasY = false;
+                    double y = 0;
+                    bool hasX = false;
+                    Vector2D p1 = null;
+                    Vector2D p2 = null;
+                    while (reader.Read())
                     {
-                        switch (reader.Name)
+                        if (reader.IsStartElement())
                         {
-                            case "p1":
-                                if (!(hasX && hasY))
-                                    throw new ArgumentException();
-                                p1 = new Vector2D(x, y);
-                                hasX = false;
-                                hasY = false;
-                                break;
-                            case "p2":
-                                if (!(hasX && hasY))
-                                    throw new ArgumentException();
-                                p2 = new Vector2D(x, y);
-                                hasX = false;
-                                hasY = false;
-                                break;
-                            case "Wall":
-                                if (p1 == null || p2 == null)
-                                    throw new ArgumentException();
-                                if (!(p1.GetX() == p2.GetX() || p1.GetY() == p2.GetY()))
-                                    throw new ArgumentException("Missing Equivalence: Either both xs or ys of a wall must match.");
-                                else
-                                {
-                                    wallList.Add(new Tuple<Vector2D, Vector2D>(p1, p2));
-                                    p1 = null;
-                                    p2 = null;
-                                }
-                                break;
+                            switch (reader.Name)
+                            {
+                                case "GameSettings":
+                                    continue;
+                                case "UniverseSize":
+                                    reader.Read();
+                                    mapSize = uint.Parse(reader.Value);
+                                    break;
+                                case "MSPerFrame":
+                                    reader.Read();
+                                    frameRate = uint.Parse(reader.Value);
+                                    break;
+                                case "FramesPerShot":
+                                    reader.Read();
+                                    framePerShot = uint.Parse(reader.Value);
+                                    break;
+                                case "RespawnRate":
+                                    reader.Read();
+                                    respawnRate = uint.Parse(reader.Value);
+                                    break;
+                                case "x":
+                                    hasX = true;
+                                    reader.Read();
+                                    x = int.Parse(reader.Value);
+                                    break;
+                                case "y":
+                                    hasY = true;
+                                    reader.Read();
+                                    y = int.Parse(reader.Value);
+                                    break;
+                                case "MaxNumberOfActivePowerups":
+                                    reader.Read();
+                                    activePUs = uint.Parse(reader.Value);
+                                    break;
+                                case "FramePerPowerUpRespawn":
+                                    reader.Read();
+                                    puRespawn = uint.Parse(reader.Value);
+                                    break;
+                                case "TankHitPoints":
+                                    reader.Read();
+                                    tankHP = uint.Parse(reader.Value);
+                                    break;
+                                case "TankSize":
+                                    reader.Read();
+                                    tankSize = uint.Parse(reader.Value);
+                                    break;
+                                case "TankSpeed":
+                                    reader.Read();
+                                    tankSpeed = uint.Parse(reader.Value);
+                                    break;
+                                case "WallSize":
+                                    reader.Read();
+                                    wallSize = uint.Parse(reader.Value);
+                                    break;
+                                case "ProjectileSpeed":
+                                    reader.Read();
+                                    projSpeed = uint.Parse(reader.Value);
+                                    break;
+                                case "HotPotatoGameMode":
+                                    reader.Read();
+                                    gameMode = bool.Parse(reader.Value);
+                                    break;
+                                case "TimeForHotPotato":
+                                    reader.Read();
+                                    gameModeTimer = uint.Parse(reader.Value);
+                                    break;
+                            }
                         }
-                    }
 
+                        else
+                        {
+                            switch (reader.Name)
+                            {
+                                case "p1":
+                                    if (!(hasX && hasY))
+                                        throw new ArgumentException();
+                                    p1 = new Vector2D(x, y);
+                                    hasX = false;
+                                    hasY = false;
+                                    break;
+                                case "p2":
+                                    if (!(hasX && hasY))
+                                        throw new ArgumentException();
+                                    p2 = new Vector2D(x, y);
+                                    hasX = false;
+                                    hasY = false;
+                                    break;
+                                case "Wall":
+                                    if (p1 == null || p2 == null)
+                                        throw new ArgumentException();
+                                    if (!(p1.GetX() == p2.GetX() || p1.GetY() == p2.GetY()))
+                                        throw new ArgumentException("Missing Equivalence: Either both xs or ys of a wall must match.");
+                                    else
+                                    {
+                                        wallList.Add(new Tuple<Vector2D, Vector2D>(p1, p2));
+                                        p1 = null;
+                                        p2 = null;
+                                    }
+                                    break;
+                            }
+                        }
+
+                    }
                 }
-            }
-            //}
-            //catch
-            //{
-
-            //}
+            
+        
         }
 
 

@@ -62,7 +62,7 @@ namespace Model
         /// <summary>
         /// How long the potato waits before detonating.
         /// </summary>
-        private float potatoLifetime = 5f;
+        private float potatoLifetime;
 
         private Tank hotPotatoTank;
 
@@ -151,6 +151,11 @@ namespace Model
             Projectile.SetProjParam(gameConstants.ProjSpeed);
             hotPotatoGameMode = gameConstants.GameMode;
             potatoLifetime = gameConstants.GameModeTimer;
+            if(hotPotatoGameMode == true)
+            {
+                maxNumberOfActivePowerups = 0;
+            }
+
 
         }
 

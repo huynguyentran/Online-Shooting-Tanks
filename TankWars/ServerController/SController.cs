@@ -39,7 +39,7 @@ namespace ServerController
 
             while (serverActive)
             {
-                while(waitFrame.ElapsedMilliseconds - lastTime <= controller.consts.FrameRate){ }
+                while (waitFrame.ElapsedMilliseconds - lastTime <= controller.consts.FrameRate) { }
                 deltaTime = ((float)(waitFrame.ElapsedMilliseconds - lastTime)) / 1000f;
                 lastTime = waitFrame.ElapsedMilliseconds;
 
@@ -71,9 +71,9 @@ namespace ServerController
                 serverModel.postUpdateWorld();
             }
 
-            lock(clientInfo)
+            lock (clientInfo)
             {
-                foreach(Tuple<SocketState, ControlCommands> statePair in clientInfo.Values)
+                foreach (Tuple<SocketState, ControlCommands> statePair in clientInfo.Values)
                 {
                     Networking.Send(statePair.Item1.TheSocket, frameJsonComposite);
                 }
@@ -85,7 +85,7 @@ namespace ServerController
         {
             StringBuilder sb = new StringBuilder();
 
-            foreach(T gameObject in gameObjects)
+            foreach (T gameObject in gameObjects)
             {
                 if (gameObject is Tank t && t.IsHotPotato)
                 {
@@ -99,9 +99,7 @@ namespace ServerController
                 else
                 {
                     sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
-
                 }
-
             }
 
             return sb.ToString();
@@ -110,19 +108,32 @@ namespace ServerController
         public SController()
 
         {
+            bool stopWorking = false;
             string root = AppDomain.CurrentDomain.BaseDirectory;
             clientInfo = new Dictionary<int, Tuple<SocketState, ControlCommands>>();
-            consts = new GameConstants(root + @"..\..\..\..\Resources\settings.XML");
+            try
+            {
+                consts = new GameConstants(root + @"..\..\..\..\Resources\settings.XML");
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+                Console.Read();
+                stopWorking = true;
+            }
 
-            clientCommands = new Dictionary<int, ControlCommands>();
-            serverModel = new GameModel(consts.Size, consts);
-            
-            Networking.StartServer(OnConnection, 11000);
+            if (!stopWorking)
+            {
+                clientCommands = new Dictionary<int, ControlCommands>();
+                serverModel = new GameModel(consts.Size, consts);
+                Networking.StartServer(OnConnection, 11000);
+            }
+         
             //Initialize Server w/ TCP Listener
             //Set up the callback for getting a connection.
         }
 
-        
+
 
 
         private void OnConnection(SocketState state)
@@ -130,64 +141,64 @@ namespace ServerController
             //Lock clientinfo
             //Add this socketstate to clientinfo
 
-            if (state.ErrorOccurred)
+            if (!state.ErrorOccurred)
             {
-                throw new Exception("Something bad happened: " + state.ErrorMessage);
+                state.OnNetworkAction = InitialServerData;
+                Networking.GetData(state);
             }
 
-            ////On connection.
-            ///
-            state.OnNetworkAction = InitialServerData;
-            Networking.GetData(state);
         }
 
         private void InitialServerData(SocketState state)
         {
             if (state.ErrorOccurred)
             {
-                throw new Exception("Something bad happened: " + state.ErrorMessage);
-            }
-
-
-            string clientName = state.GetData();
-            int newlineIndex = clientName.IndexOf('\n');
-
-            if (newlineIndex == -1)
-            {
-                Networking.GetData(state);
+                state.TheSocket.Close();
             }
             else
             {
-                clientName = clientName.Substring(0, newlineIndex);
-                state.RemoveData(0, clientName.Length + 1);
+                string clientName = state.GetData();
+                int newlineIndex = clientName.IndexOf('\n');
 
-             
-
-                lock (serverModel)
+                if (newlineIndex == -1)
                 {
-                    serverModel.AddTank((int)state.ID, clientName);
+                    Networking.GetData(state);
                 }
-
-                lock (clientInfo)
+                else
                 {
-                    clientInfo[(int)state.ID] = new Tuple<SocketState, ControlCommands>(state, new ControlCommands());
-                    clientCommands[(int)state.ID] = new ControlCommands();
-                }
+                    clientName = clientName.Substring(0, newlineIndex);
+                    state.RemoveData(0, clientName.Length + 1);
 
-                SendingFirstData(state);
+
+
+                    lock (serverModel)
+                    {
+                        serverModel.AddTank((int)state.ID, clientName);
+                    }
+
+                    lock (clientInfo)
+                    {
+                        clientInfo[(int)state.ID] = new Tuple<SocketState, ControlCommands>(state, new ControlCommands());
+                        clientCommands[(int)state.ID] = new ControlCommands();
+                    }
+
+                    SendingFirstData(state);
+                }
             }
+
+
         }
 
         private void SendingFirstData(SocketState state)
         {
-            Networking.Send(state.TheSocket, ""+(int)state.ID +"\n" + consts.Size + "\n");
+            Networking.Send(state.TheSocket, "" + (int)state.ID + "\n" + consts.Size + "\n");
 
             string walls = JsonSerializationComposite(serverModel.Walls.Values);
 
             if (walls.Length == 0)
                 walls = "\n";
 
-            Networking.Send(state.TheSocket,walls);
+            Networking.Send(state.TheSocket, walls);
 
             state.OnNetworkAction = GetClientCommand;
             Networking.GetData(state);
@@ -201,9 +212,9 @@ namespace ServerController
                 {
                     clientInfo.Remove((int)state.ID);
                     clientCommands.Remove((int)state.ID);
-           
-        
-                   
+
+
+
                 }
                 lock (serverModel)
                 {
@@ -253,13 +264,7 @@ namespace ServerController
                 Networking.GetData(state);
 
             }
-
-            //Extract commands from the state.s
-            //Replace command in clientInfo.
-
-        
         }
-
 
         /// <summary>
         /// Serialize the command then send to the server.
