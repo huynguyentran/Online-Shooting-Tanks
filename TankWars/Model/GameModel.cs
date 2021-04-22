@@ -52,11 +52,19 @@ namespace Model
         private float timeUntilNextPowerupRespawn;
         private readonly float numOfFramePerSec;
 
-        private readonly bool hotPotatoGameMode = false;
+        private readonly bool hotPotatoGameMode = true;
 
-        private bool hotPotatoMatchDone = false;
+        /// <summary>
+        /// The age of the current potato (how long it has lived).
+        /// </summary>
+        private float potatoAge;
 
+        /// <summary>
+        /// How long the potato waits before detonating.
+        /// </summary>
+        private float potatoLifetime = 5f;
 
+        private Tank hotPotatoTank;
 
         //The intial client player ID, -1 is an invalid number.
         private int playerID = -1;
@@ -400,49 +408,6 @@ namespace Model
                         t.Location = loc;
                     }
                 }
-                else
-                {
-                    int i = 0;
-                    if (!hotPotatoMatchDone)
-                    {
-                        foreach (Tank _tank in tanks.Values)
-                        {
-                            if (_tank.HitPoints == 0)
-                            {
-                                i++;
-                            }
-                        }
-                    }
-
-                    if (i == (tanks.Count - 1) || hotPotatoMatchDone)
-                    {
-                        hotPotatoMatchDone = true;
-                        t.HitPoints = (int)Tank.MaxHP;
-                        bool checkCollision;
-                        Vector2D loc;
-                        do
-                        {
-                            Random rnd = new Random();
-                            int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
-                            int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
-                            loc = new Vector2D(VecX, VecY);
-                            checkCollision = false;
-                            foreach (Wall w in walls.Values)
-                            {
-                                if (WallCollisionCheck((int)Tank.TankSize / 2, w, loc))
-                                {
-                                    checkCollision = true;
-                                }
-                            }
-
-                        }
-                        while (checkCollision);
-                        t.Location = loc;
-                        //Set a bool lean 
-                        //Respawn. 
-                        //Delay until next game
-                    }
-                }
                
             }
 
@@ -574,8 +539,7 @@ namespace Model
                         {
                             if (tanks[proj.PlayerID].IsHotPotato)
                             {
-                                tanks[proj.PlayerID].IsHotPotato = false;
-                                t.IsHotPotato = true;
+                                SwitchHotPotato(t);
                             }
 
                             proj.Died = true;
@@ -584,17 +548,77 @@ namespace Model
                     }
                 }
 
-                if (hotPotatoMatchDone)
+                int numberOfAliveTanks = tanks.Count;
+                //if (!hotPotatoMatchDone)
+                //{
+                foreach (Tank _tank in tanks.Values)
                 {
-                    hotPotatoMatchDone = false;
-                    ///Chose new hotpotato here 
+                    if (_tank.HitPoints == 0)
+                    {
+                        numberOfAliveTanks--;
+                    }
                 }
-               
+                //}
+
+                if (numberOfAliveTanks <= 1) //|| hotPotatoMatchDone)
+                {
+                    foreach (Tank t in tanks.Values)
+                    {
+                        if (t.Died || t.HitPoints == 0)
+                        {
+                            t.HitPoints = (int)Tank.MaxHP;
+                            bool checkCollision;
+                            Vector2D loc;
+                            do
+                            {
+                                Random rnd = new Random();
+                                int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
+                                int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
+                                loc = new Vector2D(VecX, VecY);
+                                checkCollision = false;
+                                foreach (Wall w in walls.Values)
+                                {
+                                    if (WallCollisionCheck((int)Tank.TankSize / 2, w, loc))
+                                    {
+                                        checkCollision = true;
+                                    }
+                                }
+
+                            }
+                            while (checkCollision);
+                            t.Location = loc;
+
+                            numberOfAliveTanks++;
+                            //Set a bool lean 
+                            //Respawn. 
+                            //Delay until next game
+                        }
+                    }
+
+                    if (!ReferenceEquals(hotPotatoTank, null))
+                    {
+                        hotPotatoTank.IsHotPotato = false;
+                        hotPotatoTank = null;
+                    }
+                }
+
+
+                if (hotPotatoTank != null)
+                    potatoAge += deltaTime;
+                else if (numberOfAliveTanks > 2) //Should only be called at the start of the a match.
+                    ChooseHotPotato(numberOfAliveTanks);
 
 
 
+                if (potatoAge >= potatoLifetime)
+                {
+                    //Explode the hot potato.
+                    hotPotatoTank.HitPoints = 0;
+                    hotPotatoTank.Died = true;
+                    //Choose another potato.
+                    ChooseHotPotato(numberOfAliveTanks);
+                }
             }
-            //Collision;
 
             return beams;
         }
@@ -720,6 +744,29 @@ namespace Model
             double root2 = -b - Math.Sqrt(disc);
 
             return (root1 > 0.0 && root2 > 0.0);
+        }
+
+        private void ChooseHotPotato(int numberOfAliveTanks)
+        {
+            int selectedTank = new Random().Next(numberOfAliveTanks);
+
+            foreach(Tank t in tanks.Values)
+            {
+                if (t.HitPoints != 0 && selectedTank-- == 0)
+                {
+                    SwitchHotPotato(t);
+                    potatoAge = 0;
+                    break;
+                }
+            }
+        }
+
+        private void SwitchHotPotato(Tank newHotPotato)
+        {
+            if (! ReferenceEquals(hotPotatoTank, null))
+                hotPotatoTank.IsHotPotato = false;
+            newHotPotato.IsHotPotato = true;
+            hotPotatoTank = newHotPotato;
         }
 
     }

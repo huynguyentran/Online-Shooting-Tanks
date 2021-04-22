@@ -74,6 +74,7 @@ namespace Model
             {
                 return name;
             }
+            set { name = value; }
         }
 
         [JsonProperty(PropertyName = "hp")]

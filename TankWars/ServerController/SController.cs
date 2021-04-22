@@ -87,7 +87,21 @@ namespace ServerController
 
             foreach(T gameObject in gameObjects)
             {
-                sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
+                if (gameObject is Tank t && t.IsHotPotato)
+                {
+                    string realName = t.Name;
+                    t.Name = "HOT POTATO - " + realName;
+
+                    sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
+
+                    t.Name = realName;
+                }
+                else
+                {
+                    sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
+
+                }
+
             }
 
             return sb.ToString();
