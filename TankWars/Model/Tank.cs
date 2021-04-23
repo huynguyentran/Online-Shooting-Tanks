@@ -200,7 +200,7 @@ namespace Model
 
         }
 
-        public void UpdatingTank(ControlCommands cmd)
+        public void UpdatingTurretDirection(ControlCommands cmd)
         {
             if (cmd.directionOfTank.Length()>= 0.05)
             {
