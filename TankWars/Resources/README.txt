@@ -1,68 +1,49 @@
-﻿A client for a 2D tank war game. 
+﻿The server for a 2D tank war game. 
 Author: Willian Erignac & Huy Nguyen 
-Date: 04/08/2021
+Date: 04/23/2021
 
-<>
--Since TankWars client will be the same for everyone, there are no differences in basic inputs. 
+<Special Game Mode: HOT POTATO>
+-The game mode will start if there are 3 or more players connect to the server 
+-One random person would be chosen as the HOT POTATO. HOT POTATO will have their name changed to signify it. 
+-After a period of time, HOT POTATO tank will exploded. The HOT POTATO can pass the HOT POTATO status to another player by hitting other player with their projectiles. 
+-Except for the HOT POTATO, tanks can not shoot, and power ups will not spawn. 
+-The score for each person has been replaced by the count down until the HOT POTATO exploded. If the HOT POTATO explodes, the status will be passed to another random person, and the timer will be reset. 
+-The last player that still alive would be the victor of the game. After 7 seconds, other players will respawn, the server would start the game again.
+-The user can modify the time that a HOT POTATO has until it explodes and the time until the next match starts in the setting XML.
 
-<Features that graders should be aware of>
-+Our game can take any number of tank, turret, and projectile sprite groups (i.e. red tank, red turret, and red projectile) as long as the image filenames follow the same naming scheme:
-  Tank: COLOR"Tank.png"
-  Turret: COLOR"Turret.png"
-  Projectile: "shot-"COLOR".png"
-    *COLOR is not case-sensitive
-    **Exactly one sprite of each COLOR is needed to work
-  To demonstrate this feature, we added a disco tank to the list of sprites
-+Custom laser and tank explosion animations.
+<Bugs>
+()Tank stops moving after a few commands																						(Fixed by removing extra new line from the json that sends to the clients)
+()HOT POTATO game mode crashes when only one player is left (Trying to kill a null HOT POTATO tank)								(Fixed by re-increment the number of tanks alive after they've respawned)
+()Clients would still show the tank image after the other player has disconnected												(Fixed by setting the diconnected player's hitpoints to zero)
+()HOT POTATO game mode would instantly start again after																		(Fixed by creating a timer system)
+()Projectiles stops when hitting the location where a tank died																	(Fixed by projectiles passing through tank with zero hit points)
+()Projectiles appear in the center of the tank instead of at the cannon															(Fixed by change the spawn point for projectiles at the tank's cannon)
+()The client would crash when the cursor is at the middle of the tank															(Fixed by having a small deadzone at the middle of the tank so that DrawObjectWithTransform from the client would not receive any input
+																																 when the cursor is at the middle point)
+()The porgram would crash when a player disconnects																				(Fixed by implementing try catch around the server Async proccess)
+()Tank can damage itself if its projectile speed is slowe enough																(Fixed by making sure that the projectile would pass through its owner)
+()The power ups would instantly spawn if the number of power ups on the map does not reach the maximum							(Fixed by reconfiguring the timer for the respawn powerup time)
+()The projectiles stay where they are spawned																					(Fixed by adding actual movement calculation to the projectiles)
+()The score of tank does not updated when killing a player																		(Fixed by changing the logic of collision)
 
-<Design decisions>
-_We created enums to translate button presses into movements and firing actions for the GameController.
+<HOT POTATO design decision> 
+- The score for each players would indicate where the HOT POTATO will explode, so they can plan their movement.
+- HOT POTATO game would not start until there are three players in the server. If someone disconnect, that match would continue, and the server will not automatically start the next game until there are 3 or more players in the server.
+- The name of the player is changed to HOT POTATO + their name if they are the HOT POTATO.
+- The player passes their HOT POTATO status by hitting another player with their projectiles. If they are not HOT POTATO, they can not shoot.
+- Powerups would not spawn in this mode.
 
-_The default size and clientID are 0 and -1, respectively. We expect that the server would never send invalid numbers like these. Thus, we deduce whether the handshake has been completed by checking to see if these values are their defaults.
 
-_Most Json serializable game objects' properties have getters and setters for easier access.
+<Design decision>
+- A lot of public getters and setters to modify the contents in the Game Model.
+- For XML settings files, as long as the wall has both p1 and p2, and each p1 and p2 has their own x-y co-ordinates, the XML would still try to parse the wall into the game. It does not matter the order of p1 and p2, or the order of x and y.
+- Serialization and deserialization has been move from Game Model to Controller for seperation of concern. 
+- Since beam only appears in one frame, a beam list would be returned from the model to the controller. The controller would then send the beam to the client. This mean that the beam is handled completely by the controller, rather than the model (Exception for collision math of the beam, which still in the Model)
+- The HOT POTATO game mode is still in the same Model as the normal game, we seperate both by using bool instance variables.
+- If there is something wrong with the XML settings, we would not attempt to start the server. The XML files has to follow certain protocl: it has to be XML, and its name has to be "settings"
+- We creates a deadzone in the middle of the tank so when a cursor is at the middle point, the server would not update the turret direction due to math error with DrawObjectWithTransform in the view.
+- We use real time (second) to determine when a frame has passed in the method (The XML would still have the required parameters.)
+- We have collisions check between walls, powerups, and tanks. A tank would not spawn on any wall space, and the powerups would not spawn on any wall space, or on any tank location.
+- The projectiles would be destroy if there is no wall at the end of the map.
 
-_Since tanks only "die" for a single frame, we remove the tank from the model once died is true and wait for its health to be greater than zero to add it back into the model. This prevents dead tanks from being drawn.
-  _When the client's tank dies, the view captures the last position of the tank to keep the camera still while the client's tank is not in the model.
 
-_Just like with tanks, when any object that can dies does, we remove it from the model.Then we notify the controller to inform the view that an object has died through the return value of the method that deserializes game objects.
-  _This enables us to play animations when an object dies.
-  _We count beams as objects that can die, even if they don't have the died parameter. We just treat them as if they die on the frame they arrive so that we can play the laser animation.
-
-_We created different animation classes with a inheritance heiarchy for each animation type (laser and explosion).
-  _Animatable -> FrameByFrameAnimation -> TankExplosionAnimation, BeamAnimation
-
-_To ensure that the frist 9 (since we have the disco tank) players detected by the client have a unique color, we created a queue with the different sprite groups. Whenever a new player is detected by the client,
-  a sprite group is dequeued by the view, assigned to the player, and then enqueued back into the queue.
-
-_The controller holds a private instance of a Control Command that is updated as input comes from the view. When a frame is rendered, the controller sends the current state of the control command to the server.
-  _To prevent controller from sending an "alt" fire command two frames in a row, the controller sets fire to "none" if it was "alt" aften being sent.
-  _If this feature wasn't implemented, a player with two powerups would shoot both of their lasers in a miniscule amount of time, effectively wasting one powerup.
-
-_We use a string to keep track of the last movement direction of the tank before its direction is changed by a button press. When we revert to string (i.e. when the overriding button is lifted), we set the string to "none".
-  _If the string is not none and the button corresponding to the string's direction is lifted before the overriding button has been lifted, then the string is set to "none" (i.e. press A and S, lift A then S).
-
-_Deserilization proecess was put in the Model while the Serialization process was put in the Controller for seperation of concern. Deserilization process was in charge of creating the game object, while Serialization was for sending command/request back to the server.
-
-_Some color sprites that were given are very hard to see with the background. We use more contrasting color that does not match its tank (Each tank still has its unique projectile color).
-
-<External code and resources> 
--Some methods were based on Labs and Lectures.
--Our own PS7 NetworkController. 
--To get the images from the resouces folder, we use System.IO.Directory.GetFiles
-
-<Problems>
-()Can not run the program.																												(Fixed by installing the Json package)
-()The walls were drawned weirdly.																								        (Fixed by using another formula to calculate the DrawObjectWithTransform)
-()The turret is not rotating full 360 degrees.																							(Fixed by subtracting half the drawing panel size from the cordinates of the mouse)
-()The projectiles stay on the map after they have "died"																			    (Fixed by removing dead objects from the model (see above))
-()When moving the tank, when holding a key then holding another key, after releasing the second key that we hold, the tank would stop.  (Fixed by using a string to keep track of the last movement direction (see above))
-()When moving and click on the form(outside of drawing panel), the tank will move forward.                                              (Fixed by using Form Deactivate property to remove all request)
-()When playing the game, clicking on the box will have make the form focus on the boxes, and the player lose controls.                  (Fixed by disabling the text boxes after connecting to the server)
-()Invisible bullet (actually just bullets that blend in really well with the background)                                                (Fixed by changing the colors of the sprites)
-()The health bar is not chanigng color.                                                                                                 (Fixed by correctly calculating the percentage of health a tank has)
-()The player only shoots one laser when they get two powerups (they actually shoot both powerups in two frames) .                       (see Control Command design decision subpoint)
-()Closing the application results in an extra message box popping up (view is called by the controller, but the view is disposed).      (Put a try/catch block around calls to the view from the controller)
-()The tanks no longer explode and the player's view is no longer kept after dying.                                                      (Fixed by implementing LifeTime property in TankExplosionAnimation)
-()Every time the player types something in one of the two input boxes, the view displays an error                                       (Fixed by moving the error message box into an if statement checking that the enter key is the button pressed)
-  complaining one of the two boxes is empty.

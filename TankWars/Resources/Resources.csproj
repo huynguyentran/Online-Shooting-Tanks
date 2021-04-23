@@ -245,8 +245,8 @@
     <Content Include="Image\WallSprite.png" />
     <Content Include="Image\Tanks\YellowTank.png" />
     <Content Include="Image\Turrets\YellowTurret.png" />
+    <Content Include="READMEold.txt" />
     <Content Include="README.txt" />
-    <Content Include="README2.txt" />
     <Content Include="settings.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
