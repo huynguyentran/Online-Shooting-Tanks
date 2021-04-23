@@ -13,15 +13,21 @@ using System.Text;
 
 namespace ServerController
 {
+    /// <summary>
+    /// The server controller of the Tank War game.
+    /// </summary>
+    /// <author>Huy Nguyen</author>
+    /// <author>William Erignac</author>
+    /// <version>04/23/2021</version>
     class SController
     {
+        //A dictionary contains the client infos. The keys are the client state ID
         private Dictionary<int, Tuple<SocketState, ControlCommands>> clientInfo;
-
+        //A dictionary contains the client commands. The keys are the client state ID
         private Dictionary<int, ControlCommands> clientCommands;
-
+        //The class contains the constants that would detemrines how the tank war work
         private GameConstants consts;
-
-        //Change ClientModel to just model or something that makes sense for both the client and the server.
+        //The model that contains every information for the tank war game.
         private GameModel serverModel;
 
         static void Main(string[] args)
@@ -29,48 +35,54 @@ namespace ServerController
             //Construct Controller
             SController controller = new SController();
 
+            //A boolean to make sure the server would be in a loop to accept new IDs.
             bool serverActive = true;
 
+            //Variables to make sure the server update in certain frame of time.
             long lastTime = 0;
             Stopwatch waitFrame = new Stopwatch();
             waitFrame.Start();
             //The amount of time that passed between frames in seconds.
             float deltaTime = 0;
 
+            //Update World loop.
             while (serverActive)
             {
                 while (waitFrame.ElapsedMilliseconds - lastTime <= controller.consts.FrameRate) { }
                 deltaTime = ((float)(waitFrame.ElapsedMilliseconds - lastTime)) / 1000f;
                 lastTime = waitFrame.ElapsedMilliseconds;
-
                 controller.UpdateWorld(deltaTime);
             }
-            //Update World loop.
         }
 
+        /// <summary>
+        /// A private method to update the world frame.
+        /// </summary>
+        /// <param name="deltaTime">The amount of time that passes between frame</param>
         private void UpdateWorld(float deltaTime)
         {
             string frameJsonComposite;
             lock (serverModel)
             {
+                //Since beam is only appeared for one frame, we update the beam through the controller.
                 IList<Beam> beams;
-                //Access the commands that we have. 
                 lock (clientInfo)
                 {
                     beams = serverModel.UpdatingWorld(clientCommands, deltaTime);
-
                 }
 
+                //Serialize all game objects to send to the clients.
                 frameJsonComposite = "";
-
                 frameJsonComposite += JsonSerializationComposite(serverModel.Tanks.Values);
                 frameJsonComposite += JsonSerializationComposite(serverModel.Projectiles.Values);
                 frameJsonComposite += JsonSerializationComposite(beams);
                 frameJsonComposite += JsonSerializationComposite(serverModel.Powerups.Values);
 
+                //Update the clients to catch up with the world frame.
                 serverModel.postUpdateWorld();
             }
 
+            //For each clients, send the serialized code back.
             lock (clientInfo)
             {
                 foreach (Tuple<SocketState, ControlCommands> statePair in clientInfo.Values)
@@ -81,19 +93,23 @@ namespace ServerController
 
         }
 
+        /// <summary>
+        /// Serialized the game object 
+        /// </summary>
+        /// <typeparam name="T"> The type of game Objects such as Tank, Wall,...</typeparam>
+        /// <param name="gameObjects"> Game objects</param>
+        /// <returns> The string message.</returns>
         private static string JsonSerializationComposite<T>(IEnumerable<T> gameObjects)
         {
             StringBuilder sb = new StringBuilder();
-
             foreach (T gameObject in gameObjects)
             {
+                //If the hot potato mode is on, change the name of the hot potato.
                 if (gameObject is Tank t && t.IsHotPotato)
                 {
                     string realName = t.Name;
                     t.Name = "HOT POTATO - " + realName;
-
                     sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
-
                     t.Name = realName;
                 }
                 else
@@ -101,13 +117,17 @@ namespace ServerController
                     sb.Append(JsonConvert.SerializeObject(gameObject) + '\n');
                 }
             }
-
             return sb.ToString();
         }
 
+        /// <summary>
+        /// A constructor for the server controller.
+        /// </summary>
         public SController()
 
         {
+            //A bool to identify if there is something wrong with the settings.XML, if it is true, then we would not attemp to connect
+            //The settings of the server has to follow a certain protocol: An XML file, with the name "settings" or else it would not work
             bool stopWorking = false;
             string root = AppDomain.CurrentDomain.BaseDirectory;
             clientInfo = new Dictionary<int, Tuple<SocketState, ControlCommands>>();
@@ -115,20 +135,21 @@ namespace ServerController
             {
                 consts = new GameConstants(root + @"..\..\..\..\Resources\settings.XML");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 Console.Read();
                 stopWorking = true;
             }
 
+            //We do not attempt to start the server if the settings XML file is wrong.
             if (!stopWorking)
             {
                 clientCommands = new Dictionary<int, ControlCommands>();
                 serverModel = new GameModel(consts.Size, consts);
                 Networking.StartServer(OnConnection, 11000);
             }
-         
+
             //Initialize Server w/ TCP Listener
             //Set up the callback for getting a connection.
         }

@@ -21,6 +21,8 @@ Design decision
 // We move the serialize and desrilzie process into the controller. 
 // Everytime we update world, which handles all collision, since beam would only appear in one frame, we return a beam list when updating the world, and use that beam list in controller to send the beam to the clients.
 // We use the same model class for hot potato game mode, and seperate the game mode with normal mode with boolean instance variable
+//A bool to identify if there is something wrong with the settings.XML, if it is true, then we would not attemp to connect
+ //The settings of the server has to follow a certain protocol: An XML file, with the name "settings" or else it would not work
 
 Hot potato design deciesion 
 //The score for every memeber will be the timer until the hot potato explode 
