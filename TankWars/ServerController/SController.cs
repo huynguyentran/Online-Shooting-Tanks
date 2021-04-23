@@ -68,7 +68,7 @@ namespace ServerController
                 frameJsonComposite += JsonSerializationComposite(beams);
                 frameJsonComposite += JsonSerializationComposite(serverModel.Powerups.Values);
 
-                serverModel.postUpdateWorld();
+                serverModel.PostUpdateWorld();
             }
 
             lock (clientInfo)
