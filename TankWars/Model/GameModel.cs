@@ -17,7 +17,7 @@ namespace Model
     /// </summary>
     /// <author>Huy Nguyen</author>
     /// <author>William Erignac</author>
-    /// <version>04/09/2021</version>
+    /// <version>04/23/2021</version>
     public class GameModel
     {
         //--------------------------------------------Instance Variables used by both Client and Server side Models--------------------------------------------
