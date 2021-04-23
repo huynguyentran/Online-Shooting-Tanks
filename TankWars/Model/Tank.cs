@@ -99,7 +99,7 @@ namespace Model
         [JsonIgnore]
         public static uint MaxHP
         {
-        get{ return maxHitPoints; }
+            get { return maxHitPoints; }
         }
 
         [JsonIgnore]
@@ -110,10 +110,8 @@ namespace Model
             get { return tankSpeed; }
         }
 
-
         [JsonProperty(PropertyName = "score")]
         private int score = 0;
-
 
         [JsonIgnore]
         public int Score
@@ -144,7 +142,7 @@ namespace Model
         }
 
         [JsonProperty(PropertyName = "join")]
-        private bool joined =true;
+        private bool joined = true;
         [JsonIgnore]
         public bool Joined
         {
@@ -175,7 +173,7 @@ namespace Model
         [JsonIgnore]
         public float RespawnCD
         {
-            get { return respawnCD;}
+            get { return respawnCD; }
             set { respawnCD = value; }
         }
 
@@ -188,8 +186,6 @@ namespace Model
             set { isHotPotato = value; }
         }
 
-    
-
         public Tank(int stateID, string playerName, Vector2D _location)
         {
             ID = stateID;
@@ -200,18 +196,23 @@ namespace Model
 
         }
 
+        /// <summary>
+        /// Update the turret direction of the tank, this method will not update when the mouse is at the middle of the tank for 
+        /// DrawWithObjectTransform math error.
+        /// </summary>
+        /// <param name="cmd"></param>
         public void UpdatingTurretDirection(ControlCommands cmd)
         {
-            if (cmd.directionOfTank.Length()>= 0.05)
+            if (cmd.directionOfTank.Length() >= 0.05)
             {
                 aiming = cmd.directionOfTank;
             }
-     
+
         }
 
         public static void SetTankParam(uint _hitpoints, uint _size, uint _speed)
         {
-            maxHitPoints =  _hitpoints;
+            maxHitPoints = _hitpoints;
             tankSize = _size;
             tankSpeed = _speed;
         }

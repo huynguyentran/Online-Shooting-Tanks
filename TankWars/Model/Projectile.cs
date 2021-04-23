@@ -14,7 +14,7 @@ namespace Model
         [JsonProperty(PropertyName = "proj")]
         private int ID;
 
-        private static int nextID =0;
+        private static int nextID = 0;
         private static object mutexProjID = new object();
 
         [JsonIgnore]
@@ -39,14 +39,9 @@ namespace Model
         public Vector2D Orientation
         {
             get { return orientation; }
-  
+
         }
 
-        /// <summary>
-        /// Desrialize the projectile object. 
-        /// </summary>
-        /// <param name="input">The string input by the server</param>
-        /// <returns>The projectile object</returns>
         [JsonProperty(PropertyName = "died")]
         private bool died = false;
         [JsonIgnore]
@@ -70,8 +65,7 @@ namespace Model
             get { return projSpeed; }
         }
 
-    
-        public  Projectile(Vector2D _location, Vector2D _orientation, int _playerID)
+        public Projectile(Vector2D _location, Vector2D _orientation, int _playerID)
         {
             location = _location;
             orientation = _orientation;
@@ -81,7 +75,7 @@ namespace Model
                 ID = nextID;
                 nextID++;
             }
-       
+
         }
         public static void SetProjParam(uint speed)
         {

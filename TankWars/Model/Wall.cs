@@ -10,11 +10,8 @@ namespace Model
     /// A class that represents wall object.
     /// </summary>
     /// 
-
-
     public class Wall
     {
-
         [JsonProperty(PropertyName = "wall")]
         private int ID;
         [JsonIgnore]
@@ -39,7 +36,6 @@ namespace Model
         public Vector2D End
         {
             get { return endpoint; }
-     
         }
 
         [JsonIgnore]
@@ -56,7 +52,6 @@ namespace Model
             startpoint = start;
             endpoint = end;
         }
-
 
         public static void SetWallParam(uint _wallSize)
         {

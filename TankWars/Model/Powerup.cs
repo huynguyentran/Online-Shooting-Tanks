@@ -11,6 +11,8 @@ namespace Model
     /// </summary>
     public class Powerup
     {
+        private static int nextID = 0;
+        private static object mutexPowerupID = new object();
 
         [JsonProperty(PropertyName = "power")]
         private int ID;
@@ -19,10 +21,7 @@ namespace Model
         {
             get { return ID; }
         }
-
-        private static int nextID = 0;
-        private static object mutexPowerupID = new object();
-
+      
         [JsonProperty(PropertyName = "loc")]
         private Vector2D location;
         [JsonIgnore]
@@ -33,7 +32,6 @@ namespace Model
                 return location;
             }
         }
-
 
         [JsonProperty(PropertyName = "died")]
         private bool died = false;

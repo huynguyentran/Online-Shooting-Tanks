@@ -52,7 +52,7 @@ namespace Model
 
         public Beam(Vector2D _origin, Vector2D _direction, int _playerID)
         {
-            shootLocaiton  = _origin;
+            shootLocaiton = _origin;
             direction = _direction;
             playerID = _playerID;
 
@@ -61,7 +61,7 @@ namespace Model
                 ID = nextID;
                 nextID++;
             }
-          
+
         }
     }
 }

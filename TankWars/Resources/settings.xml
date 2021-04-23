@@ -10,13 +10,13 @@
 	<TankSpeed>3</TankSpeed>
 	<TankSize>60</TankSize>
 	<WallSize>50</WallSize>
+	<TimeTilNextHotPotatoMatch>7</TimeTilNextHotPotatoMatch>
 
 	<!-- true to enable the game mode/ false to disable the game mode -->
-	<HotPotatoGameMode>false</HotPotatoGameMode>
+	<HotPotatoGameMode>true</HotPotatoGameMode>
 
 	<!-- Alive time of a hot potato -->
-	<TimeForHotPotato>5</TimeForHotPotato>
-	
+	<TimeForHotPotato>10</TimeForHotPotato>
 
 	<!-- upper left 'L' piece -->
 	<Wall>
@@ -244,5 +244,4 @@
 			<y>-100</y>
 		</p2>
 	</Wall>
-
 </GameSettings>

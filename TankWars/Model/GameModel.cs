@@ -21,11 +21,6 @@ namespace Model
     public class GameModel
     {
         /// <summary>
-        /// A HashSet of player IDs. The player IDs should be unique.
-        /// </summary>
-        private HashSet<int> IDs;
-
-        /// <summary>
         /// A group of dictionaries for each different type of the game objects. 
         /// </summary>
 
@@ -66,7 +61,7 @@ namespace Model
 
         private Tank hotPotatoTank;
 
-        private float timerTilNextMatch = 5f;
+        private float timerTilNextMatch;
 
         //The intial client player ID, -1 is an invalid number.
         private int playerID = -1;
@@ -151,6 +146,7 @@ namespace Model
             Projectile.SetProjParam(gameConstants.ProjSpeed);
             hotPotatoGameMode = gameConstants.GameMode;
             potatoLifetime = gameConstants.GameModeTimer;
+            timerTilNextMatch = gameConstants.TimerTillNextHotPotatoMatch;
             if (hotPotatoGameMode == true)
             {
                 maxNumberOfActivePowerups = 0;
@@ -566,7 +562,7 @@ namespace Model
                 else if (numberOfAliveTanks > 2) //Should only be called at the start of the a match.
                 {
                     ChooseHotPotato(numberOfAliveTanks);
-                    timerTilNextMatch = 5f;
+                    timerTilNextMatch = gameConstants.TimerTillNextHotPotatoMatch;
                 }
                 else
                 {

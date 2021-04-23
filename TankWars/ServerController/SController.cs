@@ -145,23 +145,22 @@ namespace ServerController
             //We do not attempt to start the server if the settings XML file is wrong.
             if (!stopWorking)
             {
+                //Initialize Server w/ TCP Listener
+                //Set up the callback for getting a connection.
                 clientCommands = new Dictionary<int, ControlCommands>();
                 serverModel = new GameModel(consts.Size, consts);
                 Networking.StartServer(OnConnection, 11000);
             }
-
-            //Initialize Server w/ TCP Listener
-            //Set up the callback for getting a connection.
         }
 
-
-
-
+        /// <summary>
+        /// A method to check for the socket state error.
+        /// If there is no error, we uses the Async call back to itnitalize the server data.
+        /// The event loop below will continues to get the information from the state.
+        /// </summary>
+        /// <param name="state">The socket state</param>
         private void OnConnection(SocketState state)
         {
-            //Lock clientinfo
-            //Add this socketstate to clientinfo
-
             if (!state.ErrorOccurred)
             {
                 state.OnNetworkAction = InitialServerData;
@@ -170,6 +169,10 @@ namespace ServerController
 
         }
 
+        /// <summary>
+        /// Initializing the server data
+        /// </summary>
+        /// <param name="state">The socket state</param>
         private void InitialServerData(SocketState state)
         {
             if (state.ErrorOccurred)
@@ -178,9 +181,10 @@ namespace ServerController
             }
             else
             {
+                //Get the client Name.
                 string clientName = state.GetData();
                 int newlineIndex = clientName.IndexOf('\n');
-
+                //If we have not received the full name.
                 if (newlineIndex == -1)
                 {
                     Networking.GetData(state);
@@ -190,66 +194,71 @@ namespace ServerController
                     clientName = clientName.Substring(0, newlineIndex);
                     state.RemoveData(0, clientName.Length + 1);
 
-
-
+                    //Create a new client information in the server.
                     lock (serverModel)
                     {
                         serverModel.AddTank((int)state.ID, clientName);
                     }
-
                     lock (clientInfo)
                     {
                         clientInfo[(int)state.ID] = new Tuple<SocketState, ControlCommands>(state, new ControlCommands());
                         clientCommands[(int)state.ID] = new ControlCommands();
                     }
 
+                    //Sending the initial data back to the server.
                     SendingFirstData(state);
                 }
             }
-
-
         }
 
+        /// <summary>
+        /// Mtethod to send the initial data when setting up the game.
+        /// </summary>
+        /// <param name="state"> The socket state.</param>
         private void SendingFirstData(SocketState state)
         {
+            //Send the client their id and map size.
             Networking.Send(state.TheSocket, "" + (int)state.ID + "\n" + consts.Size + "\n");
-
             string walls = JsonSerializationComposite(serverModel.Walls.Values);
 
             if (walls.Length == 0)
                 walls = "\n";
 
+            //Send the walls information.
             Networking.Send(state.TheSocket, walls);
 
+            //Start accepting commands by the clients.
             state.OnNetworkAction = GetClientCommand;
             Networking.GetData(state);
         }
 
+        /// <summary>
+        /// Getting the commands by the clients
+        /// </summary>
+        /// <param name="state"> The socket state</param>
         private void GetClientCommand(SocketState state)
         {
+            //If a client disconnects, remove the client information from the server.
             if (state.ErrorOccurred)
             {
                 lock (clientInfo)
                 {
                     clientInfo.Remove((int)state.ID);
                     clientCommands.Remove((int)state.ID);
-
-
-
                 }
+                //Set the client's tank to died and dc.
                 lock (serverModel)
                 {
                     serverModel.Tanks[(int)state.ID].DC = true;
                     serverModel.Tanks[(int)state.ID].Died = true;
                     serverModel.Tanks[(int)state.ID].HitPoints = 0;
                 }
+                //Close
                 state.TheSocket.Close();
-
             }
             else
             {
                 string[] commands = Regex.Split(state.GetData(), @"(?<=[\n])");
-
                 lock (clientInfo)
                 {
                     // Loop until we have processed all messages.
@@ -265,7 +274,6 @@ namespace ServerController
 
                         //Get rid of extra newline character.
                         string trimmedCommand = command.Substring(0, command.Length - 1);
-
 
                         ControlCommands deserializedCommand = new ControlCommands();
                         if (Deserialize(command) != null)
@@ -292,7 +300,6 @@ namespace ServerController
         /// </summary>
         /// <param name="command">ControlCommands object</param>
         /// <returns>A serialized Json command</returns>
-
         private static ControlCommands Deserialize(string input)
         {
             JObject gObj = JObject.Parse(input);
@@ -301,11 +308,7 @@ namespace ServerController
                 ControlCommands commands = JsonConvert.DeserializeObject<ControlCommands>(input);
                 return commands;
             }
-
             return null;
-
         }
-
-
     }
 }
