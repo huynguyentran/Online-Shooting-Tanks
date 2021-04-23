@@ -25,9 +25,9 @@ namespace Model
         /// </summary>
         private HashSet<int> IDs;
 
-        /// <summary>
+        //--------------------------------------------Instance Variables used by both Client and Server side Models--------------------------------------------
+
         /// A group of dictionaries for each different type of the game objects. 
-        /// </summary>
 
         //A dictionary for tanks and their ids.
         private Dictionary<int, Tank> tanks;
@@ -45,28 +45,7 @@ namespace Model
         private Dictionary<int, Wall> walls;
         public Dictionary<int, Wall> Walls { get { return walls; } }
 
-        private GameConstants gameConstants;
-
-        private readonly uint maxNumberOfActivePowerups;
-        private readonly uint maxPowerupRespawnFrames;
-        private float timeUntilNextPowerupRespawn;
-        private readonly float numOfFramePerSec;
-
-        private readonly bool hotPotatoGameMode;
-
-        /// <summary>
-        /// The age of the current potato (how long it has lived).
-        /// </summary>
-        private float potatoAge;
-
-        /// <summary>
-        /// How long the potato waits before detonating.
-        /// </summary>
-        private float potatoLifetime;
-
-        private Tank hotPotatoTank;
-
-        private float timerTilNextMatch = 5f;
+        //--------------------------------------------Client-Side Instance Variables--------------------------------------------
 
         //The intial client player ID, -1 is an invalid number.
         private int playerID = -1;
@@ -83,32 +62,6 @@ namespace Model
             }
         }
 
-        public void AddTank(int stateID, string clientName)
-        {
-            bool checkCollision;
-            Vector2D loc;
-            do
-            {
-                Random rnd = new Random();
-                int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
-                int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
-                loc = new Vector2D(VecX, VecY);
-                checkCollision = false;
-                foreach (Wall w in walls.Values)
-                {
-                    if (WallCollisionCheck(30, w, loc))
-                    {
-                        checkCollision = true;
-                    }
-                }
-
-            }
-            while (checkCollision);
-
-            Tank tank = new Tank(stateID, clientName, loc);
-            tanks[tank.TankID] = tank;
-        }
-
         //The map size 
         private int size;
         public int MapSize
@@ -123,42 +76,13 @@ namespace Model
             }
         }
 
+        //--------------------------------------------Client-Side Methods --------------------------------------------
+
         /// <summary>
         /// A construcor that intialize when the information is sent by the server. 
         /// Assigns the map size of the tank war game.
         /// </summary>
         /// <param name="_size">The map size that sent by the server</param>
-        public GameModel(int _size, GameConstants _const)
-        {
-            size = _size;
-            tanks = new Dictionary<int, Tank>();
-            projectiles = new Dictionary<int, Projectile>();
-            powerups = new Dictionary<int, Powerup>();
-            walls = new Dictionary<int, Wall>();
-            gameConstants = _const;
-            foreach (Tuple<Vector2D, Vector2D> points in _const.WallList)
-            {
-
-                Wall wall = new Wall(points.Item1, points.Item2, walls.Count);
-                walls.Add(wall.WallID, wall);
-            }
-
-            numOfFramePerSec = 1000 / (gameConstants.FrameRate);
-            maxNumberOfActivePowerups = (uint)gameConstants.ActivePUs;
-            maxPowerupRespawnFrames = gameConstants.PURespawn;
-            Tank.SetTankParam(gameConstants.TankHP, gameConstants.TankSize, gameConstants.TankSpeed);
-            Wall.SetWallParam(gameConstants.WallSize);
-            Projectile.SetProjParam(gameConstants.ProjSpeed);
-            hotPotatoGameMode = gameConstants.GameMode;
-            potatoLifetime = gameConstants.GameModeTimer;
-            if(hotPotatoGameMode == true)
-            {
-                maxNumberOfActivePowerups = 0;
-            }
-
-
-        }
-
         public GameModel(int _size)
         {
 
@@ -212,11 +136,120 @@ namespace Model
                         powerups.Remove(id);
                 }
             }
+        }
+
+        //--------------------------------------------Server-Side Instance Variables--------------------------------------------
+
+        /// <summary>
+        /// The constants found in the xml file for this match.
+        /// </summary>
+        private GameConstants gameConstants;
+        /// <summary>
+        /// The maxiumum number of powerups allowed on the feild at any given time.
+        /// </summary>
+        private readonly uint maxNumberOfActivePowerups;
+        /// <summary>
+        /// The maximum amount of time it takes a powerup to respawn.
+        /// </summary>
+        private readonly uint maxPowerupRespawnFrames;
+        /// <summary>
+        /// The amount of time until THIS next powerup will resond.
+        /// When this value reaches zero, a new powerup will respawn.
+        /// </summary>
+        private float timeUntilNextPowerupRespawn;
+        /// <summary>
+        /// The framerate of the game.
+        /// </summary>
+        private readonly float numOfFramePerSec;
+        /// <summary>
+        /// Whether the match is a hot potato match, or a boring match.
+        /// </summary>
+        private readonly bool hotPotatoGameMode;
+
+        /// <summary>
+        /// The age of the current potato (how long it has lived).
+        /// When this value reaches potatoLifetime, the potato detonates.
+        /// Only applicable in hot potato mode.
+        /// </summary>
+        private float potatoAge;
+
+        /// <summary>
+        /// How long the potato waits before detonating.
+        /// Only applicable in hot potato mode.
+        /// </summary>
+        private float potatoLifetime;
+
+        /// <summary>
+        /// The tank that is currently "it" in a game of hot potato.
+        /// Only applicable in hot potato mode.
+        /// </summary>
+        private Tank hotPotatoTank;
+
+        /// <summary>
+        /// The time between hot potato matches.
+        /// This timer gives a breif window of pause between hot potato
+        /// matches and the winner of the match an opportunity to brag.
+        /// Only applicable in hot potato mode.
+        /// </summary>
+        private float timerUntilNextMatch = 5f;
+
+        //--------------------------------------------Server-Side Methods--------------------------------------------
+        public GameModel(int _size, GameConstants _const)
+        {
+            size = _size;
+            tanks = new Dictionary<int, Tank>();
+            projectiles = new Dictionary<int, Projectile>();
+            powerups = new Dictionary<int, Powerup>();
+            walls = new Dictionary<int, Wall>();
+            gameConstants = _const;
+            foreach (Tuple<Vector2D, Vector2D> points in _const.WallList)
+            {
+
+                Wall wall = new Wall(points.Item1, points.Item2, walls.Count);
+                walls.Add(wall.WallID, wall);
+            }
+
+            numOfFramePerSec = 1000 / (gameConstants.FrameRate);
+            maxNumberOfActivePowerups = (uint)gameConstants.ActivePUs;
+            maxPowerupRespawnFrames = gameConstants.PURespawn;
+            Tank.SetTankParam(gameConstants.TankHP, gameConstants.TankSize, gameConstants.TankSpeed);
+            Wall.SetWallParam(gameConstants.WallSize);
+            Projectile.SetProjParam(gameConstants.ProjSpeed);
+            hotPotatoGameMode = gameConstants.GameMode;
+            potatoLifetime = gameConstants.GameModeTimer;
+            if (hotPotatoGameMode == true)
+            {
+                maxNumberOfActivePowerups = 0;
+            }
 
 
         }
 
+        public void AddTank(int stateID, string clientName)
+        {
+            bool checkCollision;
+            Vector2D loc;
+            do
+            {
+                Random rnd = new Random();
+                int VecX = rnd.Next(-(MapSize / 2), MapSize / 2);
+                int VecY = rnd.Next(-(MapSize / 2), MapSize / 2);
+                loc = new Vector2D(VecX, VecY);
+                checkCollision = false;
+                foreach (Wall w in walls.Values)
+                {
+                    if (WallCollisionCheck(30, w, loc))
+                    {
+                        checkCollision = true;
+                    }
+                }
 
+            }
+            while (checkCollision);
+
+            Tank tank = new Tank(stateID, clientName, loc);
+            tanks[tank.TankID] = tank;
+        }
 
         public Beam UpdateTank(int id, ControlCommands cmd, float deltaTime)
         {
@@ -582,7 +615,7 @@ namespace Model
 
                 if (numberOfAliveTanks <= 1) //|| hotPotatoMatchDone)
                 {
-                    if(timerTilNextMatch< 0)
+                    if(timerUntilNextMatch< 0)
                     {
                         foreach (Tank t in tanks.Values)
                         {
@@ -636,11 +669,11 @@ namespace Model
                 else if (numberOfAliveTanks > 2 ) //Should only be called at the start of the a match.
                 {
                     ChooseHotPotato(numberOfAliveTanks);
-                    timerTilNextMatch = 5f;
+                    timerUntilNextMatch = 5f;
                 }
                 else
                 {
-                    timerTilNextMatch -= deltaTime;
+                    timerUntilNextMatch -= deltaTime;
                 }
                  
 
