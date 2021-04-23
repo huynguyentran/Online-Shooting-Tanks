@@ -78,8 +78,7 @@ namespace ServerController
                 frameJsonComposite += JsonSerializationComposite(beams);
                 frameJsonComposite += JsonSerializationComposite(serverModel.Powerups.Values);
 
-                //Update the clients to catch up with the world frame.
-                serverModel.postUpdateWorld();
+                serverModel.PostUpdateWorld();
             }
 
             //For each clients, send the serialized code back.
